@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment/>
+
+<entry key="accomoImage">
+    INSERT
+          INTO ATTACHMENT
+        VALUES(
+               SEQ_ATTACHMENT_NO.NEXTVAL
+              , 1
+              , ?
+              , ?
+              , ?
+              , ?
+              , ?
+              , 'Y'
+              , NULL
+              , REPORT_NO_SEQ.CURRVAL
+              )
+</entry>
+
+</properties>

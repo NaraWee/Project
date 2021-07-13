@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="selectBookingList">
+	SELECT     
+		   E.RNUM,
+	       E.BOOK_NO,
+	       E.BOOK_USER_NAME,
+	       E.BOOK_PERSONNEL,
+	       E.BOOK_CHECK_DATE,
+	       E.BOOK_CHECKOUT_DATE,
+	       E.BOOK_APPROVE_YN,
+           E.BOOK_STATUS_YNC,	       
+	       E.BOOK_CHECK_IN,
+	       E.REQUEST,
+	       E.ROOM_NO,
+	       E.ROOM_NAME,
+	       E.ROOM_FEE,
+	       E.ACCOMO_NAME,
+           E.USER_PHONE
+	  FROM (SELECT ROWNUM RNUM,
+	       D.BOOK_NO,
+	       D.BOOK_USER_NAME,
+	       D.BOOK_PERSONNEL,
+	       D.BOOK_CHECK_DATE,
+	       D.BOOK_CHECKOUT_DATE,
+	       D.BOOK_APPROVE_YN,
+           D.BOOK_STATUS_YNC,	       
+	       D.BOOK_CHECK_IN,
+	       D.REQUEST,
+	       D.ROOM_NO,
+	       D.ROOM_NAME,
+	       D.ROOM_FEE,
+	       D.ACCOMO_NAME,
+           D.USER_PHONE
+      FROM (SELECT
+	       B.BOOK_NO,
+	       BOOK_USER_NAME,
+	       BOOK_PERSONNEL,
+	       B.BOOK_CHECK_DATE,
+	       BOOK_CHECKOUT_DATE,
+	       BOOK_APPROVE_YN,
+           BOOK_STATUS_YNC,	       
+	       BOOK_CHECK_IN,
+	       REQUEST,
+	       R.ROOM_NO,
+	       R.ROOM_NAME,
+	       R.ROOM_FEE,
+	       A.ACCOMO_NAME,
+           U.USER_PHONE
+	  FROM BOOK_LIST B
+	  JOIN ROOM_INFO R ON(B.ROOM_NO = R.ROOM_NO)
+	  JOIN ACCOMO_INFO A ON(R.ACCOMO_NO = A.ACCOMO_NO)
+      JOIN USER_INFO U ON(B.USER_NO = U.USER_NO)
+	 WHERE A.OWNER_NO = ?
+	   AND BOOK_APPROVE_YN = 'N'
+	   AND BOOK_STATUS_YNC = 'N'
+	 ORDER BY B.BOOK_NO DESC) D) E
+	 WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectBookContent">
+	SELECT
+	       B.BOOK_NO,
+	       BOOK_USER_NAME,
+	       BOOK_PERSONNEL,
+	       B.BOOK_CHECK_DATE,
+	       BOOK_CHECKOUT_DATE,
+	       BOOK_APPROVE_YN,
+	       BOOK_CHECK_IN,
+	       REQUEST,
+	       R.ROOM_NO,
+	       R.ROOM_NAME,
+	       R.ROOM_FEE, 
+	       A.ACCOMO_NAME,
+           U.USER_ID,
+           U.USER_PHONE,
+           P.PAYMENT_TIME,
+           P.PAYMENT_METHOD,
+           P.PAYMENT_AMOUNT,
+           A.ACCOMO_NO,
+           P.PAYMENT_NO
+	  FROM BOOK_LIST B
+	  JOIN ROOM_INFO R ON(B.ROOM_NO = R.ROOM_NO)
+	  JOIN ACCOMO_INFO A ON(R.ACCOMO_NO = A.ACCOMO_NO)
+      JOIN USER_INFO U ON(B.USER_NO = U.USER_NO)
+      JOIN PAYMENT P ON(B.BOOK_NO = P.BOOK_NO)
+	 WHERE B.BOOK_NO = ?
+	</entry>
+	
+	<entry key="selectPastBookingList">
+		SELECT Y.RNUM
+	     , Y.OWNER_NO
+	     , Y.BOOK_NO
+	     , Y.BOOK_USER_NAME
+	     , Y.BOOK_PERSONNEL
+	     , Y.BOOK_CHECK_DATE
+	     , Y.BOOK_CHECKOUT_DATE
+	     , Y.BOOK_APPROVE_YN
+	     , Y.BOOK_CHECK_IN
+	     , Y.REQUEST
+	     , Y.ACCOMO_NAME
+	     , Y.ROOM_NAME
+	     , Y.ROOM_NO
+	     , Y.USER_NO
+	     , Y.BOOK_STATUS_YNC
+	     , Y.BOOK_PHONE
+	FROM (SELECT ROWNUM RNUM
+	     , X.OWNER_NO
+	     , X.BOOK_NO
+	     , X.BOOK_USER_NAME
+	     , X.BOOK_PERSONNEL
+	     , X.BOOK_CHECK_DATE
+	     , X.BOOK_CHECKOUT_DATE
+	     , X.BOOK_APPROVE_YN
+	     , X.BOOK_CHECK_IN
+	     , X.REQUEST
+	     , X.ACCOMO_NAME
+	     , X.ROOM_NAME
+	     , X.ROOM_NO
+	     , X.USER_NO
+	     , X.BOOK_STATUS_YNC
+	     , X.BOOK_PHONE
+	FROM(SELECT 
+	       C.OWNER_NO
+	     , A.BOOK_NO
+	     , A.BOOK_USER_NAME
+	     , A.BOOK_PERSONNEL
+	     , A.BOOK_CHECK_DATE
+	     , A.BOOK_CHECKOUT_DATE
+	     , A.BOOK_APPROVE_YN
+	     , A.BOOK_CHECK_IN
+	     , A.REQUEST
+	     , C.ACCOMO_NAME
+	     , A.ROOM_NO
+	     , B.ROOM_NAME
+	     , A.USER_NO
+	     , A.BOOK_STATUS_YNC
+	     , A.BOOK_PHONE
+	  FROM BOOK_LIST A, ROOM_INFO B, ACCOMO_INFO C
+	 WHERE NOT (BOOK_STATUS_YNC = 'N' 
+       AND BOOK_APPROVE_YN = 'N')
+       AND C.OWNER_NO = ?
+	   AND C.ACCOMO_NO = B.ACCOMO_NO
+	   AND A.ROOM_NO = B.ROOM_NO
+	 ORDER BY A.BOOK_NO DESC)X)Y
+     WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="bookAllowUpadte">
+	UPDATE BOOK_LIST
+  	   SET BOOK_APPROVE_YN = 'Y'
+     WHERE BOOK_NO = ?
+	</entry>
+	
+	<entry key="bookAllowStatusUpadte">
+	UPDATE BOOK_LIST
+  	   SET BOOK_STATUS_YNC = 'Y'
+     WHERE BOOK_NO = ?
+	</entry>
+	
+	<entry key="insertAllowBookHistory">
+	INSERT
+	  INTO BOOK_HISTORY
+	VALUES
+	(
+	  ?
+	, SYSDATE
+	, 'Y'
+	, null
+	, SEQ_HISTORY_NO.NEXTVAL
+	) 
+	</entry>
+	
+	<entry key="bookRejectUpadte">
+	UPDATE BOOK_LIST
+  	   SET BOOK_STATUS_YNC = 'C'
+     WHERE BOOK_NO = ?
+	</entry>
+	
+	<entry key="bookRejectBookConfirmUpadte">
+	UPDATE BOOK_LIST
+  	   SET BOOK_APPROVE_YN = 'X' /* X = 업주 거절 */
+     WHERE BOOK_NO = ?
+	</entry>
+	
+	<entry key="insertRejectBookHistory">
+	INSERT
+	  INTO BOOK_HISTORY
+	VALUES
+	(
+	  ?
+	, SYSDATE
+	, 'X'
+	, ?
+	, SEQ_HISTORY_NO.NEXTVAL
+	) 
+	</entry>
+	
+	<entry key="selectQuestion">
+		SELECT E.RNUM 
+             , E.OWNER_QNA_NO
+		     , E.OWNER_QNA_TITLE
+		     , E.OWNER_QNA_CONTENT
+		     , E.OWNER_QNA_DATE
+		     , E.OWNER_ANSWER_YN
+		     , E.ACCOMO_NO
+             , E.USER_NICKNAME
+        FROM(SELECT ROWNUM RNUM 
+             , D.OWNER_QNA_NO
+		     , D.OWNER_QNA_TITLE
+		     , D.OWNER_QNA_CONTENT
+		     , D.OWNER_QNA_DATE
+		     , D.OWNER_ANSWER_YN
+		     , D.ACCOMO_NO
+             , D.USER_NICKNAME
+        FROM(SELECT A.OWNER_QNA_NO
+		     , A.OWNER_QNA_TITLE
+		     , A.OWNER_QNA_CONTENT
+		     , A.OWNER_QNA_DATE
+		     , A.OWNER_ANSWER_YN
+		     , A.ACCOMO_NO
+             , B.USER_NICKNAME
+          FROM OWNER_QNA A, USER_INFO B, ACCOMO_INFO C
+		 WHERE A.USER_NO = B.USER_NO
+           AND C.ACCOMO_NO = A.ACCOMO_NO
+           AND C.OWNER_NO = ?
+		 ORDER BY OWNER_QNA_NO DESC)D )E
+   		 WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectTotalCount">
+        SELECT 
+               COUNT(*)
+          FROM OWNER_QNA A, USER_INFO B, ACCOMO_INFO C
+		 WHERE A.USER_NO = B.USER_NO
+           AND C.ACCOMO_NO = A.ACCOMO_NO
+           AND C.OWNER_NO = ?
+	</entry>
+	
+	<entry key="selectContent">
+		SELECT A.OWNER_QNA_TITLE
+		     , A.OWNER_QNA_DATE
+             , B.USER_NICKNAME
+		     , A.OWNER_QNA_CONTENT
+		  FROM OWNER_QNA A, USER_INFO B
+         WHERE A.USER_NO = B.USER_NO
+		   AND A.OWNER_QNA_NO = ?
+	</entry>
+	
+	<entry key="insertAnswer">
+	INSERT 
+	  INTO OWNER_ANSWER
+	(
+ 	  OWNER_ANSWER_NO
+	, OWNER_ANSWER_CONTENT
+	, OWNER_ANSWER_DATE
+	, OWNER_QNA_NO
+	)
+	VALUES
+	(
+      SEQ_OWNER_ANSWER_NO.NEXTVAL
+ 	, ?
+  	, SYSDATE
+ 	, ?
+	)
+	</entry>
+	
+	<entry key="selectAnswer">
+	SELECT 
+	       A.OWNER_ANSWER_CONTENT
+	     , A.OWNER_ANSWER_DATE
+	  FROM OWNER_ANSWER A, OWNER_QNA B
+	 WHERE B.OWNER_QNA_NO = ?
+	   AND A.OWNER_QNA_NO = ?
+	</entry>
+	
+	<entry key="pastBookingTotalCount">
+    SELECT
+	       COUNT(*)
+	  FROM BOOK_LIST A, ROOM_INFO B, ACCOMO_INFO C
+	  WHERE NOT (BOOK_STATUS_YNC = 'N' 
+       AND BOOK_APPROVE_YN = 'N')
+       AND C.OWNER_NO = ?
+	   AND C.ACCOMO_NO = B.ACCOMO_NO
+	   AND A.ROOM_NO = B.ROOM_NO
+	</entry>
+	
+	<entry key="bookingTotalCount">
+  	SELECT
+	       COUNT(*)
+	  FROM BOOK_LIST A, ROOM_INFO B, ACCOMO_INFO C
+	 WHERE C.OWNER_NO = ?
+       AND A.ROOM_NO = B.ROOM_NO
+       AND C.ACCOMO_NO = B.ACCOMO_NO
+	   AND BOOK_APPROVE_YN = 'N'
+	   AND BOOK_STATUS_YNC = 'Y'
+	</entry>
+	
+	<entry key="insertSelectHistory">
+		INSERT
+		  INTO SALES_HISTORY
+		VALUES
+		(
+		  SEQ_SALES_NO.NEXTVAL
+		, ?
+		, ?
+		, SYSDATE
+		, ? 
+		, ?
+		, DEFAULT
+		) 
+	</entry>
+	
+	<entry key="selectcompleteCount">
+	    SELECT 
+               COUNT(*)
+  		  FROM PAYMENT P
+  	      JOIN SALES_HISTORY S ON(P.PAYMENT_NO = S.PAYMENT_NO)
+  	      JOIN BOOK_LIST B ON(P.BOOK_NO = B.BOOK_NO)
+ 	     WHERE B.BOOK_NO = ?
+	</entry>
+	
+	<entry key="updateYn">
+    UPDATE OWNER_QNA
+ 	   SET OWNER_ANSWER_YN = 'Y'
+ 	 WHERE OWNER_QNA_NO = ?
+	</entry>
+	
+	<entry key="selectAccomoList">
+	SELECT A.ACCOMO_NO
+	     , A.ACCOMO_NAM
+	  FROM ACCOMO_INFO A, ROOM_INFO B
+	 WHERE A.OWNER_NO = ?
+	   AND B.ACCOMO_NO = A.ACCOMO_NO
+	</entry>
+	
+	<entry key="rowspanCount">
+	SELECT count(*)
+	  FROM ACCOMO_INFO A
+      JOIN ATTACHMENT T ON(A.ACCOMO_NO = T.REF_NO)
+      JOIN ROOM_INFO R ON(A.ACCOMO_NO = R.ACCOMO_NO)
+	 WHERE A.OWNER_NO = ?
+       AND A.ACCOMO_NO = ?
+       AND A.VISIBLE_YN = 'Y'
+	</entry>
+	
+	<entry key="selectRoomName">
+	SELECT A.ACCOMO_NO
+         , R.ROOM_NO
+         , R.ROOM_NAME
+	  FROM ACCOMO_INFO A
+      JOIN ATTACHMENT T ON(A.ACCOMO_NO = T.REF_NO)
+      JOIN ROOM_INFO R ON(A.ACCOMO_NO = R.ACCOMO_NO)
+	 WHERE A.OWNER_NO = ?
+       AND A.ACCOMO_NO = ?
+       AND A.VISIBLE_YN = 'Y'
+	
+	</entry>
+	
+	<entry key="selectBookCount">
+	SELECT count(*)
+	  FROM SALES_HISTORY
+     WHERE ACCOMO_NO  = ?
+	
+	</entry>
+	
+	<entry key="sumSalePrice">
+	SELECT SUM(SALES_PRICE)
+	  FROM SALES_HISTORY
+     WHERE ACCOMO_NO = ?
+	
+	</entry>
+	
+</properties>

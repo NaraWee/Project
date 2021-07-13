@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="selectEncryptedPwd">
+        SELECT
+               USER_PWD
+          FROM USER_INFO
+         WHERE USER_WITHDRAW_YN = 'N'
+           AND USER_ID = ?
+	</entry>
+	
+	<entry key="selectEncryptedOwnerPwd">
+        SELECT
+               OWNER_PWD
+          FROM OWNER_INFO
+         WHERE OWNER_WITHDRAW_YN = 'N'
+           AND OWNER_ID = ?
+	</entry>
+
+	<entry key="userLoginCheck">
+		SELECT *
+		  FROM USER_INFO
+		 WHERE USER_ID = ?
+		   AND USER_WITHDRAW_YN = 'N'
+		   
+	</entry>
+	
+	<entry key="ownerLoginCheck">
+		SELECT *
+		  FROM OWNER_INFO
+		 WHERE OWNER_ID = ?
+		   AND OWNER_WITHDRAW_YN = 'N'
+	</entry>
+	
+	<entry key="signUpRegist">
+		INSERT
+		  INTO USER_INFO
+		     ( USER_NO
+             , USER_ID
+             , USER_PWD
+             , USER_PHONE
+             , REPORT_COUNT
+             , USER_NICKNAME
+             , USER_WITHDRAW_YN
+             , USER_ROLE
+             , SIGNDATE
+             , WITHDRAWDATE
+		       )
+		VALUES ( SEQ_USER_INFO.NEXTVAL
+		       , ?
+		       , ?
+		       , ?
+		       , DEFAULT
+		       , ?
+		       , DEFAULT
+		       , DEFAULT
+		       , SYSDATE
+		       , NULL
+		       )
+	</entry>
+	
+	<entry key="signUpRegistOwner">
+		INSERT
+		  INTO OWNER_INFO
+		     ( OWNER_NO
+             , OWNER_ID
+             , OWNER_PWD
+             , OWNER_PHONE
+             , OWNER_WITHDRAW_YN
+             , OWNER_SIGNDATE
+             , OWNER_WITHDATE
+		     )
+		VALUES ( SEQ_OWNER_NO.NEXTVAL
+		       , ?
+		       , ?
+		       , ?
+		       , DEFAULT
+		       , SYSDATE
+		       , NULL
+		       )
+	</entry>
+	
+	<entry key="pointInsert">
+		INSERT
+		  INTO POINT
+		     ( POINT_NO
+		     , USER_NO
+		     , POINT
+		     )
+		VALUES
+		     ( SQU_POINT.NEXTVAL
+		     , SEQ_USER_INFO.CURRVAL
+		     , DEFAULT
+		     )
+		  
+	</entry>
+	
+	<entry key="userNicknameSelect">
+		SELECT COUNT(*)
+		  FROM USER_INFO
+		 WHERE USER_NICKNAME = ?
+    </entry>
+    
+    <entry key="userEmailSelect">
+		SELECT COUNT(*)
+		  FROM USER_INFO
+		 WHERE USER_ID = ?
+    </entry>
+</properties>
