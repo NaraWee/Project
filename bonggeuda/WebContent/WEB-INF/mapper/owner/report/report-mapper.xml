@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="insertReport">
+		INSERT
+		  INTO REPORT
+		VALUES
+		(
+		  ?
+		, ?
+		, ?
+		, ?
+		, SYSDATE
+		, ?
+		, DEFAULT
+		, ?
+		, ?
+		)
+	</entry>
+	
+	<entry key="isnertReportImage">
+	    INSERT
+	      INTO ATTACHMENT
+	    VALUES
+	    (
+	      SEQ_ATTACHMENT_NO.NEXTVAL
+	    , 6
+	    , ?
+	    , ?
+	    , ?
+	    , ?
+	    , ?
+	    , 'Y'
+	    , ?
+	    
+	    
+	    )
+	
+	
+	</entry>
+	
+	<entry key="selectRefortNoNoMax">
+
+ 		SELECT REPORT_NO_SEQ.NEXTVAL
+ 		  FROM DUAL
+	
+	</entry>
+
+	
+</properties>

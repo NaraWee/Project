@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment/>
+	<entry key="insertAccomo">
+		INSERT INTO RM_ACCOMO_INFO
+		VALUES
+		(
+			?
+		  , NULL
+		  , ?
+		  , ?
+		  , ?
+		  , ?
+		  , ?
+		  , ?
+		  , ?
+		  , ?
+		  , ?
+		  , ?
+		  , ?
+		  , ?
+		  , ?
+		  , ?
+		  , ?
+		  , ?
+          , DEFAULT
+          , ?
+          , 'EN'
+          , SEQ_EN_ACCOMO_NO.NEXTVAL
+		)
+	</entry>
+
+	<entry key="insertRoom">
+		INSERT INTO RM_ROOM_INFO
+		VALUES
+		(
+		    SEQ_ROOM_REQUEST_NO.NEXTVAL 
+		  , null
+          , null
+		  , ?
+		  , ?
+		  , ?
+		  , ?
+		  , 'Y'
+		  , 'EN'
+          , (SELECT MAX(EN_ACCOMO_NO) FROM RM_ACCOMO_INFO)
+          , 'N'
+          , ?
+		)
+	</entry>
+	
+	<entry key="insertRoomAttachment">
+	        INSERT
+            INTO ATTACHMENT
+            VALUES
+            (
+              SEQ_ATTACHMENT_NO.NEXTVAL
+            , 2
+            , ? /*오리진*/
+            , ? /*세이브 네임*/
+            , ? /* 세이브 패스*/
+            , ? /* 파일 타입*/
+            , ? /* 떰브네일패스*/
+            , 'Y'
+            , SEQ_ROOM_REQUEST_NO.CURRVAL
+            )
+	</entry>
+	<entry key="selectEnNo">
+		SELECT 
+			   MAX(EN_ACCOMO_NO) 
+		  FROM RM_ACCOMO_INFO
+	</entry>
+	
+	<entry key="selectRequestNextVal">
+    SELECT
+	       SEQ_REQUEST_NO.NEXTVAL
+	  FROM DUAL
+	</entry>
+	
+	<entry key="maxRmRoomNoNext">
+    SELECT
+	       MAX(REQUEST_NO)
+	  FROM RM_ROOM_INFO
+	</entry>
+	
+
+	<entry key="roomRequestCurrval">
+	    SELECT
+	           SEQ_ROOM_REQUEST_NO.CURRVAL
+	      FROM DUAL
+	
+	</entry>
+	
+	<entry key="insertRmRoomThumbnail">
+	    INSERT
+          INTO ATTACHMENT
+        VALUES
+        (
+         SEQ_ATTACHMENT_NO.NEXTVAL
+        , 2
+        , ? /*오리진*/
+        , ? /*세이브 네임*/
+        , ? /* 세이브 패스*/
+        , ? /* 파일 타입*/
+        , ? /* 떰브네일패스*/
+        , 'Y'
+        , SEQ_ROOM_REQUEST_NO.CURRVAL
+        )
+	</entry>
+	
+	<entry key="insertRmRoomInfo">
+	    INSERT
+	      INTO RM_ROOM_INFO
+	    VALUES
+	    (
+	      SEQ_ROOM_REQUEST_NO.NEXTVAL
+	    , ?
+	    , ?
+	    , ?
+	    , ?
+	    , ?
+	    , ?
+	    , 'Y'
+	    , 'RM'
+	    , NULL
+	    , 'N'
+	    , ?
+	    )
+	</entry>
+	
+</properties>

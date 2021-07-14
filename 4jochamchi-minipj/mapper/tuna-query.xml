@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="selectMemberInfo">
+		SELECT
+		*
+		FROM USER_INFORMATION
+		WHERE USER_ID = ?
+	</entry>
+	<entry key="selectUserInventory">
+		SELECT
+		       U.USER_NO
+		     , U.ITEM_NO
+		     , U.ITEM_CATEGORY
+		     , U.EQUIP_ITEM_YN
+		     , S.ITEM_NAME
+		     , S.ITEM_IMG
+		  FROM USER_INVENTORY_LIST U
+		  JOIN STORE S ON(U.ITEM_NO = S.ITEM_NO)
+		 WHERE U.USER_NO = ?
+	</entry>
+	<entry key="selectCategoryInvenYN">
+		SELECT
+		       EQUIP_ITEM_YN
+		  FROM USER_INVENTORY_LIST
+		 WHERE USER_NO = ?
+		   AND ITEM_CATEGORY = ?
+	</entry>
+	<entry key="updateUserInformation">
+		UPDATE
+		       USER_INFORMATION
+		   SET USER_PWD = ?
+		     , PHONE = ?
+		     , EMAIL = ?
+		 WHERE USER_NO = ?
+	</entry>
+	<entry key="updateItemEquipYn">
+		UPDATE
+		       USER_INVENTORY_LIST
+		   SET EQUIP_ITEM_YN = ?
+		 WHERE USER_NO = ?
+		   AND ITEM_NO = ?
+	</entry>
+	<entry key="insertComment">
+		INSERT
+		  INTO COMMENT_BOARD
+		(
+		  COMMENT_NO
+		, BOARD_NO
+		, COMMENT_CONTENT
+		, USER_NO
+		)
+		VALUES
+		(
+		  SQU_COMMENT.NEXTVAL
+		, ?
+		, ?
+		, ?
+		)
+	</entry>
+	<entry key="login_check">
+		SELECT
+		       *
+		  FROM USER_INFORMATION
+		 WHERE USER_ID = ?
+	</entry>
+	<entry key="create_User">
+		INSERT
+		  INTO USER_INFORMATION
+		VALUES
+		(
+		  SQU_USER_INFORMATION.NEXTVAL
+		, ?
+		, ?
+		, ?
+		, ?
+		, ?
+		, 0
+		)
+	</entry>
+
+	<entry key="selectBulletin">
+		SELECT
+		       A.TITLE
+		     , A.BOARD_CONTENTS
+		     , B.USER_NICKNAME
+		     , A.ENROLLDATE
+		     , A.LIST_NO
+		     , B.USER_NO
+		  FROM BOARD_LIST A
+		  JOIN USER_INFORMATION B ON(A.USER_NO = B.USER_NO)
+		 WHERE A.BOARD_NO = ?
+	</entry>
+	<entry key="selectComment">
+		SELECT
+		       A.COMMENT_CONTENT
+		     , B.USER_NICKNAME
+		  FROM COMMENT_BOARD A
+		  JOIN USER_INFORMATION B ON(A.USER_NO = B.USER_NO)
+		 WHERE A.BOARD_NO = ?
+		 ORDER BY A.COMMENT_NO
+	</entry>
+	<entry key="updateEquipYn">
+		UPDATE
+		       USER_INVENTORY_LIST
+		   SET EQUIP_ITEM_YN = ?
+		 WHERE ITEM_NO = ?
+		   AND USER_NO = ?
+	</entry>
+
+	<entry key="selectCoin">
+		SELECT
+		       COIN
+		  FROM USER_INFORMATION
+		 WHERE USER_NO = ?
+	</entry>
+
+	<entry key="updateCoin">
+		UPDATE USER_INFORMATION
+		   SET COIN = ?
+		 WHERE USER_NO = ?
+	</entry>
+
+	<entry key="selectBoard">
+		SELECT
+		       A.TITLE
+		     , A.LIST_NO
+		     , A.BOARD_CONTENTS
+		     , B.USER_NICKNAME
+		  FROM BOARD_LIST A
+		  JOIN USER_INFORMATION B ON(A.USER_NO = B.USER_NO)
+		 WHERE A.BOARD_NO = ?
+	</entry>
+	<entry key="slectFriendsLIst">
+		SELECT
+		       U.USER_NO
+		     , U.USER_NICKNAME
+		     , F.FRIEND_NO
+		 FROM FRIENDS_LIST F
+		 JOIN USER_INFORMATION U ON(F.FRIEND_NO = U.USER_NO)
+		WHERE F.USER_NO = ?
+	</entry>
+	<entry key="updateEquipYn">
+		UPDATE USER_INVENTORY_LIST
+		   SET EQUIP_ITEM_YN = ?
+		 WHERE ITEM_NO = ?
+		   AND USER_NO = ?
+	</entry>
+	<entry key="selectCoin">
+		SELECT
+		       COIN
+		  FROM USER_INFORMATION
+		 WHERE USER_NO = ?
+	</entry>
+	<entry key="updateCoin">
+		UPDATE USER_INFORMATION
+		   SET COIN = ?
+		 WHERE USER_NO = ?
+	</entry>
+	<entry key="selectFriends">
+		SELECT
+		       USER_NICKNAME
+		  FROM FRIENDS_LIST F
+		  JOIN USER_INFORMATION U ON(F.FRIEND_NO = U.USER_NO)
+		 WHERE F.USER_NO = ?
+	</entry>
+	<entry key="insertRequestFriend">
+		INSERT
+		  INTO PLUS_FRIEND
+		(
+		  USER_NO
+		, REQUEST_FRIEND_NO
+		)
+		VALUES
+		(
+		  ?
+		, ?
+		)
+	</entry>
+	<entry key="insertBoard1">
+		INSERT
+		  INTO BOARD_LIST
+		(
+		  BOARD_NO
+		, TITLE
+		, BOARD_CONTENTS
+		, USER_NO
+		, LIST_NO
+		, ENROLLDATE
+		)
+		VALUES
+		(
+		  SQU_BOARD_LIST.NEXTVAL
+		, ?
+		, ?
+		, ?
+		, ?
+		, DEFAULT
+		)
+	</entry>
+	<entry key="updateUserInventory">
+		INSERT
+		  INTO USER_INVENTORY_LIST
+		VALUES
+		(
+		  ?
+		, ?
+		, ?
+		, ?
+		)
+	</entry>
+	<entry key="selectSecretBoard">
+		SELECT
+		       TITLE
+		     , BOARD_NO
+		  FROM BOARD_LIST
+		 WHERE USER_NO = ?
+		   AND LIST_NO = 2
+	</entry>
+	<entry key="deleteAllBoard">
+		DELETE
+		  FROM BOARD_LIST
+		 WHERE TITLE = ?
+		   AND BOARD_NO = ?
+	</entry>
+	<entry key="selectBoard">
+		SELECT
+		       A.TITLE
+		     , A.BOARD_CONTENTS
+		     , B.USER_NICKNAME
+		  FROM BOARD_LIST A
+		  JOIN USER_INFORMATION B ON(A.USER_NO = B.USER_NO)
+		 WHERE A.BOARD_NO = ?
+	</entry>
+	<entry key="selectFriendsLIst">
+		SELECT
+		       F.USER_NO
+		     , U.USER_NICKNAME
+		     , F.FRIEND_NO
+		  FROM FRIENDS_LIST F
+		  JOIN USER_INFORMATION U ON(F.FRIEND_NO = U.USER_NO)
+		 WHERE F.USER_NO = ?
+	</entry>
+	<entry key="deleteFriend">
+		DELETE
+		  FROM FRIENDS_LIST
+		 WHERE USER_NO = ?
+	  	   AND FRIEND_NO = ?
+	</entry>
+	<entry key="updateEquipYn">
+		UPDATE USER_INVENTORY_LIST
+		   SET EQUIP_ITEM_YN = ?
+		 WHERE ITEM_NO = ?
+		   AND USER_NO = ?
+	</entry>
+	<entry key="selectCoin">
+		SELECT
+		       COIN
+		  FROM USER_INFORMATION
+		 WHERE USER_NO = ?
+	</entry>
+	<entry key="updateCoin">
+		UPDATE USER_INFORMATION
+		   SET COIN = ?
+		 WHERE USER_NO = ?
+	</entry>
+	<entry key="selectFriends">
+		SELECT
+		       USER_NICKNAME
+		  FROM FRIENDS_LIST F
+		  JOIN USER_INFORMATION U ON(F.FRIEND_NO = U.USER_NO)
+		 WHERE F.USER_NO = ?
+	</entry>
+	<entry key="selectPlus_friend">
+		SELECT
+		       USER_NO
+		     , REQUEST_FRIEND_NO
+		  FROM PLUS_FRIEND
+		 WHERE USER_NO = ?
+	</entry>
+	<entry key="insertFriend">
+		INSERT
+		  INTO FRIENDS_LIST
+		VALUES
+		(
+		  SQU_FRIENDS_LIST.NEXTVAL
+		, ?
+		, ?
+		)
+	</entry>
+	<entry key="deleteRequest">
+		DELETE
+		  FROM PLUS_FRIEND
+		 WHERE USER_NO = ?
+		   AND REQUEST_FRIEND_NO = ?
+	</entry>
+	<entry key="insertRequestFriend">
+		INSERT
+		  INTO PLUS_FRIEND
+		(
+		  USER_NO
+		, REQUEST_FRIEND_NO
+		)
+		VALUES
+		(
+		  ?
+		, ?
+		)
+	</entry>
+	<entry key="selectStoreItem">
+		SELECT
+			   *
+		  FROM STORE
+	</entry>
+	<entry key="updateCoin">
+		UPDATE
+		       USER_INFORMATION
+		   SET COIN = ?
+		 WHERE USER_NO = ?
+	</entry>
+	<entry key="selectAllBoard">
+		SELECT
+		       TITLE
+		     , BOARD_NO
+		  FROM BOARD_LIST
+		 WHERE LIST_NO = 1
+	</entry>
+	<entry key="selectMyBoard">
+		SELECT
+		       TITLE
+		     , BOARD_NO
+		  FROM BOARD_LIST
+		 WHERE USER_NO = ?
+	</entry>
+	<entry key="selectFriendBoard">
+		SELECT
+		       B.*
+		  FROM BOARD_LIST B
+		 WHERE B.USER_NO IN (SELECT F.USER_NO
+		                       FROM FRIENDS_LIST F
+		                       JOIN USER_INFORMATION UI ON (F.FRIEND_NO = UI.USER_NO)
+		                      WHERE UI.USER_NO = ?)
+		   AND B.LIST_NO = 3
+	</entry>
+	<entry key="modifyScreteBoard">
+		SELECT
+		       TITLE
+		     , BOARD_CONTENTS
+		     , LIST_NO
+		     , USER_NO
+		  FROM BOARD_LIST
+		 WHERE BOARD_NO = ?
+	</entry>
+	<entry key="selecrRequestUserNickName">
+		SELECT
+		       UI.USER_NICKNAME
+		  FROM PLUS_FRIEND P
+		  JOIN USER_INFORMATION UI ON (P.REQUEST_FRIEND_NO = UI.USER_NO)
+		 WHERE P.USER_NO = ?
+	</entry>
+	<entry key="updateBoard">
+		UPDATE BOARD_LIST
+		   SET TITLE = ?
+		     , BOARD_CONTENTS = ?
+		     , ENROLLDATE = DEFAULT
+         WHERE BOARD_NO = ?
+	</entry>
+	<entry key="deleteComment">
+		DELETE
+		  FROM COMMENT_BOARD
+		 WHERE BOARD_NO = ?
+	</entry>
+	<entry key="deleteSecretBoard">
+		DELETE
+		  FROM BOARD_LIST
+		 WHERE TITLE = ?
+		   AND USER_NO = ?
+	</entry>
+</properties>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+
+	<entry key="selectEventTotalCount">
+       SELECT 
+             COUNT(*)
+         FROM EVENT E
+	</entry>
+	
+	<entry key="selectEventList">
+        SELECT
+               C.RNUM
+    		 , C.EVENT_NO
+    		 , C.EVENT_TITLE
+   			 , C.EVENT_START
+    		 , C.EVENT_END
+    		 , C.USER_NO
+		 FROM(
+			   SELECT
+ 				      ROWNUM RNUM   
+  				    , B.EVENT_NO
+   				    , B.EVENT_TITLE
+   				    , B.EVENT_START
+  			        , B.EVENT_END
+    				, B.USER_NO
+ 				 FROM(       
+        			  SELECT
+               				 A.EVENT_NO
+              			   , A.EVENT_TITLE
+              			   , A.EVENT_START
+              			   , A.EVENT_END
+              			   , A.USER_NO
+                        FROM EVENT A
+       				 )B
+		 	)C
+      WHERE C.RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="insertEvent">
+        INSERT
+          INTO EVENT
+        VALUES
+        (
+          SEQ_EVENT_NO.NEXTVAL
+        , ?
+        , ?
+        , ?
+        , DEFAULT
+        )
+	</entry>
+	
+	<entry key="insertEventAttachment">
+        INSERT
+          INTO ATTACHMENT
+        VALUES
+        (
+          SEQ_ATTACHMENT_NO.NEXTVAL
+        , ?
+        , ?
+        , ?
+        , ?
+        , ?
+        , ?
+        , 'Y'
+        , SEQ_EVENT_NO.CURRVAL
+        )
+	</entry>
+	
+	<entry key="selectEventDetail">
+        SELECT 
+               EVENT_TITLE
+     		 , EVENT_START
+    		 , EVENT_END
+  		 FROM EVENT
+ 		WHERE EVENT_NO = ?
+	</entry>
+	
+	<entry key="selectEventThumnail">
+        SELECT 
+               THUMBNAIL_PATH
+  		  FROM ATTACHMENT A
+ 		  JOIN EVENT E ON (A.REF_NO = E.EVENT_NO)
+  		  JOIN CATEGORY C ON (A.CATEGORY_NO = C.CATEGORY_NUMBER)
+	     WHERE C.CATEGORY_NUMBER = 7
+   	       AND E.EVENT_NO = ?
+	</entry>
+</properties>

@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="selectRoomCount">
+        SELECT 
+               COUNT(*)
+          FROM RM_ACCOMO_INFO A
+         WHERE A.OWNER_NO = ?
+	</entry>
+	
+	<entry key="selectApproveAccomoList">
+
+      SELECT
+             *
+        FROM ACCOMO_INFO A
+        JOIN ATTACHMENT A ON (A.ACCOMO_NO = A.REF_NO)
+       WHERE A.OWNER_NO = ?
+         AND A.CATEGORY_NO = 3
+         AND VISIBLE_YN = 'Y'
+
+    </entry>
+	<entry key="selectApplyEnrollAccomoList">
+
+         SELECT
+             *
+           FROM RM_ACCOMO_INFO R
+        JOIN ATTACHMENT A ON (R.REQUEST_NO = A.REF_NO)
+       WHERE R.OWNER_NO = ?
+         AND R.APPROVAL_YN ='N' 
+         AND A.CATEGORY_NO = 1
+         AND R.RM_TYPE = 'EN'
+           
+   
+   	</entry>
+   	
+   	<entry key="selectApplyRejectAccomoList">
+   	
+SELECT 
+       R.REQUEST_NO
+     , R.RM_ACCOMO_NAME
+     , R.RM_ACCOMO_TYPE
+     , R.APPROVAL_YN
+     , R.RM_TYPE
+     , R.EN_ACCOMO_NO
+     , A.THUMBNAIL_PATH
+     , H.INSPECTION_COMMENT
+     , H.APPROVE_STATUS
+     , H.REQUEST_NO_RM
+  FROM RM_ACCOMO_INFO R
+  JOIN ATTACHMENT A ON (R.REQUEST_NO = A.REF_NO) 
+  JOIN RM_HISTORY H ON (R.REQUEST_NO = H.REQUEST_NO_RM)
+ WHERE H.APPROVE_STATUS = 'N'
+   AND A.CATEGORY_NO = 1
+   AND R.OWNER_NO = ?
+
+   	</entry>
+    
+    
+
+	
+	<entry key="selectRmAccomoImagePath">
+	
+	    SELECT
+                *
+	      FROM RM_ACCOMO_INFO R
+          JOIN ATTACHMENT A ON(R.REQUEST_NO = A.REF_NO)
+	     WHERE R.OWNER_NO = ?
+           AND ( CATEGORY_NO = 1)
+	
+	</entry>
+	
+	<entry key="selectModifyAccomo">
+	
+	SELECT
+      	   *
+ 	  FROM ACCOMO_INFO C
+ 	  JOIN ATTACHMENT A ON(C.ACCOMO_NO = A.REF_NO)
+ 	 WHERE ACCOMO_NO = ?
+  	   AND CATEGORY_NO = 3
+  	 </entry>
+  	   
+	<entry key="selectModifyAccomoTwo">
+	
+	SELECT
+      	   *
+ 	  FROM ACCOMO_INFO C
+ 	  JOIN ATTACHMENT A ON(C.ACCOMO_NO = A.REF_NO)
+ 	 WHERE ACCOMO_NO = ?
+  	   AND CATEGORY_NO = 3
+	
+	
+	</entry>
+	
+	<entry key="selectModifyAccomoThree">
+	
+	SELECT
+      	   *
+ 	  FROM ACCOMO_INFO C
+ 	  JOIN ATTACHMENT A ON(C.ACCOMO_NO = A.REF_NO)
+ 	 WHERE ACCOMO_NO = ?
+  	   AND CATEGORY_NO = 3
+	
+	
+	</entry>
+	
+	
+
+	
+	<entry key="insertModifyAccomoAttachment">
+	        INSERT
+            INTO ATTACHMENT
+            VALUES
+            (
+              SEQ_ATTACHMENT_NO.NEXTVAL
+            , 1
+            , ?
+            , ?
+            , ?
+            , ?
+            , ?
+            , 'Y'
+            , ?
+            )
+	
+	
+	</entry>
+	
+		<entry key="insertAccomoAttachment">
+	        INSERT
+            INTO ATTACHMENT
+            VALUES
+            (
+              SEQ_ATTACHMENT_NO.NEXTVAL
+            , 1
+            , ?
+            , ?
+            , ?
+            , ?
+            , ?
+            , 'Y'
+            , ?
+            )
+	
+	
+	</entry>
+
+	<entry key="insertRmAccomo">
+		INSERT
+		INTO RM_ACCOMO_INFO
+		VALUES
+		(
+		  ? /* 받아온 selectRequestNextVal 값 */
+		, ?
+		, ?
+		, ?
+		, ?
+		, ?
+		, ?
+		, ?
+		, ?
+		, ?
+		, ?
+		, ?
+		, ?
+		, ?
+		, ?
+		, ?
+		, ?
+		, ?
+		, DEFAULT
+		, ?
+		, 'RM'
+		, null
+		)
+	</entry>
+
+	<entry key="selectcurrval">
+		SELECT
+		SEQ_REQUEST_NO.CURRVAL
+		FROM DUAL;
+	</entry>
+
+	<entry key="selectRmCount">
+		SELECT
+		   	   COUNT(*)
+	 	  FROM RM_ACCOMO_INFO R
+		  JOIN ACCOMO_INFO A ON (R.RM_ACCOMO_NO = A.ACCOMO_NO)
+		 WHERE R.RM_TYPE = 'RM'
+		   AND R.APPROVAL_YN = 'N'
+		   AND ACCOMO_NO = ?
+		
+	</entry>
+	<entry key="selectRoomList">
+		SELECT 
+       		   *
+  		  FROM ROOM_INFO R
+  		  JOIN ATTACHMENT A ON(R.ROOM_NO = A.REF_NO)
+ 		 WHERE ACCOMO_NO = ?
+   		   AND A.CATEGORY_NO = 4
+	</entry>
+	
+	<entry key="selectRoomDetail">
+	      SELECT 
+                 *
+            FROM ROOM_INFO
+           WHERE ROOM_NO = ?
+	</entry>
+	
+	<entry key="rmRoomCount">
+	      SELECT
+                 COUNT(*)
+            FROM RM_ROOM_INFO
+           WHERE ROOM_NO_RM = ?
+             AND APPROVAL_YN = 'N'
+	
+	</entry>
+	
+	<entry key="deleteAccomo">
+		UPDATE ACCOMO_INFO
+		   SET VISIBLE_YN = 'N'
+		 WHERE ACCOMO_NO = ?
+
+	</entry>
+
+	
+</properties>

@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="selectTotalCount">
+       SELECT 
+             COUNT(*)
+         FROM USER_INFO A
+	</entry>
+	
+	<entry key="selectBoardList">
+        SELECT
+               C.RNUM
+  		     , C.USER_NO
+    		 , C.USER_NICKNAME
+    		 , C.USER_ID
+    		 , C.USER_PHONE
+          FROM (
+       			 SELECT
+            		    ROWNUM RNUM
+            		  , B.USER_NO
+             		  , B.USER_NICKNAME
+          	  	      , B.USER_ID
+           			  , B.USER_PHONE
+         		   FROM(
+                		SELECT
+                     		   A.USER_NO
+                   			 , A.USER_NICKNAME
+                   			 , A.USER_ID
+                  		     , A.USER_PHONE
+                		  FROM USER_INFO A
+                         WHERE A.USER_NO NOT IN 0
+                        )B
+                )C
+         WHERE C.RNUM BETWEEN ? AND ?
+    </entry>
+    
+    <entry key="selectBookList">
+        SELECT
+      	       A.RNUM 
+       	     , A.BOOK_NO
+     	     , A.BOOK_USER_NAME
+     	     , A.USER_ID
+      	     , A.PAYMENT_AMOUNT
+	         , A.BOOK_PERSONNEL
+	         , A.BOOK_CHECK_DATE
+	         , A.BOOK_CHECKOUT_DATE
+         FROM( 
+   			  SELECT
+          		   	 ROWNUM RNUM 
+          		   , B.BOOK_NO
+      			   , B.BOOK_USER_NAME
+      			   , B.USER_ID
+     			   , B.PAYMENT_AMOUNT
+     			   , B.BOOK_PERSONNEL
+     			   , B.BOOK_CHECK_DATE
+     			   , B.BOOK_CHECKOUT_DATE
+     			FROM(
+            		 SELECT
+                 		    C.BOOK_NO
+               			  , C.BOOK_USER_NAME
+       		   			  , U.USER_ID
+       		   			  , P.PAYMENT_AMOUNT
+       		   			  , C.BOOK_PERSONNEL
+       		   			  , C.BOOK_CHECK_DATE
+       		   			  , C.BOOK_CHECKOUT_DATE
+                      FROM BOOK_LIST C
+  		      		  JOIN USER_INFO U ON (C.USER_NO = U.USER_NO)
+  		      		  JOIN PAYMENT P ON ( C.BOOK_NO = P.BOOK_NO)
+              	     )B
+        	   )A
+           WHERE A.RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectDetail">
+        SELECT
+               U.USER_ID
+             , U.USER_PWD
+             , U.USER_NICKNAME
+             , U.USER_PHONE
+             , P.POINT
+             , U.USER_NO
+          FROM USER_INFO U
+          JOIN POINT P ON (U.USER_NO = P.USER_NO)
+         WHERE U.USER_NO = ?
+	</entry>
+	
+
+	<entry key="insertCoupon">
+        INSERT 
+          INTO COUPON
+        (
+          COUPON_NO
+ 		, COUPON_START
+		, COUPON_END
+		, COUPON_CONDITION
+		, COUPON_USE_YN
+		, USER_NO
+		, COUPON_NAME
+        , COUPON_DISCOUNT
+        )
+        VALUES
+        (
+         SEQ_COUPON_NO.NEXTVAL
+		, ?
+		, ?
+		, ?
+		, DEFAULT
+		, ?
+		, ?
+		, ?
+		)
+	</entry>
+	
+	<entry key="selectWithdrawList">
+        SELECT 
+               A.RNUM
+             , A.WITHDRAW_NO
+             , A.USER_ID
+             , A.WITHDRAW_REASON
+             , A.WITHDRAWDATE
+             , A.YEAR
+          FROM (   
+                SELECT 
+                       ROWNUM RNUM 
+                     , B.WITHDRAW_NO
+                     , B.USER_ID
+                     , B.WITHDRAW_REASON
+                     , B.WITHDRAWDATE
+                     , B.YEAR
+                  FROM (    
+                        SELECT
+                               C.WITHDRAW_NO
+                             , U.USER_ID
+                             , C.WITHDRAW_REASON
+                             , U.WITHDRAWDATE
+                             , U.WITHDRAWDATE + (INTERVAL '1' YEAR) AS YEAR
+                          FROM WITHDRAW_REASON C
+                          JOIN USER_INFO U ON (C.MEMBER_NO = U.USER_NO)
+                        ) B
+               ) A
+        WHERE A.RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectReservationDetail">
+        SELECT  
+               U.USER_ID 
+             , U.USER_NICKNAME 
+     		 , A.ACCOMO_NAME
+     		 , R.ROOM_NAME 
+     		 , P.PAYMENT_AMOUNT 
+    		 , B.BOOK_PERSONNEL
+     		 , B.BOOK_CHECK_DATE 
+     		 , B.BOOK_CHECKOUT_DATE 
+     		 , B.BOOK_APPROVE_YN
+  		  FROM BOOK_LIST B  
+  		  JOIN USER_INFO U ON (B.USER_NO = U.USER_NO)
+  	      JOIN ROOM_INFO R ON ( B.ROOM_NO = R.ROOM_NO)
+          JOIN ACCOMO_INFO A ON ( R.ACCOMO_NO = A.ACCOMO_NO)
+  		  JOIN PAYMENT P ON ( B.BOOK_NO = P.BOOK_NO)
+         WHERE B.BOOK_NO = ?
+	</entry>
+	
+	<entry key="selectSearch">
+        SELECT
+  	  	       C.RNUM
+   		     , C.USER_NO
+    		 , C.USER_NICKNAME
+    		 , C.USER_ID
+    		 , C.USER_PHONE
+  		  FROM(
+       		   SELECT
+              		  ROWNUM RNUM
+            	    , B.USER_NO
+             	   	, B.USER_NICKNAME
+         	        , B.USER_ID
+           		    , B.USER_PHONE
+           		 FROM(
+                	  SELECT
+                   	 	     A.USER_NO
+                   		   , A.USER_NICKNAME
+                   	  	   , A.USER_ID
+                   		   , A.USER_PHONE
+                 		FROM USER_INFO A
+                WHERE A.USER_NO NOT IN 0
+                )B
+        )C
+WHERE C.RNUM BETWEEN ? AND ?
+         AND USER_ID = ?
+    </entry>
+   
+    	<entry key="selectNameSearch">
+        SELECT
+  	  	       C.RNUM
+   		     , C.USER_NO
+    		 , C.USER_NICKNAME
+    		 , C.USER_ID
+    		 , C.USER_PHONE
+  		  FROM(
+       		   SELECT
+              		  ROWNUM RNUM
+            	    , B.USER_NO
+             	   	, B.USER_NICKNAME
+         	        , B.USER_ID
+           		    , B.USER_PHONE
+           		 FROM(
+                	  SELECT
+                   	 	     A.USER_NO
+                   		   , A.USER_NICKNAME
+                   	  	   , A.USER_ID
+                   		   , A.USER_PHONE
+                 		FROM USER_INFO A
+                WHERE A.USER_NO NOT IN 0
+                     )B
+              )C
+         WHERE C.RNUM BETWEEN ? AND ?
+           AND USER_NICKNAME = ?
+    </entry>
+    
+    <entry key="selectSearchCount">
+       SELECT 
+             COUNT(*)
+         FROM USER_INFO A
+        WHERE A.USER_ID = ?
+	</entry>
+	
+	<entry key="selectNameCount">
+       SELECT 
+             COUNT(*)
+         FROM USER_INFO A
+        WHERE A.USER_NICKNAME = ?
+	</entry>
+	
+	 <entry key="selectLeaveCount">
+       SELECT 
+             COUNT(*)
+         FROM WITHDRAW_REASON A
+         JOIN USER_INFO B ON (A.MEMBER_NO = B.USER_NO)
+        WHERE B.USER_ID = ?
+	</entry>
+	
+	<entry key="selectLeaveList">
+        SELECT 
+       		   A.RNUM
+     		 , A.WITHDRAW_NO
+     		 , A.USER_ID
+     		 , A.WITHDRAW_REASON
+     		 , A.WITHDRAWDATE
+ 		  FROM (   
+        	     SELECT 
+              		    ROWNUM RNUM 
+             		  , B.WITHDRAW_NO
+             		  , B.USER_ID
+             		  , B.WITHDRAW_REASON
+             		  , B.WITHDRAWDATE
+          	       FROM (    
+		                 SELECT
+			                    C.WITHDRAW_NO
+			                  , U.USER_ID
+			                  , C.WITHDRAW_REASON
+			                  , U.WITHDRAWDATE
+		                   FROM WITHDRAW_REASON C
+		                   JOIN USER_INFO U ON (C.MEMBER_NO = U.USER_NO)
+               			) B
+    		    ) A
+ 		  WHERE A.RNUM BETWEEN ? AND ?
+   		    AND USER_ID = ?
+	</entry>
+	
+    <entry key="selectIdBookList">	
+        SELECT
+               A.RNUM 
+             , A.BOOK_NO
+             , A.BOOK_USER_NAME
+             , A.USER_ID
+             , A.PAYMENT_AMOUNT
+             , A.BOOK_PERSONNEL
+             , A.BOOK_CHECK_DATE
+             , A.BOOK_CHECKOUT_DATE
+          	FROM(
+                SELECT
+                       ROWNUM RNUM 
+                     , B.BOOK_NO
+                     , B.BOOK_USER_NAME
+                     , B.USER_ID
+                     , B.PAYMENT_AMOUNT
+        			 , B.BOOK_PERSONNEL
+        			 , B.BOOK_CHECK_DATE
+        			 , B.BOOK_CHECKOUT_DATE
+     			  FROM  (
+            			 SELECT
+                   				C.BOOK_NO
+                			  , C.BOOK_USER_NAME
+       		     			  , U.USER_ID
+       		     			  , P.PAYMENT_AMOUNT
+       		     			  , C.BOOK_PERSONNEL
+       		    			  , C.BOOK_CHECK_DATE
+       		    		 	  , C.BOOK_CHECKOUT_DATE
+             			   FROM BOOK_LIST C
+  		      			   JOIN USER_INFO U ON (C.USER_NO = U.USER_NO)
+  		      			   JOIN PAYMENT P ON ( C.BOOK_NO = P.BOOK_NO)
+              			)B
+        	    )A
+            WHERE A.RNUM BETWEEN ? AND ?
+              AND USER_ID = ?
+	</entry>
+	
+    <entry key="selectBookCount">
+       SELECT 
+             COUNT(*)
+         FROM BOOK_LIST A
+         JOIN USER_INFO B ON (A.USER_NO = B.USER_NO)
+         JOIN PAYMENT C ON ( A.BOOK_NO = C.BOOK_NO)
+         WHERE B.USER_ID = ?
+	</entry>
+	
+	<entry key="selectBookListCount">
+       SELECT 
+             COUNT(*)
+         FROM BOOK_LIST A
+         JOIN USER_INFO B ON (A.USER_NO = B.USER_NO)
+         JOIN PAYMENT C ON ( A.BOOK_NO = C.BOOK_NO)
+	</entry>
+	
+	<entry key="selectBlackList">
+        SELECT
+               C.RNUM
+             , C.BLIST_NO
+             , C.MEMBER_NO
+   			 , C.BLIST_REASON
+   			 , C.WRITER_TYPE
+   			 , C.ENROLL_DATE
+          FROM(
+       		   SELECT
+             		  ROWNUM RNUM
+            		, B.BLIST_NO
+            		, B.MEMBER_NO
+            		, B.BLIST_REASON
+            		, B.WRITER_TYPE
+            		, B.ENROLL_DATE
+                FROM(
+                      SELECT
+                    		 A.BLIST_NO
+                   		   , A.MEMBER_NO
+                  		   , A.BLIST_REASON
+                   		   , A.WRITER_TYPE
+                 		   , A.ENROLL_DATE
+              		    FROM BLIST A
+                        WHERE WRITER_TYPE = 'user'
+                        )B
+        	  )C
+        	WHERE C.RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectBlackCount">
+        SELECT 
+               COUNT(*)
+         FROM BLIST 
+	</entry>
+	
+	<entry key="selectBlackListMemberNo">
+	       SELECT
+               C.RNUM
+             , C.BLIST_NO
+             , C.MEMBER_NO
+   			 , C.BLIST_REASON
+   			 , C.WRITER_TYPE
+   			 , C.ENROLL_DATE
+          FROM(
+       		   SELECT
+             		  ROWNUM RNUM
+            		, B.BLIST_NO
+            		, B.MEMBER_NO
+            		, B.BLIST_REASON
+            		, B.WRITER_TYPE
+            		,B.ENROLL_DATE
+                FROM(
+                      SELECT
+                    		 A.BLIST_NO
+                   		   , A.MEMBER_NO
+                  		   , A.BLIST_REASON
+                   		   , A.WRITER_TYPE
+                 		   , A.ENROLL_DATE
+              		    FROM BLIST A
+              		    JOIN OWNER_INFO O ON (A.MEMBER_NO = O.OWNER_NO)
+                        JOIN USER_INFO U ON (A.MEMBER_NO = U.USER_NO)
+              		)B
+        	  )C
+        	WHERE C.RNUM BETWEEN ? AND ?
+              AND C.MEMBER_NO = ?
+	</entry>
+	
+	<entry key="selectBlackNoCount">
+        SELECT 
+               COUNT(*)
+         FROM BLIST 
+        WHERE MEMBER_NO = ?
+	</entry>
+	
+	<entry key="selectBestReview">
+        SELECT 
+               C.RNUM
+     		 , C.REVIEW_NO
+    		 , C.REVIEW_TITLE
+    		 , C.USER_ID
+    		 , C.ACCOMO_NO
+		  FROM(
+			   SELECT
+      				  ROWNUM RNUM
+     			    , B.REVIEW_NO
+    			    , B.REVIEW_TITLE
+     				, B.USER_ID
+     				, B.ACCOMO_NO
+				 FROM(     
+  					  SELECT 
+       						 A.REVIEW_NO
+      					   , A.REVIEW_TITLE
+      					   , U.USER_ID
+                           , AI.ACCOMO_NO
+  					    FROM REVIEW A
+  						JOIN BOOK_LIST B ON (A.BOOK_NO = B.BOOK_NO)
+  						JOIN USER_INFO U ON (B.USER_NO = U.USER_NO)
+                        JOIN ROOM_INFO R ON (B.ROOM_NO = R.ROOM_NO)
+                        JOIN ACCOMO_INFO AI ON (R.ACCOMO_NO = AI.ACCOMO_NO)
+  					 )B
+  			  )C
+  			  WHERE C.RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectBestReviewCount">
+        SELECT 
+               COUNT(*)
+  		  FROM REVIEW A
+  		  JOIN BOOK_LIST B ON (A.BOOK_NO = B.BOOK_NO)
+  		  JOIN USER_INFO U ON (B.USER_NO = U.USER_NO)
+          JOIN ROOM_INFO R ON (B.ROOM_NO = R.ROOM_NO)
+          JOIN ACCOMO_INFO AI ON (R.ACCOMO_NO = AI.ACCOMO_NO)
+	</entry>
+
+</properties>

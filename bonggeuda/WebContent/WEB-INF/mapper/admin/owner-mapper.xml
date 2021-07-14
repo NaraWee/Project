@@ -1,0 +1,612 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<entry key="selectOwnerList">
+SELECT 
+	    C.*
+  FROM (SELECT
+  			   ROWNUM RNUM
+  			 , B.*
+  		  FROM (SELECT
+  		  		 	   A.*
+  		  		  FROM OWNER_INFO A
+  		  		 ORDER BY OWNER_NO DESC
+  		       ) B
+  		) C
+  	WHERE C.RNUM BETWEEN ? AND ? 
+</entry>
+<entry key="selectMaxNum">
+SELECT
+	   COUNT(*)
+  FROM OWNER_INFO
+</entry>
+<entry key="ownerSearch">
+SELECT
+	   *
+  FROM OWNER_INFO
+ WHERE OWNER_ID = ?
+</entry>
+<entry key="selectOwnerAccomoList">
+SELECT
+	   oi.OWNER_PHONE 
+	 , oi.OWNER_ID 
+	 , ai.*
+  FROM ACCOMO_INFO ai
+  JOIN OWNER_INFO oi ON (ai.OWNER_NO = ai.OWNER_NO) 
+ WHERE oi.OWNER_NO = ?
+   AND ai.OWNER_NO = ?
+</entry>
+<entry key="rmTotalCount">
+SELECT
+	   COUNT(*)
+  FROM RM_ACCOMO_INFO
+ WHERE APPROVAL_YN = ?
+  
+</entry>
+<entry key="accomoRmList">
+SELECT
+	   *
+  FROM RM_ACCOMO_INFO
+ WHERE APPROVAL_YN = ?
+</entry>
+
+<entry key="roomRmList">
+SELECT
+	   *
+  FROM RM_ROOM_INFO
+ WHERE APPROVAL_YN = ?
+</entry>
+
+
+<entry key="rmAccomoInfo">
+SELECT
+	   r.*
+	 , a.THUMBNAIL_PATH
+  FROM RM_ACCOMO_INFO r
+  JOIN ATTACHMENT a ON (r.REQUEST_NO = a.REF_NO)
+ WHERE r.REQUEST_NO = ?
+   AND a.CATEGORY_NO  = 1
+</entry>
+<entry key="rmRoomInfo">
+SELECT
+	   r.*
+	 , a.THUMBNAIL_PATH
+  FROM RM_ROOM_INFO r
+  JOIN ATTACHMENT a ON (r.REQUEST_NO = a.REF_NO)
+ WHERE r.REQUEST_NO = ?
+   AND a.CATEGORY_NO  = 2
+</entry>
+<entry key="selectThumbnail">
+SELECT
+  THUMBNAIL_PATH
+  FROM ATTACHMENT
+ WHERE CATEGORY_NO = ?
+   AND REF_NO = ?
+</entry>
+<entry key="selectAccomo">
+        SELECT 
+               ACCOMO_NO
+             , OWNER_NO
+             , ACCOMO_NAME
+             , CEO_NAME
+             , ACCOMO_TYPE
+             , REGISTRATION_NO
+             , ACCOMO_ADDRESS
+             , ACCOMO_EMAIL
+             , ACCOMO_HOMEPAGE
+             , ACCOMO_FACILITY
+             , ACCOMO_PATH
+             , ACCOMO_NEAR
+             , ACCOMO_RULE
+             , ACCOMO_PARKING
+             , CHECK_IN
+             , CHECK_OUT
+             , PEAK_DATE_START
+             , PEAK_DATE_END
+             , AM.THUMBNAIL_PATH
+          FROM ACCOMO_INFO AI
+          JOIN ATTACHMENT AM ON(AI.ACCOMO_NO = AM.REF_NO) 
+         WHERE ACCOMO_NO = ?
+           AND CATEGORY_NO = ?
+</entry>
+<entry key="selectRoom">
+ SELECT
+	    ROOM_NO,
+		ACCOMO_NO,
+		ROOM_NAME,
+		ROOM_MAX,
+		ROOM_INTRO,
+		ROOM_FEE,
+		ROOM_VISIBLE_YN,
+		PEAK_FEE,
+		THUMBNAIL_PATH 
+  FROM ROOM_INFO RI
+  JOIN ATTACHMENT AM ON(RI.ROOM_NO = AM.REF_NO)
+ WHERE RI.ACCOMO_NO = ?
+   AND AM.CATEGORY_NO = ?
+</entry>
+<entry key="selectEnAccomoInfo">
+SELECT
+	   R.*,
+	   A.THUMBNAIL_PATH 
+  FROM RM_ACCOMO_INFO R 
+  JOIN ATTACHMENT A ON (R.REQUEST_NO = A.REF_NO)
+ WHERE R.REQUEST_NO = ?
+   AND A.CATEGORY_NO = 1
+</entry>
+<entry key="selectEnRoomInfo">
+SELECT
+  	   R.*,
+  	   A.THUMBNAIL_PATH
+  FROM RM_ROOM_INFO R
+  JOIN ATTACHMENT A ON (R.REQUEST_NO =A.REF_NO)
+ WHERE A.CATEGORY_NO  = 2
+   AND R.EN_ACCOMO_NO IN ( SELECT
+							      S.EN_ACCOMO_NO 
+  							 FROM RM_ACCOMO_INFO S
+						    WHERE S.REQUEST_NO = ?
+						 )
+</entry>
+<entry key="selectAccomoAttachment">
+SELECT 
+	   A.*
+  FROM ATTACHMENT A 
+  JOIN RM_ACCOMO_INFO AI ON ( A.REF_NO = AI.REQUEST_NO)
+ WHERE A.CATEGORY_NO = 1
+   AND AI.REQUEST_NO = ?
+</entry>
+<entry key="selectRoomAttachment">
+SELECT 
+	   A.*
+  FROM ATTACHMENT A 
+  JOIN RM_ROOM_INFO RI ON (A.REF_NO = RI.REQUEST_NO)
+ WHERE A.CATEGORY_NO = 2
+   AND EN_ACCOMO_NO = ?
+</entry>
+
+<entry key="insertAccomo">
+INSERT INTO ACCOMO_INFO
+VALUES
+(
+ SEQ_ACCOMO_NO.NEXTVAL
+  , ?
+  , ?
+  , ?
+  , ?
+  , ?
+  , ?
+  , ?
+  , ?
+  , ?
+  , ?
+  , ?
+  , ?
+  , ?
+  , ?
+  , ?
+  , ?
+  , ?
+  , ?
+)
+</entry>
+<entry key="insertAttach">
+INSERT INTO ATTACHMENT 
+VALUES
+(
+   SEQ_ATTACHMENT_NO.NEXTVAL
+ , ?
+ , ?
+ , ?
+ , ?
+ , ?
+ , ?
+ , ?
+ , ?
+)
+</entry>
+<entry key="insertRoom">
+INSERT INTO ROOM_INFO
+VALUES
+(
+   SEQ_ROOM_NO.NEXTVAL
+ , (SELECT MAX(ACCOMO_NO) FROM ACCOMO_INFO)
+ , ?
+ , ?
+ , ?
+ , ?
+ , ?
+ , ?
+)
+
+</entry>
+<entry key="selectAccomoMaxNum">
+SELECT MAX(ACCOMO_NO) FROM ACCOMO_INFO
+</entry>
+<entry key="selectRoomMaxNum">
+SELECT MAX(ROOM_NO) FROM ROOM_INFO
+</entry>
+
+<entry key="updateRmAccomo">
+UPDATE RM_ACCOMO_INFO
+SET APPROVAL_YN = 'Y'
+WHERE REQUEST_NO = ?
+</entry>
+
+<entry key="updateRmRoom">
+UPDATE RM_ROOM_INFO
+SET APPROVAL_YN = 'Y'
+WHERE REQUEST_NO = ?
+</entry>
+
+<entry key="insertRmHistory">
+INSERT INTO RM_HISTORY
+VALUES
+(SEQ_RM_HISTORY_NO.NEXTVAL,
+sysdate, 
+?,
+?,
+?,
+?
+)
+</entry>
+<entry key="updateAccomo">
+UPDATE ACCOMO_INFO
+SET OWNER_NO= ?,
+    ACCOMO_NAME= ?,
+    CEO_NAME= ?, 
+    ACCOMO_TYPE= ?, 
+    REGISTRATION_NO= ?, 
+    ACCOMO_ADDRESS= ?, 
+    ACCOMO_EMAIL= ?, 
+    ACCOMO_HOMEPAGE= ?, 
+    ACCOMO_FACILITY= ?, 
+    ACCOMO_PATH= ?, 
+    ACCOMO_NEAR= ?, 
+    ACCOMO_RULE= ?, 
+    ACCOMO_PARKING= ?, 
+    CHECK_IN= ?, 
+    CHECK_OUT= ?, 
+    PEAK_DATE_START= ?, 
+    PEAK_DATE_END= ?, 
+    VISIBLE_YN= 'Y'
+WHERE ACCOMO_NO= ?
+</entry>
+<entry key="updateRoom">
+UPDATE BONGGEUDA.ROOM_INFO
+SET ACCOMO_NO= ?, 
+    ROOM_NAME= ?,  
+    ROOM_MAX= ?,
+    ROOM_INTRO= ?, 
+    ROOM_FEE= ?, 
+    ROOM_VISIBLE_YN= ?, 
+    PEAK_FEE= ?
+WHERE ROOM_NO= ?
+</entry>
+<entry key="updateImage">
+UPDATE ATTACHMENT
+   SET THUMBNAIL_PATH = ?
+ WHERE REF_NO = ?
+   AND CATEGORY_NO = ?
+</entry>
+<entry key="bListSelect">
+SELECT 
+ 	   A.*
+  FROM (SELECT
+  			   ROWNUM RNUM
+  			 , B.*
+  		  FROM BLIST B
+         WHERE WRITER_TYPE = ?
+ 	    ) A
+ WHERE RNUM BETWEEN ? AND ?
+</entry>
+<entry key="totalBlistCount">
+ SELECT 
+ 	   COUNT(*)
+   FROM BLIST
+ WHERE WRITER_TYPE = ?
+</entry>
+<entry key="totalPayCount">
+ SELECT 
+ 	   COUNT(*)
+   FROM PAYMENT
+</entry>
+<entry key="payListSelect">
+SELECT
+ 	   B.*
+  FROM (SELECT
+  			   ROWNUM RNUM
+  			 , A.*
+  		  FROM  ( SELECT
+		     			 p.*
+					   , bl.USER_NO 
+			  		   , bl.BOOK_USER_NAME
+			 		   , bl.ROOM_NO		
+			 		   , bl.BOOK_PHONE 
+				 	   , ri.ROOM_NAME
+					   , ai.ACCOMO_NAME
+				       , ai.ACCOMO_NO 
+				    FROM PAYMENT p 
+		 		    JOIN BOOK_LIST bl ON (p.BOOK_NO = bl.BOOK_NO)
+		  		    JOIN ROOM_INFO ri ON (bl.ROOM_NO = ri.ROOM_NO)
+		 		    JOIN ACCOMO_INFO ai ON (ri.ACCOMO_NO = ai.ACCOMO_NO)
+		 		   ORDER BY PAYMENT_NO DESC
+		 	    ) A
+		) B
+ WHERE RNUM BETWEEN ? AND ?
+</entry>
+<entry key="payDetailInfo">
+SELECT
+	   p.*
+	 , bl.USER_NO 
+	 , bl.BOOK_USER_NAME
+	 , bl.ROOM_NO
+	 , bl.BOOK_PHONE
+	 , ri.ROOM_NAME
+	 , ai.ACCOMO_NAME
+	 , ai.ACCOMO_NO 
+  FROM PAYMENT p 
+  JOIN BOOK_LIST bl ON (p.BOOK_NO = bl.BOOK_NO)
+  JOIN ROOM_INFO ri ON (bl.ROOM_NO = ri.ROOM_NO)
+  JOIN ACCOMO_INFO ai ON (ri.ACCOMO_NO = ai.ACCOMO_NO)
+ WHERE p.PAYMENT_NO = ?
+</entry>
+<entry key="totalCancleCount">
+SELECT
+	   COUNT(*)
+  FROM CANCLE_HISTORY
+ WHERE REFUND_STATUS = ?
+</entry>
+<entry key="cancleList">
+SELECT
+ 	   B.*
+  FROM (SELECT
+  			   ROWNUM RNUM
+  			 , A.*
+  		  FROM  ( SELECT
+  		  				 ch.REASON_CANCLE
+  		  			   , ch.REFUND_STATUS 
+  		  			   , ch.CANCLE_NO 
+  		  			   , ch.CANCLE_DATE
+		     		   , p.*
+					   , bl.USER_NO 
+			  		   , bl.BOOK_USER_NAME
+			 		   , bl.ROOM_NO
+			 		   , bl.BOOK_PHONE 
+				 	   , ri.ROOM_NAME
+					   , ai.ACCOMO_NAME
+				       , ai.ACCOMO_NO 
+				    FROM PAYMENT p
+				    JOIN CANCLE_HISTORY ch ON (p.PAYMENT_NO = ch.PAYMENT_NO)
+		 		    JOIN BOOK_LIST bl ON (p.BOOK_NO = bl.BOOK_NO)
+		  		    JOIN ROOM_INFO ri ON (bl.ROOM_NO = ri.ROOM_NO)
+		 		    JOIN ACCOMO_INFO ai ON (ri.ACCOMO_NO = ai.ACCOMO_NO)
+		 		   WHERE REFUND_STATUS = ?
+		 		   ORDER BY ch.CANCLE_NO DESC
+		 	    ) A
+		) B
+ WHERE RNUM BETWEEN ? AND ?
+</entry>
+<entry key="cancleDetailInfo">
+SELECT
+	   ch.CANCLE_AMOUNT
+	 , ch.REASON_CANCLE
+     , ch.REFUND_STATUS 
+	 , ch.CANCLE_NO 
+	 , ch.CANCLE_DATE
+	 , p.*
+	 , bl.USER_NO 
+	 , bl.BOOK_USER_NAME
+	 , bl.ROOM_NO
+	 , bl.BOOK_PHONE 
+	 , ri.ROOM_NAME
+	 , ai.ACCOMO_NAME
+	 , ai.ACCOMO_NO 
+  FROM PAYMENT p
+  JOIN CANCLE_HISTORY ch ON (p.PAYMENT_NO = ch.PAYMENT_NO)
+  JOIN BOOK_LIST bl ON (p.BOOK_NO = bl.BOOK_NO)
+  JOIN ROOM_INFO ri ON (bl.ROOM_NO = ri.ROOM_NO)
+  JOIN ACCOMO_INFO ai ON (ri.ACCOMO_NO = ai.ACCOMO_NO)
+ WHERE ch.CANCLE_NO = ?
+</entry>
+<entry key="monthStlList">
+SELECT
+	   B.*
+  FROM ( SELECT
+	   			ROWNUM RNUM
+ 			  , A.*
+		   FROM ( SELECT 
+					     s.*
+				  	   , ai.ACCOMO_NAME
+					   , ai.CEO_NAME
+					   , ai.REGISTRATION_NO
+					   , oi.OWNER_PHONE 
+				    FROM SETTLEMENT s 
+				    JOIN ACCOMO_INFO ai ON (s.ACCOMO_NO = ai.ACCOMO_NO)
+				    JOIN OWNER_INFO oi ON (ai.OWNER_NO = oi.OWNER_NO)
+				   WHERE s.ACCOMO_NO = ?
+				   ORDER BY STL_NO DESC
+				) A
+		 ) B
+ WHERE RNUM BETWEEN ? AND ?
+</entry>
+<entry key="totalStlCount">
+SELECT 
+	   COUNT(*)
+  FROM SETTLEMENT
+ WHERE ACCOMO_NO = ?
+</entry>
+<entry key="prePerList">
+SELECT 
+	   A.*
+  FROM ( SELECT 
+	    	    ROWNUM RNUM
+	    	  , ai.ACCOMO_NAME
+	    	  , ri.ROOM_NAME 
+			  , sh.*
+  		   FROM SALES_HISTORY sh
+  		   JOIN ROOM_INFO ri ON (sh.ROOM_NO = ri.ROOM_NO)
+  		   JOIN ACCOMO_INFO ai ON (sh.ACCOMO_NO = ai.ACCOMO_NO)
+ 		  WHERE sh.STL_YN = 'N'
+ 		    AND sh.ACCOMO_NO = ?
+ 		  ORDER BY SALES_NO DESC
+        ) A
+ WHERE RNUM BETWEEN ? AND ?
+</entry>
+<entry key="totalPerCount">
+SELECT
+	   COUNT(*)
+  FROM SALES_HISTORY sh 
+ WHERE sh.STL_YN = ?
+   AND sh.ACCOMO_NO = ?
+</entry>
+<entry key="stlPerList">
+SELECT
+	   A.*
+  FROM ( SELECT
+  			    ROWNUM RNUM
+  			  , B.*
+  		   FROM ( SELECT
+		  			     sh2.SALES_NO 
+					   , ri.ROOM_NAME 
+					   , s.STL_DATE 
+				       , sh2.SALES_PRICE 
+				       , sh2.SALES_DATE 
+				    FROM SETTLEMENT s 
+				    JOIN SETTLEMENT_HISTORY sh ON (s.STL_NO = sh.STL_NO)
+				    JOIN SALES_HISTORY sh2  ON (sh.SALES_NO = sh2.SALES_NO)
+				    JOIN ROOM_INFO ri ON (sh2.ROOM_NO = ri.ROOM_NO)
+				   WHERE s.ACCOMO_NO = ?
+				   ORDER BY sh2.SALES_DATE DESC 
+  		   ) B
+  ) A
+ WHERE RNUM BETWEEN ? AND ?
+</entry>
+<entry key="stlPerCount">
+SELECT 
+	   COUNT(*)
+  FROM SALES_HISTORY sh 
+  JOIN SETTLEMENT_HISTORY sh2 ON (sh.SALES_NO = sh2.SALES_NO)
+  JOIN SETTLEMENT s ON (sh2.STL_NO = s.STL_NO)
+ WHERE s.ACCOMO_NO = ?
+</entry>
+<entry key="insertStl">
+INSERT INTO SETTLEMENT
+(STL_NO, STL_DATE, MONTH_AMOUNT, ACCOMO_NO)
+VALUES(STL_NO_SEQ.NEXTVAL, SYSDATE, (SELECT
+	   SUM(SALES_PRICE)
+  FROM SALES_HISTORY sh
+ WHERE ACCOMO_NO = ?
+   AND STL_YN = 'N'), ?)
+</entry>
+<entry key="selectSalesNo">
+SELECT 
+  	   SALES_NO
+  FROM SALES_HISTORY
+ WHERE ACCOMO_NO = ?
+   AND STL_YN = 'N'
+</entry>
+<entry key="updateSalesHistory">
+UPDATE SALES_HISTORY
+   SET STL_YN = 'Y'
+ WHERE ACCOMO_NO = ?
+   AND STL_YN = 'N'
+</entry>
+<entry key="insertStlHistory">
+INSERT INTO SETTLEMENT_HISTORY
+(STL_NO, SALES_NO)
+VALUES
+(
+  (SELECT MAX(STL_NO) FROM SETTLEMENT)
+, ?
+)
+</entry>
+<entry key="taxBillInfo">
+ SELECT
+ 	    rtb.REQUEST_NO 
+	  , ai.ACCOMO_NAME 
+	  , ai.CEO_NAME 
+	  , ai.ACCOMO_ADDRESS 
+	  , ai.ACCOMO_TYPE 
+	  , ai.REGISTRATION_NO 
+	  , s.MONTH_AMOUNT 
+	  , s.STL_DATE
+	  , (SELECT
+	  		    COUNT(*)
+	  	   FROM SETTLEMENT_HISTORY sh3
+	  	  WHERE sh3.STL_NO = ? )
+  FROM SETTLEMENT s 
+  JOIN ACCOMO_INFO ai ON (s.ACCOMO_NO = ai.ACCOMO_NO)
+  JOIN REQUEST_TAX_BILL rtb ON (rtb.STL_NO = s.STL_NO)
+ WHERE s.STL_NO = ?
+</entry>
+<entry key="stlRequestList">
+SELECT 
+	   B.*
+  FROM ( SELECT
+  	    		ROWNUM RNUM
+	  		  , A.*
+ 		   FROM ( SELECT
+ 		   		         ai.ACCOMO_NAME 
+ 		   			   , rs.*
+ 		   			FROM REQUEST_STL rs 
+ 		   			JOIN ACCOMO_INFO ai ON (rs.ACCOMO_NO = ai.ACCOMO_NO)
+ 		   		   WHERE rs.STL_YN = ?
+ 		   		  ORDER BY rs.REQUEST_STL_NO 
+ 		   	  	)A
+ 	   ) B
+ WHERE RNUM BETWEEN ? AND ?
+</entry>
+<entry key="stlRequestCount">
+SELECT
+	   COUNT(*)
+  FROM REQUEST_STL rs 
+ WHERE STL_YN = ?
+</entry>
+<entry key="taxRequestCount">
+SELECT
+	   COUNT(*)
+  FROM REQUEST_TAX_BILL rtb  
+ WHERE rtb.RESPONSE_YN = ?
+</entry>
+<entry key="taxBillList">
+SELECT 
+	   B.*
+  FROM ( SELECT
+  	    		ROWNUM RNUM
+	  		  , A.*
+ 		   FROM ( SELECT
+ 		   		         ai.ACCOMO_NAME 
+ 		   		       , s2.STL_DATE 
+ 		   			   , rtb.*
+ 		   			FROM REQUEST_TAX_BILL rtb 
+ 		   			JOIN ACCOMO_INFO ai ON (rtb.ACCOMO_NO = ai.ACCOMO_NO)
+ 		   			JOIN SETTLEMENT s2 ON (rtb.STL_NO = s2.STL_NO)
+ 		   		   WHERE rtb.RESPONSE_YN = ?
+ 		   		  ORDER BY rtb.REQUEST_NO
+ 		   	  	)A
+ 	   ) B
+ WHERE RNUM BETWEEN ? AND ?
+</entry>
+<entry key="updateRequestList">
+UPDATE REQUEST_STL 
+   SET STL_YN = 'Y'
+ WHERE ACCOMO_NO = ?
+   AND STL_YN = 'N'
+</entry>
+<entry key="updateTaxRequest">
+UPDATE REQUEST_TAX_BILL 
+   SET RESPONSE_YN = 'Y'
+ WHERE REQUEST_NO = ?
+</entry>
+<entry key="insertTaxHistory">
+
+INSERT INTO TAXBILL_ISSUE_HISTORY 
+VALUES
+(
+   SEQ_TAXBILL_HISTORY_NO.NEXTVAL
+ , SYSDATE
+ , ?
+ , ?
+)
+</entry>
+</properties>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="selectReportList">
+        SELECT
+               C.RNUM
+             , C.REPORT_NO
+    		 , C.REPORT_TITLE
+   		     , C.REPORT_DATE
+    		 , C.REPORTED_TYPE
+    		 , C.REPORT_STATUS
+    		 , C.WRITER_TYPE
+  		 FROM(
+			   SELECT 
+      				 ROWNUM RNUM
+    			   , B.REPORT_NO
+   				   , B.REPORT_TITLE
+    			   , B.REPORT_DATE
+      			   , B.REPORTED_TYPE
+    			   , B.REPORT_STATUS
+    			   , B.WRITER_TYPE
+     			FROM(
+          			 SELECT
+                			A.REPORT_NO
+              			  , A.REPORT_TITLE
+              			  , A.REPORT_DATE
+              			  , A.REPORTED_TYPE
+              		 	  , A.REPORT_STATUS
+              			  , A.WRITER_TYPE
+     		           FROM REPORT A
+     				)B
+			 )C
+          WHERE C.RNUM BETWEEN ? AND ?
+	</entry>
+
+
+	<entry key="selectReportTotalCount">
+       SELECT 
+             COUNT(*)
+         FROM REPORT R
+	</entry>
+
+		<entry key="selectWriterTypeList">
+        SELECT
+               C.RNUM
+             , C.REPORT_NO
+    		 , C.REPORT_TITLE
+   		     , C.REPORT_DATE
+    		 , C.REPORTED_TYPE
+    		 , C.REPORT_STATUS
+    		 , C.USER_ID
+    		 , C.OWNER_ID
+    		 , C.WRITER_TYPE
+  		 FROM(
+			   SELECT 
+      				 ROWNUM RNUM
+    			   , B.REPORT_NO
+   				   , B.REPORT_TITLE
+    			   , B.REPORT_DATE
+      			   , B.REPORTED_TYPE
+    			   , B.REPORT_STATUS
+    			   , B.USER_ID
+    			   , B.OWNER_ID
+    			   , B.WRITER_TYPE
+     			FROM(
+          			 SELECT
+                			A.REPORT_NO
+              			  , A.REPORT_TITLE
+              			  , A.REPORT_DATE
+              			  , A.REPORTED_TYPE
+              		 	  , A.REPORT_STATUS
+              			  , U.USER_ID
+              			  , O.OWNER_ID
+              			  , A.WRITER_TYPE
+     		           FROM REPORT A
+     				   JOIN USER_INFO U ON ( A.MEMBER_NO = U.USER_NO)
+     		           JOIN OWNER_INFO O ON ( A.REPORTED_NO = O.OWNER_NO)
+     				)B
+			 )C
+          WHERE C.RNUM BETWEEN ? AND ?
+            AND C.WRITER_TYPE = ?
+	</entry>
+	
+	<entry key="selectWriterTypeTotalCount">
+       SELECT 
+             COUNT(*)
+         FROM REPORT R
+        WHERE R.WRITER_TYPE = ?
+	</entry>
+
+	<entry key="insertReport">
+        INSERT
+          INTO REPORT_HISTORY
+          (
+             REPORT_HISTORY_NO
+		   , REPORT_ANSWER_DATE
+           , REPORT_ANSWER
+           , REPORT_NO
+           , APPROVE_YN
+          )
+          VALUES
+          (
+             SEQ_REPORT_HISTORY_NO.NEXTVAL
+           , SYSDATE
+           , ?
+           , ?
+           , 'Y'
+          ) 
+	</entry>
+	
+	<entry key="selectReportDetail">
+        SELECT
+               REPORTED_TYPE
+             , REPORT_REASON
+             , REPORTED_NO
+             , REPORT_TITLE
+             , WRITER_TYPE
+          FROM REPORT
+         WHERE REPORT_NO = ?
+	</entry>
+
+	<entry key="selectReportThumnail">
+        SELECT 
+               THUMBNAIL_PATH
+  		  FROM ATTACHMENT A
+ 		  JOIN REPORT R ON (A.REF_NO = R.REPORT_NO)
+  		  JOIN CATEGORY C ON (A.CATEGORY_NO = C.CATEGORY_NUMBER)
+	     WHERE C.CATEGORY_NUMBER = 6
+   	       AND R.REPORT_NO = ?
+	</entry>
+</properties>
