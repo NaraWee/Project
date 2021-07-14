@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nobanryeo.petpal.user.mypage.dao.UserMapper">
+	
+	<resultMap id="userResultSet" type="UserInfoDTO">
+		<id column="USER_CODE" property="code" />
+		<result column="USER_ID" property="id" />
+		<result column="USER_PWD" property="pwd" />
+		<result column="USER_NAME" property="name" />
+		<result column="USER_NIKNAME" property="nikname" />
+		<result column="USER_PHONE" property="phone" />
+		<result column="USER_EMAIL" property="email" />
+		<result column="EMAIL_YN" property="emailYn" />
+		<result column="REPLY_YN" property="replyYn" />
+		<result column="WITHDRAW_YN" property="withdrawYn" />
+		<result column="REPORT_COUNT" property="reportCount" />
+		<result column="PERMISSON_SET" property="permisson" />
+	</resultMap>
+	
+	<resultMap id="QnAResultSet" type="AdQnADTO">
+		<id column="BOARD_CODE" property="boardCode"/>
+		<result column="BOARD_TITLE" property="boardTitle"/>
+		<result column="BOARD_CONTENT" property="boardContent"/>
+		<result column="QUESTION_TYPE" property="questionType"/>
+		<result column="BOARD_POST_DATE" property="boardPostDate"/>
+		<result column="ADMIN_REPLY_CONTENT" property="adminReplyContent"/>
+		<result column="STATE_CODE" property="stateCode"/>
+		<result column="USER_CODE" property="userCode"/>
+	</resultMap>
+	
+	<select id="selectUserIdcheck" resultType="string">
+       SELECT
+              COUNT(*)
+         FROM USER_TABLE
+        WHERE USER_ID = #{ id }
+	</select>
+	
+	<select id="selectUserNickcheck" resultType="string">
+       SELECT
+              COUNT(*)
+         FROM USER_TABLE
+        WHERE USER_NIKNAME = #{ nikname }	
+	</select>
+	
+	<select id="selectUserEmailcheck" resultType="string">
+       SELECT
+              COUNT(*)
+         FROM USER_TABLE
+        WHERE USER_EMAIL = #{ email }	
+	</select>
+
+	<insert id="insertUser" parameterType="UserInfoDTO">
+	    INSERT 
+           INTO USER_TABLE
+           VALUES(
+             USER_CODE_SEQ.NEXTVAL
+           , #{ id }
+           , #{ name }
+           , #{ nikname }
+           , #{ pwd }
+           , #{ phone }
+           , #{ email }
+           , #{ emailYn }
+           , #{ replyYn }
+           , DEFAULT
+           , DEFAULT
+           <choose>
+           <when test="permisson == 2">
+           , 2
+           </when>
+           <when test="permisson == 3">
+           , 3
+           </when>
+           <otherwise>
+           , 1
+           </otherwise>
+           </choose>
+           
+           )
+	</insert>
+	
+	<select id="selectUser" resultMap="userResultSet" parameterType="UserInfoDTO">
+        SELECT 
+               A.USER_CODE
+             , A.USER_ID
+             , A.USER_NAME
+             , A.USER_NIKNAME
+             , A.USER_PWD
+             , A.USER_PHONE
+             , A.USER_EMAIL
+             , A.EMAIL_YN
+             , A.REPLY_YN
+             , A.WITHDRAW_YN
+             , A.REPORT_COUNT
+             , A.PERMISSON_SET
+          FROM USER_TABLE A 
+         WHERE A.USER_ID = #{ id }
+	</select>
+	
+	<select id="selectUserPassword" resultType="string" parameterType="UserInfoDTO">
+        SELECT 
+               A.USER_PWD 
+          FROM USER_TABLE A 
+         WHERE A.USER_ID = #{ id } 
+	</select>
+	
+	<select id="selectUserId" resultType="string" parameterType="UserInfoDTO">
+        SELECT 
+               A.USER_ID
+          FROM USER_TABLE A 
+         WHERE A.USER_EMAIL = #{ email } 
+	</select>
+	
+	<update id="modifyPwd" parameterType="UserInfoDTO">
+		UPDATE USER_TABLE 
+           SET USER_PWD = #{ pwd } 
+         WHERE USER_ID  = #{ id }
+	</update>
+	
+	<update id="updateNick" parameterType="UserInfoDTO">
+		UPDATE USER_TABLE 
+           SET USER_NIKNAME = #{ nikname } 
+         WHERE USER_ID  = #{ id }
+	</update>
+	
+	<update id="updateEmail" parameterType="UserInfoDTO">
+		UPDATE USER_TABLE 
+           SET USER_EMAIL = #{ email } 
+         WHERE USER_ID  = #{ id }
+	</update>
+	
+	<update id="updateUserInfo" parameterType="UserInfoDTO">
+		UPDATE USER_TABLE 
+           SET EMAIL_YN = #{ emailYn }
+             , REPLY_YN = #{ replyYn }
+             , USER_PWD = #{ pwd } 
+             , USER_PHONE = #{ phone }
+         WHERE USER_ID  = #{ id }
+	</update>
+	
+	<update id="updatewithdrawUser" parameterType="UserInfoDTO">
+		UPDATE USER_TABLE
+		   SET WITHDRAW_YN = 'Y'
+         WHERE USER_ID  = #{ id }
+	</update>
+	
+	<insert id="insertwithdrawUser" parameterType="UserInfoDTO">
+		INSERT 
+           INTO WITHDRAW_USER_TABLE
+           VALUES(
+             SYSDATE
+           , #{ code }
+           , ADD_MONTHS(SYSDATE, 3)  
+           )
+	</insert>
+	<insert id="insertQuestion" parameterType="AdQnADTO">
+		INSERT
+		  INTO QUESTION_BOARD
+		VALUES ( QUESTION_BOARD_SEQ.NEXTVAL
+		       , #{ boardTitle }
+		       , #{ boardContent }
+		       , 1
+		       , SYSDATE
+		       , NULL
+		       , 1
+		       , #{ userCode }
+		       )
+	</insert>
+ </mapper>
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

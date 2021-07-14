@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nobanryeo.petpal.user.mypage.dao.QuestionMapper">
+
+	<resultMap id="QnAResultSet" type="AdQnADTO">
+		<id column="BOARD_CODE" property="boardCode"/>
+		<result column="BOARD_TITLE" property="boardTitle"/>
+		<result column="BOARD_CONTENT" property="boardContent"/>
+		<result column="QUESTION_TYPE" property="questionType"/>
+		<result column="BOARD_POST_DATE" property="boardPostDate"/>
+		<result column="ADMIN_REPLY_CONTENT" property="adminReplyContent"/>
+		<result column="STATE_CODE" property="stateCode"/>
+		<result column="USER_CODE" property="userCode"/>
+	</resultMap>
+
+	<resultMap id="ReportResultSet" type="ReportManageDTO">
+		<id column="REPORT_CODE" property="reportCode"/>
+		<result column="REPORT_TITLE" property="title"/>
+		<result column="REPORT_CONTENT" property="content"/>
+		<result column="REPORT_DATE" property="date"/>
+		<result column="DECISION_CODE" property="decisionCode"/>
+		<result column="USER_CODE" property="userCode"/>
+		<result column="DECISION_REASON" property="dReason"/>
+		<result column="DECISION_DATE" property="dDate"/>
+		<result column="REPLY_REPORT_TITLE" property="replyTitle"/>
+		<result column="REPLY_REPORT_CONTENT" property="replyContent"/>
+		<result column="REPLY_REPORT_DATE" property="replyDate"/>
+		<result column="STATE_CODE" property="stateCode"/>
+	</resultMap>
+
+	<select id="selectQnACount" resultType="int">
+		SELECT
+		       COUNT(*)
+		  FROM QUESTION_BOARD
+		 WHERE USER_CODE = #{ userCode }
+	</select>
+	
+	<select id="selectQnAList" resultMap="QnAResultSet" parameterType="hashmap">
+		SELECT * 
+		  FROM (SELECT ROWNUM RN, A.* 
+		          FROM (SELECT 
+		                        BOARD_CODE
+		                       ,BOARD_TITLE
+		                       ,BOARD_CONTENT
+		                       ,QUESTION_TYPE
+		                       ,BOARD_POST_DATE
+		                       ,ADMIN_REPLY_CONTENT
+		                       ,STATE_CODE
+		                       ,USER_CODE
+		          FROM QUESTION_BOARD
+		         WHERE USER_CODE = #{ qnaDTO.userCode }
+		      ORDER BY BOARD_POST_DATE DESC) A)
+			WHERE RN BETWEEN #{ pageInfo.start } AND #{ pageInfo.end }
+		      ORDER BY BOARD_POST_DATE DESC	
+	</select>
+
+	<select id="selectQnADetail" resultMap="QnAResultSet" parameterType="int">
+		SELECT
+			   BOARD_CODE
+			 , BOARD_TITLE
+			 , BOARD_CONTENT
+ 	         , QUESTION_TYPE
+ 	         , BOARD_POST_DATE
+ 	         , ADMIN_REPLY_CONTENT
+ 	         , STATE_CODE
+ 	         , USER_CODE
+		  FROM QUESTION_BOARD
+		 WHERE BOARD_CODE = #{ boardCode }
+	</select>
+
+	<select id="selectReportCount" resultType="int">
+		SELECT
+		       COUNT(*)
+		  FROM REPORT_MANAGE
+		 WHERE USER_CODE = #{ userCode }
+	</select>
+	
+	<select id="selectReportList" resultMap="ReportResultSet" parameterType="hashmap">
+		SELECT * 
+		  FROM (SELECT ROWNUM RN, A.* 
+		          FROM (SELECT 
+		                         A.REPORT_CODE
+		                       , A.REPORT_TITLE
+		                       , A.REPORT_CONTENT
+		                       , A.REPORT_DATE
+		                       , A.DECISION_CODE
+		                       , A.USER_CODE
+		                       , B.DECISION_REASON
+                               , B.DECISION_DATE
+                               , B.STATE_CODE
+		          FROM REPORT_MANAGE A
+		     LEFT JOIN DECISION_TABLE B ON (A.DECISION_CODE = B.DECISION_CODE)
+		         WHERE A.USER_CODE = #{ reportDTO.userCode }
+		      ORDER BY REPORT_DATE DESC) A)
+			WHERE RN BETWEEN #{ pageInfo.start } AND #{ pageInfo.end }
+		      ORDER BY REPORT_DATE DESC	
+	</select>
+	
+	<select id="selectReportDetail" resultMap="ReportResultSet" parameterType="int">
+		SELECT
+			   A.REPORT_CODE
+             , A.REPORT_TITLE
+             , A.REPORT_CONTENT
+             , A.REPORT_DATE
+             , A.DECISION_CODE
+             , A.USER_CODE
+             , B.DECISION_REASON
+             , B.DECISION_DATE
+             , B.STATE_CODE
+		  FROM REPORT_MANAGE A
+     LEFT JOIN DECISION_TABLE B ON (A.DECISION_CODE = B.DECISION_CODE)
+		 WHERE REPORT_CODE = #{ boardCode }
+	</select>
+	
+	<select id="selectReplyReportCount" resultType="int">
+		SELECT
+		       COUNT(*)
+		  FROM REPLY_REPORT_TABLE
+		 WHERE USER_CODE = #{ userCode }
+	</select>
+	
+	<select id="selectReplyReportList" resultMap="ReportResultSet" parameterType="hashmap">
+		SELECT * 
+		  FROM (SELECT ROWNUM RN, A.* 
+		          FROM (SELECT 
+		                        A.USER_CODE
+                              , A.REPLY_REPORT_TITLE
+                              , A.REPLY_REPORT_CONTENT
+                              , A.REPLY_REPORT_DATE
+                              , B.STATE_CODE
+                              , B.DECISION_CODE
+		          FROM REPLY_REPORT_TABLE A
+		     LEFT JOIN DECISION_TABLE B ON (A.DECISION_CODE = B.DECISION_CODE)
+		         WHERE A.USER_CODE = #{ reportDTO.userCode }
+		      ORDER BY REPLY_REPORT_DATE DESC) A)
+			WHERE RN BETWEEN #{ pageInfo.start } AND #{ pageInfo.end }
+		      ORDER BY REPLY_REPORT_DATE DESC	
+	</select>
+	
+	<select id="selectDecision" resultMap="ReportResultSet" parameterType="int">
+		SELECT 
+		       DECISION_REASON
+			 , DECISION_DATE
+		     , STATE_CODE
+		  FROM DECISION_TABLE
+		 WHERE DECISION_CODE = #{ decisionCode }
+	</select>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

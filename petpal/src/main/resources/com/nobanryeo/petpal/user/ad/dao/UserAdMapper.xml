@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nobanryeo.petpal.user.ad.dao.UserAdMapper">
+
+	<resultMap id="adResultSet" type="AdDTO">
+		<id column="AD_CODE" property="adCode"/>
+		<result column="COMPANY_NAME" property="companyName"/>
+		<result column="APPLY_DATE" property="applyDate"/>
+		<result column="COMPANY_NUMBER" property="companyNumber"/>
+		<result column="COMPANY_PHONE" property="companyPhone"/>
+		<result column="COMPANY_EMAIL" property="companyEmail"/>
+		<result column="AD_CONTENT" property="adContent"/>
+		<result column="POST_YN" property="postYn"/>
+		<result column="REFUND_YN" property="refundYn"/>
+		<result column="PAY_DATE_2ND" property="payDate2nd"/>
+		<result column="PICTURE_CODE" property="pictureCode"/>
+		<result column="PAY_DATE_1ST" property="payDate1st"/>
+		<result column="USER_CODE" property="userCode"/>
+		<result column="AD_TYPE_CODE" property="adTypeCode"/>
+		<result column="AD_TITLE" property="adTitle"/>
+		<result column="PAY_METHOD" property="payMethod"/>
+		<result column="DECISION_CODE" property="decisionCode"/>
+		<result column="CANCEL_APPLY_DATE" property="cancelApplyDate"/>
+		<result column="POST_START_DATE" property="postStartDate"/>
+		<result column="POST_END_DATE" property="postEndDate"/>
+		<result column="STATE_CODE" property="stateCode"/>
+		<result column="CLICK_DATE" property="clickDate"/>
+		<result column="AD_TYPE_NAME" property="adTypeName"/>
+		<result column="AD_PRICE" property="adPrice"/>
+		<result column="AD_WEEK" property="adWeek"/>
+		<result column="CLICK_COUNT" property="clickCount"/>
+		<result column="MORE_PAY_AMOUNT" property="morePayAmount"/>
+		<result column="LEADER_NAME" property="leaderName"/>
+		<result column="COMPANY_LOCATION" property="companyLocation"/>
+		<result column="INDUSTRY" property="industry"/>
+		<result column="INDUSTRY_DETAIL" property="industryDetail"/>
+		<result column="PICTURE_NAME" property="pictureName"/>
+		<result column="PICTURE_URL" property="pictureUrl"/>
+		<result column="PICTURE_UPLOAD_DATE" property="pictureUploadDate"/>
+		<result column="PICTURE_DELETE_YN" property="pictureDeleteYn"/>
+		<result column="PICTURE_NEW_NAME" property="pictureNewName"/>
+		<result column="PICTURE_UTIL_PATH" property="pictureUtilPath"/>
+		<result column="DECISION_DATE" property="decisionDate"/>
+		<result column="AA" property="sysdate"/>
+	</resultMap>
+	
+	<resultMap id="adQnAResultSet" type="AdQnADTO">
+		<id column="BOARD_CODE" property="boardCode"/>
+		<result column="BOARD_TITLE" property="boardTitle"/>
+		<result column="BOARD_CONTENT" property="boardContent"/>
+		<result column="QUESTION_TYPE" property="questionType"/>
+		<result column="BOARD_POST_DATE" property="boardPostDate"/>
+		<result column="ADMIN_REPLY_CONTENT" property="adminReplyContent"/>
+		<result column="STATE_CODE" property="stateCode"/>
+		<result column="USER_CODE" property="userCode"/>
+	</resultMap>
+	
+	
+	
+	<select id="selectAdListCount" resultType="int">
+        SELECT COUNT(*)
+          FROM AD_APPLY_TABLE A
+		  JOIN AD_MANAGE_TABLE B ON(B.AD_TYPE_CODE = A.AD_TYPE_CODE)
+		 WHERE A.USER_CODE = #{ userCode }
+	</select>
+	
+	<select id="selectAdList" parameterType="AdDTO" resultMap="adResultSet">
+		SELECT * 
+		  FROM (
+			     SELECT ROWNUM RN, D.* 
+			       FROM (
+		                  SELECT
+	                             A.COMPANY_NAME
+                               , B.AD_WEEK
+	                           , A.APPLY_DATE
+	                           , A.POST_YN
+	                           , A.STATE_CODE
+	                           , A.POST_END_DATE
+	                           , A.POST_START_DATE
+	                           , A.PAY_DATE_2ND
+	                           , A.AD_CODE
+	                           , B.AD_PRICE
+	                           , A.COMPANY_EMAIL
+	                           , A.COMPANY_PHONE
+	                           , A.COMPANY_LOCATION
+	                           , A.USER_CODE
+	                           , A.DECISION_CODE
+                               , C.DECISION_DATE
+                               , A.CANCEL_APPLY_DATE
+                           FROM AD_APPLY_TABLE A
+                           JOIN AD_MANAGE_TABLE B ON(B.AD_TYPE_CODE = A.AD_TYPE_CODE)
+                           LEFT JOIN DECISION_TABLE C ON(C.DECISION_CODE = A.DECISION_CODE)
+                          WHERE A.USER_CODE = #{ userCode }
+                          ORDER BY A.APPLY_DATE DESC
+                        ) D
+               )
+	     WHERE RN BETWEEN #{start} AND #{end}
+	</select>
+	
+	<select id="selectAdPaymentList" parameterType="AdDTO" resultMap="adResultSet">
+		<!-- SELECT AD_CODE
+             , COUNT(*) CLICK_COUNT
+             , COUNT(*)*150*1.1 MORE_PAY_AMOUNT
+          FROM AD_CLICK_COUNT
+         GROUP BY AD_CODE -->
+         SELECT A.AD_CODE
+              , COUNT(B.AD_CODE) CLICK_COUNT
+              , COUNT(B.AD_CODE)*150*1.1 MORE_PAY_AMOUNT
+           FROM AD_APPLY_TABLE A
+           LEFT JOIN AD_CLICK_COUNT B ON(B.AD_CODE = A.AD_CODE)
+           GROUP BY A.AD_CODE
+	</select>
+	
+	<select id="selectAdApplyDetail" parameterType="AdDTO" resultMap="adResultSet">
+		SELECT B.AD_TYPE_CODE
+		     , B.AD_TYPE_NAME
+		     , B.AD_PRICE
+		     , B.AD_WEEK
+		     , A.COMPANY_NAME
+		     , A.COMPANY_NUMBER
+		     , A.COMPANY_PHONE
+		     , A.COMPANY_EMAIL
+		     , A.AD_CODE
+		     , A.AD_TITLE
+		     , A.AD_CONTENT
+		     , A.STATE_CODE
+		     , A.POST_END_DATE
+		     , C.PICTURE_UTIL_PATH
+		     , A.USER_CODE
+		     , A.DECISION_CODE
+             , D.DECISION_DATE
+             , A.POST_YN
+             , A.PAY_DATE_1ST
+		  FROM AD_APPLY_TABLE A
+		  JOIN AD_MANAGE_TABLE B ON(B.AD_TYPE_CODE = A.AD_TYPE_CODE)
+		  JOIN PICTURE_TABLE C ON(C.PICTURE_CODE = A.PICTURE_CODE)
+		  LEFT JOIN DECISION_TABLE D ON(D.DECISION_CODE = A.DECISION_CODE)
+		 WHERE A.USER_CODE = #{ userCode }
+		   AND A.AD_CODE = #{ adCode }
+	</select>
+	
+	<insert id="insertAdQnA" parameterType="AdQnADTO">
+	 	INSERT
+	 	  INTO QUESTION_BOARD
+	 	VALUES ( QUESTION_BOARD_SEQ.NEXTVAL
+	 	       , #{ boardTitle }
+	 	       , #{ boardContent }
+	 	       , 2
+	 	       , SYSDATE
+	 	       , NULL
+	 	       , 1
+	 	       , #{ userCode }
+	 	       )
+	</insert>
+	
+	<insert id="insertAdSubmit" parameterType="AdDTO">
+		INSERT
+		  INTO PICTURE_TABLE
+		VALUES ( PIC_CODE_SEQ.NEXTVAL
+		       , #{ pictureName }
+			   , #{ pictureUrl }
+               , SYSDATE
+               , 'N'
+               , #{ pictureNewName }
+               , #{ pictureUtilPath }
+		       )
+	</insert>
+	
+	<insert id="insertAdSubmit2" parameterType="AdDTO">
+		INSERT
+		  INTO AD_APPLY_TABLE
+		VALUES ( AD_CODE_SEQ.NEXTVAL
+		       , #{ companyName }
+		       , SYSDATE
+		       , #{ companyNumber }
+		       , #{ companyPhone }
+		       , #{ companyEmail }
+		       , #{ adContent }
+		       , 'N'
+		       , 'N'
+		       , NULL
+		       , PIC_CODE_SEQ.CURRVAL
+		       , NULL
+		       , #{ userCode }
+		       , #{ adTypeCode }
+		       , #{ adTitle }
+		       , NULL
+		       , NULL
+		       , NULL
+		       , NULL
+		       , NULL
+		       , 1
+		       , #{ leaderName }
+		       , #{ companyLocation }
+		       , #{ industry }
+		       , #{ industryDetail }
+		       , NULL
+		       , NULL
+		       )
+	</insert>
+	
+	<update id="updateFirstAdPayment" parameterType="AdDTO">
+		<selectKey keyProperty="adWeek" order="BEFORE" resultType="int">
+			SELECT A.AD_WEEK
+			  FROM AD_MANAGE_TABLE A
+			  JOIN AD_APPLY_TABLE B ON(B.AD_TYPE_CODE = A.AD_TYPE_CODE)
+			 WHERE B.AD_CODE = #{ adCode }
+		</selectKey>
+		UPDATE AD_APPLY_TABLE
+		   SET PAY_DATE_1ST = SYSDATE
+			 , POST_YN = 'Y'
+			 , POST_START_DATE = SYSDATE + 1
+			 , POST_END_DATE = SYSDATE + (#{ adWeek }*7+1)
+		 WHERE AD_CODE = #{ adCode }
+	</update>
+	
+	<select id="selectToday" resultType="string">
+		SELECT SYSDATE
+		  FROM DUAL
+	</select>
+	
+	<update id="updateCancelAd" parameterType="AdDTO">
+		UPDATE AD_APPLY_TABLE
+		   SET STATE_CODE = '4'
+		     , CANCEL_APPLY_DATE = SYSDATE
+		 WHERE AD_CODE = #{ adCode }
+		   AND USER_CODE = #{ userCode }
+	</update>
+	
+	<update id="updateCancelAd2" parameterType="AdDTO">
+		UPDATE AD_APPLY_TABLE
+		   SET STATE_CODE = '4'
+		     , CANCEL_APPLY_DATE = SYSDATE
+		     , REFUND_YN = 'Y'
+		 WHERE AD_CODE = #{ adCode }
+		   AND USER_CODE = #{ userCode }
+	</update>
+	
+	<update id="updateAdMorePay" parameterType="AdDTO">
+		UPDATE AD_APPLY_TABLE
+		   SET PAY_DATE_2ND = SYSDATE
+		 WHERE AD_CODE = #{ adCode }
+	</update>
+	
+	<select id="selectRandomAdNonPlace" parameterType="AdDTO" resultMap="adResultSet">
+		SELECT *
+          FROM ( SELECT *
+                   FROM AD_APPLY_TABLE
+                  ORDER BY DBMS_RANDOM.RANDOM
+               ) A
+          JOIN AD_MANAGE_TABLE B ON(A.AD_TYPE_CODE = B.AD_TYPE_CODE)
+          JOIN PICTURE_TABLE C ON(C.PICTURE_CODE = A.PICTURE_CODE)
+         WHERE POST_YN = 'Y'
+           AND STATE_CODE = 2
+           AND B.AD_TYPE_NAME = '그 외'
+         <![CDATA[
+           AND POST_START_DATE <= SYSDATE
+           AND POST_END_DATE >= SYSDATE
+         ]]>
+	</select>
+	<select id="selectRandomAdPlace" parameterType="AdDTO" resultMap="adResultSet">
+		SELECT *
+          FROM ( SELECT *
+                   FROM AD_APPLY_TABLE
+                  ORDER BY DBMS_RANDOM.RANDOM
+               ) A
+          JOIN AD_MANAGE_TABLE B ON(A.AD_TYPE_CODE = B.AD_TYPE_CODE)
+          JOIN PICTURE_TABLE C ON(C.PICTURE_CODE = A.PICTURE_CODE)
+         WHERE POST_YN = 'Y'
+           AND STATE_CODE = 2
+           AND B.AD_TYPE_NAME = '장소'
+         <![CDATA[
+           AND POST_START_DATE <= SYSDATE
+           AND POST_END_DATE >= SYSDATE
+         ]]>
+	</select>
+	
+	<insert id="insertAdClick" parameterType="AdDTO">
+		INSERT
+		  INTO AD_CLICK_COUNT
+		VALUES ( SYSDATE
+		       , #{ userCode }
+		       , #{ adCode }
+		       )
+	</insert>
+	
+	<insert id="insertAdClickNoUser" parameterType="AdDTO">
+		INSERT
+		  INTO AD_CLICK_COUNT
+		VALUES ( SYSDATE
+		       , DEFAULT
+		       , #{ adCode }
+		       )
+	</insert>
+	
+	<select id="selectAdClick" parameterType="AdDTO" resultType="int">
+		SELECT COUNT(*)
+		  FROM AD_CLICK_COUNT
+		 WHERE USER_CODE = #{userCode}
+		   AND AD_CODE = #{adCode}
+	</select>
+	
+	<select id="selectAdDetail" parameterType="AdDTO" resultMap="adResultSet">
+		SELECT *
+          FROM AD_APPLY_TABLE
+         WHERE AD_CODE = #{ adCode }
+	</select>
+	
+</mapper>

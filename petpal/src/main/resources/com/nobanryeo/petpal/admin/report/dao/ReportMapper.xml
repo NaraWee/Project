@@ -1,0 +1,558 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nobanryeo.petpal.admin.report.dao.ReportMapper">
+
+<resultMap id="ReportSet" type="ReportDTO">
+		<id column="REPORT_CODE" property="reportCode" />
+		<result column="USER_ID" property="userId" />
+		<result column="REPORT_TITLE" property="boardTitle" />
+		<result column="REPORTED_USER" property="reportedUser" />
+		<result column="REPORT_DATE" property="reportDate" />
+		<result column="STATE" property="state" />
+	</resultMap>
+	 <resultMap type="MissingDTO" id="missingResultset">
+  		<id column="BOARD_CODE" property="boardCode"/>
+  		<result column="BOARD_DATE" property="boardDate"/>
+  		<result column="MISSING_DATE" property="missingDate"/>
+  		<result column="MISSING_AREA" property="area"/>
+  		<result column="MISSING_PLACE" property="place"/>
+  		<result column="MISSING_PHONE" property="phone"/>
+  		<result column="MISSING_BREED" property="breed"/>
+  		<result column="MISSING_GENDER" property="gender"/>
+  		<result column="USER_NIKNAME" property="userNickname"/>
+  		<result column="MISSING_AGE" property="age"/>
+  		<result column="MISSING_WEIGTH" property="weigth"/>
+  		<result column="MISSING_CHARACTER" property="character"/>
+  		<result column="MISSING_REQUEST" property="request"/>
+  		<result column="MISSING_DELETE_YN" property="deleteYn"/>
+  		<result column="STATE_CODE" property="stateCode"/>
+  		<result column="USER_CODE" property="userCode"/>
+  		<result column="DOG_OR_CAT" property="dOc"/>
+  		<result column="MISSING_COLOR" property="color"/>
+  	</resultMap>
+<resultMap type="AdoptDTO" id="AdoptInsertResultset">
+  		<id column="BOARD_CODE" property="boardCode"/>
+  		<result column="ADOPT_BREED" property="adoptBreed"/>
+  		<result column="ADOPT_GENDER" property="adoptGender"/>
+  		<result column="ADOPT_AGE" property="adoptAge"/>
+  		<result column="ADOPT_WEIGTH" property="adoptWeight"/>
+  		<result column="ADOPT_COLOR" property="adoptColor"/>
+  		<result column="ADOPT_INTRODUCE" property="adoptIntroduce"/>
+  		<result column="ADOPT_PHONE" property="adoptPhone"/>
+  		<result column="ADOPT_CAUTION" property="adoptCaution"/>
+  		<result column="USER_NIKNAME" property="userNickname"/>
+  		<result column="ADOPT_DELETE_YN" property="deleteYN"/>
+  		<result column="STATE_CODE" property="stateCode"/>
+  		<result column="BOARD_DATE" property="boardDate"/>
+  		<result column="USER_CODE" property="userCode"/>
+  		<result column="DOG_OR_CAT" property="dogOrcat"/>
+  		<result column="USER_LOCATION" property="address"/>
+  	</resultMap>
+<resultMap id="ReportPopup" type="reportPopupDTO">
+		<id column="BOARD_CODE" property="boardCode" />
+		<result column="USER_ID" property="userId" />
+		<result column="USER_NAME" property="userName" />
+		<result column="BOARD_TITLE" property="boardTitle" />
+		<result column="BOARD_CONTENT" property="boardContent" />
+		<result column="PLACE_NAME" property="mapname" />
+		<result column="PLACE_ADDRESS" property="mapValue" />
+		<result column="PICTURE_DELETE_YN" property="pictureDeleteYN"/>
+		<result column="PICTURE_CODE" property="pictureCode"/>
+		<result column="PICTURE_NEW_NAME" property="pictureNewName"/>
+		<result column="PICTURE_UTIL_PATH" property="pictureUtilPath"/>
+	</resultMap>
+<resultMap id="ReportDetailSet" type="ReportDetailDTO">
+		<id column="REPORT_CODE" property="reportCode" />
+		<result column="BOARD_CODE" property="boardCode" />
+		<result column="USER_ID" property="userId" />
+		<result column="USER_NAME" property="userName" />
+		<result column="REPORT_TITLE" property="boardTitle" />
+		<result column="REPORTED_ID" property="reportedId" />
+		<result column="REPORTED_NAME" property="reportedName" />
+		<result column="ADMIN_ID" property="adminId" />
+		<result column="ADMIN_NAME" property="adminName" />
+		<result column="REPORT_CONTENT" property="boardContent" />
+		<result column="REPORT_DATE" property="reportDate" />
+		<result column="DECISION_REASON" property="reason" />
+		<result column="REPLY_CONTENT" property="reportedContent" />
+		<result column="STATE" property="state" />
+	</resultMap>
+	<select id="selectReportCount" resultType="int">
+	   SELECT COUNT(*) 
+	   	<choose>
+	   	<when test="category == 7">
+	   	FROM REPLY_REPORT_TABLE A
+	   	<if test='searchCondition == "userId"'>
+        JOIN USER_TABLE B ON(A.USER_CODE = B.USER_CODE)
+		WHERE B.USER_ID LIKE '%' || #{searchValue} || '%' 
+		
+		</if>
+		<if test='searchCondition == "boardTitle"'>
+		WHERE A.REPLY_REPORT_TITLE LIKE '%' || #{searchValue} || '%' 
+		</if>
+	   	
+	   	
+	   	</when>
+	   	<otherwise>
+	   	<if test='category == "0"'>
+		FROM FREE_BOARD_REPORT A
+		</if>
+		<if test='category == "1"'>
+		FROM INFO_BOARD_REPORT A
+		</if>
+		<if test='category == "2"'>
+		FROM SHARE_BOARD_REPORT A
+		</if>
+		<if test='category == "3"'>
+		FROM REVIEW_BOARD_REPORT A
+		</if>
+		<if test='category == "4"'>
+		FROM MISSING_BOARD_REPORT A
+		</if>
+		<if test='category == "5"'>
+		FROM FRIENDLY_BOARD_REPORT A
+		</if>
+		<if test='category == "6"'>
+		FROM ADOPT_BOARD_REPORT A
+		</if>
+		<if test='searchCondition == "userId"'>
+	   	JOIN REPORT_MANAGE B ON(A.REPORT_CODE = B.REPORT_CODE)
+        JOIN USER_TABLE C ON(B.USER_CODE = C.USER_CODE)
+		WHERE C.USER_ID LIKE '%' || #{searchValue} || '%' 
+		
+		</if>
+		<if test='searchCondition == "boardTitle"'>
+		JOIN REPORT_MANAGE B ON(A.REPORT_CODE = B.REPORT_CODE)
+		WHERE B.REPORT_TITLE LIKE '%' || #{searchValue} || '%' 
+		</if>
+	   	</otherwise>
+	   	</choose>
+		
+	</select>
+	<select id="selectReport" resultMap="ReportSet" parameterType="ReportDTO">
+	SELECT
+        *
+        FROM( SELECT ROWNUM RNUM, G.*
+                    FROM (SELECT
+                    		<choose>
+                    		<when test="category == 7">
+                    		A.REPLY_CODE AS REPORT_CODE,
+						    C.USER_ID,
+						    B.USER_ID AS REPORTED_USER,
+						    A.REPLY_REPORT_TITLE AS REPORT_TITLE,
+						    A.REPLY_REPORT_DATE AS REPORT_DATE,
+						    NVL2(A.DECISION_CODE,E.STATE_NAME,'대기중') AS STATE
+						    
+						    FROM REPLY_REPORT_TABLE A
+						    JOIN USER_TABLE B ON(A.USER_CODE1 = B.USER_CODE)
+						    JOIN USER_TABLE C ON(A.USER_CODE = C.USER_CODE)
+						    LEFT OUTER JOIN DECISION_TABLE D ON(A.DECISION_CODE = D.DECISION_CODE)
+						    LEFT OUTER JOIN STATE_TABLE E ON(D.STATE_CODE = E.STATE_CODE)
+                    		<if test='searchCondition == "userId"'>
+							WHERE C.USER_ID LIKE '%' || #{searchValue} || '%' 
+							</if>
+							<if test='searchCondition == "boardTitle"'>
+							WHERE A.REPLY_REPORT_TITLE LIKE '%' || #{searchValue} || '%' 
+							</if>
+							<choose>
+								<when test="sortValue == 1">
+									ORDER BY E.STATE_NAME DESC ,A.REPLY_REPORT_DATE DESC
+								</when>
+								<when test="sortValue == 2">
+									ORDER BY E.STATE_NAME ASC ,A.REPLY_REPORT_DATE DESC
+								</when>
+								<otherwise>
+									ORDER BY A.REPLY_REPORT_DATE DESC
+								</otherwise>
+							</choose>
+                    		</when>
+                    		<otherwise>
+                    		A.REPORT_CODE,
+                            D.USER_ID,
+                            B.REPORT_TITLE,
+                            G.USER_ID AS REPORTED_USER,
+                            B.REPORT_DATE,
+                            NVL2(B.DECISION_CODE,F.STATE_NAME,'대기중') AS STATE
+                            <if test='category == "0"'>
+							FROM FREE_BOARD_REPORT A
+							JOIN FREE_BOARD C ON(A.BOARD_CODE = C.BOARD_CODE)
+							</if>
+							<if test='category == "1"'>
+							FROM INFO_BOARD_REPORT A
+							JOIN INFO_BOARD C ON(A.BOARD_CODE = C.BOARD_CODE)
+							</if>
+							<if test='category == "2"'>
+							FROM SHARE_BOARD_REPORT A
+							JOIN SHARE_BOARD C ON(A.BOARD_CODE = C.BOARD_CODE)
+							</if>
+							<if test='category == "3"'>
+							FROM REVIEW_BOARD_REPORT A
+							JOIN REVIEW_BOARD C ON(A.BOARD_CODE = C.BOARD_CODE)
+							</if>
+							<if test='category == "4"'>
+							FROM MISSING_BOARD_REPORT A
+							JOIN MISSING_BOARD C ON(A.BOARD_CODE = C.BOARD_CODE)
+							</if>
+							<if test='category == "5"'>
+							FROM FRIENDLY_BOARD_REPORT A
+							JOIN FRIENDLY_BOARD C ON(A.BOARD_CODE = C.BOARD_CODE)
+							</if>
+							<if test='category == "6"'>
+							FROM ADOPT_BOARD_REPORT A
+							JOIN ADOPT_BOARD C ON(A.BOARD_CODE = C.BOARD_CODE)
+							</if>
+	                        JOIN REPORT_MANAGE B ON(A.REPORT_CODE = B.REPORT_CODE)
+	                        JOIN USER_TABLE D ON(B.USER_CODE = D.USER_CODE)
+	                        LEFT OUTER JOIN DECISION_TABLE E ON(B.DECISION_CODE = E.DECISION_CODE)
+	                        LEFT OUTER JOIN STATE_TABLE F ON(E.STATE_CODE = F.STATE_CODE)
+	                        JOIN USER_TABLE G ON(C.USER_CODE = G.USER_CODE)
+	                        
+	                        <if test='searchCondition == "userId"'>
+							WHERE D.USER_ID LIKE '%' || #{searchValue} || '%' 
+							</if>
+							<if test='searchCondition == "boardTitle"'>
+							WHERE B.REPORT_TITLE LIKE '%' || #{searchValue} || '%' 
+							</if>
+							<choose>
+								<when test="sortValue == 1">
+									ORDER BY F.STATE_NAME DESC ,A.REPORT_CODE DESC
+								</when>
+								<when test="sortValue == 2">
+									ORDER BY F.STATE_NAME ASC ,A.REPORT_CODE DESC
+								</when>
+								<otherwise>
+									ORDER BY A.REPORT_CODE DESC
+								</otherwise>
+							</choose>
+                    		</otherwise>
+                    		</choose>
+                        )G
+                )A 
+                WHERE RNUM BETWEEN #{start} AND #{end}
+	</select>
+	<select id="selectReportDetail" resultMap="ReportDetailSet" parameterType="ReportDetailDTO">
+	SELECT
+	<choose>
+    <when test="category == 7">
+    A.REPLY_CODE AS REPORT_CODE,
+    B.USER_ID,
+    B.USER_NAME,
+    C.USER_ID AS REPORTED_ID,
+    C.USER_NAME AS REPORTED_NAME,
+    A.REPLY_REPORT_TITLE AS REPORT_TITLE,
+    A.REPLY_REPORT_DATE AS REPORT_DATE,
+    A.REPLY_REPORT_CONTENT AS REPORT_CONTENT,
+    NVL2(A.DECISION_CODE,F.STATE_NAME,'대기중') AS STATE,
+    NVL2(A.DECISION_CODE,G.USER_ID,'대기중') AS ADMIN_ID,
+    NVL2(A.DECISION_CODE,G.USER_NAME,'대기중') AS ADMIN_NAME,
+    E.DECISION_REASON,
+    D.REPLY_CONTENT
+    
+    FROM REPLY_REPORT_TABLE A
+    JOIN USER_TABLE B ON(A.USER_CODE = B.USER_CODE)
+    JOIN USER_TABLE C ON(A.USER_CODE1 = C.USER_CODE)
+    JOIN REPLY_MANAGE D ON(A.REPLY_CODE = D.REPLY_CODE)
+    LEFT OUTER JOIN DECISION_TABLE E ON(A.DECISION_CODE = E.DECISION_CODE)
+    LEFT OUTER JOIN STATE_TABLE F ON(E.STATE_CODE = F.STATE_CODE)
+    LEFT OUTER JOIN USER_TABLE G ON(E.USER_CODE = G.USER_CODE)
+    
+    WHERE A.REPLY_CODE = #{reportCode}
+    
+    
+    </when>
+    <otherwise>
+    A.BOARD_CODE,
+    B.REPORT_CODE,
+    C.USER_ID,
+    C.USER_NAME,
+    E.USER_ID AS REPORTED_ID,
+    E.USER_NAME AS REPORTED_NAME,
+    B.REPORT_TITLE,
+    B.REPORT_CONTENT,
+    B.REPORT_DATE,
+    NVL2(B.DECISION_CODE,G.STATE_NAME,'대기중') AS STATE,
+    NVL2(B.DECISION_CODE,H.USER_ID,'대기중') AS ADMIN_ID,
+    NVL2(B.DECISION_CODE,H.USER_NAME,'대기중') AS ADMIN_NAME,
+    F.DECISION_REASON
+    	<if test='category == "0"'>
+		FROM FREE_BOARD_REPORT A
+		JOIN FREE_BOARD D ON(A.BOARD_CODE = D.BOARD_CODE)
+		</if>
+		<if test='category == "1"'>
+		FROM INFO_BOARD_REPORT A
+		JOIN INFO_BOARD D ON(A.BOARD_CODE = D.BOARD_CODE)
+		</if>
+		<if test='category == "2"'>
+		FROM SHARE_BOARD_REPORT A
+		JOIN SHARE_BOARD D ON(A.BOARD_CODE = D.BOARD_CODE)
+		</if>
+		<if test='category == "3"'>
+		FROM REVIEW_BOARD_REPORT A
+		JOIN REVIEW_BOARD D ON(A.BOARD_CODE = D.BOARD_CODE)
+		</if>
+		<if test='category == "4"'>
+		FROM MISSING_BOARD_REPORT A
+		JOIN MISSING_BOARD D ON(A.BOARD_CODE = D.BOARD_CODE)
+		</if>
+		<if test='category == "5"'>
+		FROM FRIENDLY_BOARD_REPORT A
+		JOIN FRIENDLY_BOARD D ON(A.BOARD_CODE = D.BOARD_CODE)
+		</if>
+		<if test='category == "6"'>
+		FROM ADOPT_BOARD_REPORT A
+		JOIN ADOPT_BOARD D ON(A.BOARD_CODE = D.BOARD_CODE)
+		</if>
+    JOIN USER_TABLE E ON(D.USER_CODE = E.USER_CODE)
+    JOIN REPORT_MANAGE B ON(A.REPORT_CODE = B.REPORT_CODE)
+    JOIN USER_TABLE C ON(B.USER_CODE = C.USER_CODE)
+    LEFT OUTER JOIN DECISION_TABLE F ON(B.DECISION_CODE = F.DECISION_CODE)
+    LEFT OUTER JOIN STATE_TABLE G ON(F.STATE_CODE = G.STATE_CODE)
+    LEFT OUTER JOIN USER_TABLE H ON(F.USER_CODE = H.USER_CODE)
+	WHERE B.REPORT_CODE =#{reportCode}
+    </otherwise>
+    </choose>
+    
+	
+	</select>
+	
+	<insert id="insertDecision" parameterType="com.nobanryeo.petpal.admin.dto.DecisionDTO">
+	    INSERT 
+	      INTO DECISION_TABLE
+	    (
+	      DECISION_CODE
+	    , DECISION_REASON
+	    , DECISION_DATE
+	    , STATE_CODE
+	    , USER_CODE
+	    )
+        VALUES
+        (
+          DECISION_CODE_SEQ.NEXTVAL
+        , #{ decisionReason }
+        , SYSDATE
+        , #{ stateCode }
+        , #{ code }
+        )
+	  </insert>	
+	  
+	  <update id="updateReport" parameterType="com.nobanryeo.petpal.admin.dto.DecisionDTO">
+		<selectKey keyProperty="decisionCode" order="BEFORE" resultType="_int">
+			SELECT
+			       DECISION_CODE_SEQ.CURRVAL
+			  FROM DUAL
+		</selectKey>
+		<choose>
+		<when test="category == 7">
+		
+	     UPDATE REPLY_REPORT_TABLE 
+		   SET 
+			   DECISION_CODE = #{ decisionCode }
+	     WHERE REPLY_CODE = #{ adCode }
+		</when>
+		<otherwise>
+		UPDATE REPORT_MANAGE 
+		   SET 
+			   DECISION_CODE = #{ decisionCode }
+	     WHERE REPORT_CODE = #{ adCode }
+		</otherwise>
+		</choose>
+		
+	 </update>
+	 
+	 
+	 <update id="updateBoardBlind" parameterType="com.nobanryeo.petpal.admin.dto.DecisionDTO">
+	     <if test='category == "0"'>
+		UPDATE FREE_BOARD
+		SET 
+			   BOARD_DELETE_YN = 'Y'
+	     WHERE BOARD_CODE = #{ boardCode }
+		</if>
+		<if test='category == "1"'>
+		UPDATE INFO_BOARD
+		SET 
+			   BOARD_DELETE_YN = 'Y'
+	     WHERE BOARD_CODE = #{ boardCode }
+		</if>
+		<if test='category == "2"'>
+		UPDATE SHARE_BOARD
+		SET 
+			   BOARD_DELETE_YN = 'Y'
+	     WHERE BOARD_CODE = #{ boardCode }
+		</if>
+		<if test='category == "3"'>
+		UPDATE REVIEW_BOARD 
+		SET 
+			   BOARD_DELETE_YN = 'Y'
+	     WHERE BOARD_CODE = #{ boardCode }
+		</if>
+		<if test='category == "4"'>
+		UPDATE MISSING_BOARD
+		SET 
+			   MISSING_DELETE_YN = 'Y'
+	     WHERE BOARD_CODE = #{ boardCode }
+		</if>
+		<if test='category == "5"'>
+		UPDATE FRIENDLY_BOARD
+		SET 
+			   BOARD_DELETE_YN = 'Y'
+	     WHERE BOARD_CODE = #{ boardCode }
+		</if>
+		<if test='category == "6"'>
+		UPDATE ADOPT_BOARD
+		SET 
+			   ADOPT_DELETE_YN = 'Y'
+	     WHERE BOARD_CODE = #{ boardCode }
+		</if>
+		<if test='category == "7"'>
+		UPDATE REPLY_MANAGE
+		SET 
+			   REPORT_YN = 'Y'
+	     WHERE REPLY_CODE = #{ adCode }
+		</if>
+	 </update>
+	  
+	<update id="updateUserBan" parameterType="com.nobanryeo.petpal.admin.dto.DecisionDTO">
+		<selectKey keyProperty="code" order="BEFORE" resultType="_int">
+			SELECT
+			       USER_CODE
+			  
+			<if test='category == "0"'>
+			FROM FREE_BOARD
+			WHERE BOARD_CODE = #{ boardCode }
+			</if>
+			<if test='category == "1"'>
+			FROM INFO_BOARD
+			WHERE BOARD_CODE = #{ boardCode }
+			</if>
+			<if test='category == "2"'>
+			FROM SHARE_BOARD
+			WHERE BOARD_CODE = #{ boardCode }
+			</if>
+			<if test='category == "3"'>
+			FROM REVIEW_BOARD 
+			WHERE BOARD_CODE = #{ boardCode }
+			</if>
+			<if test='category == "4"'>
+			FROM MISSING_BOARD 
+			WHERE BOARD_CODE = #{ boardCode }
+			</if>
+			<if test='category == "5"'>
+			FROM FRIENDLY_BOARD
+			WHERE BOARD_CODE = #{ boardCode } 
+			</if>
+			<if test='category == "6"'>
+			FROM ADOPT_BOARD
+			WHERE BOARD_CODE = #{ boardCode }
+			</if>
+			<if test='category == "7"'>
+			FROM REPLY_MANAGE
+			WHERE REPLY_CODE = #{ adCode }
+			</if>
+			
+		</selectKey>
+		UPDATE USER_TABLE 
+		   SET 
+			   REPORT_COUNT = REPORT_COUNT+1
+	     WHERE USER_CODE = #{ code }
+	 </update>
+	 
+	 
+<select id="selectReportPopup" resultMap="ReportPopup" parameterType="int">
+SELECT
+    A.BOARD_CODE
+    , A.BOARD_TITLE
+    , A.BOARD_CONTENT
+    , D.USER_ID
+    , D.USER_NAME
+    , C.PICTURE_UTIL_PATH
+    <if test="category == 5">
+    , A.PLACE_ADDRESS
+    , A.PLACE_NAME
+    </if>
+    
+    <if test="category == 0">
+    FROM FREE_BOARD A
+    LEFT OUTER JOIN FREE_PICTURE_MANAGE B ON(B.BOARD_CODE = A.BOARD_CODE)
+    </if>
+    <if test="category == 1">
+    FROM INFO_BOARD A
+    LEFT OUTER JOIN INFO_PICTURE_MANAGE B ON(B.BOARD_CODE = A.BOARD_CODE)
+    </if>
+    <if test="category == 2">
+    FROM SHARE_BOARD A
+    LEFT OUTER JOIN SHARE_PICTURE_MANAGE B ON(B.BOARD_CODE = A.BOARD_CODE)
+    </if>
+    <if test="category == 3">
+    FROM REVIEW_BOARD A
+    LEFT OUTER JOIN REVIEW_PICTURE_MANAGE B ON(B.BOARD_CODE = A.BOARD_CODE)
+    </if>
+    <if test="category == 5">
+    FROM FRIENDLY_BOARD A
+    LEFT OUTER JOIN FRIENDLY_PICTURE_MANAGE B ON(B.BOARD_CODE = A.BOARD_CODE)
+    </if>
+    <if test="category == 4">
+    FROM MISSING_BOARD A
+    LEFT OUTER JOIN MISSING_PICTURE_MANAGE B ON(B.BOARD_CODE = A.BOARD_CODE)
+    </if>
+    <if test="category == 6">
+    FROM ADOPT_BOARD A
+    LEFT OUTER JOIN ADOPT_PICTURE_MANAGE B ON(B.BOARD_CODE = A.BOARD_CODE)
+    </if>
+    
+    LEFT OUTER JOIN PICTURE_TABLE C ON (C.PICTURE_CODE = B.PICTURE_CODE)
+    JOIN USER_TABLE D ON (A.USER_CODE = D.USER_CODE)
+	WHERE A.BOARD_CODE = #{ boardCode }
+
+</select>
+
+	  <select id="selectAdoptDetail" parameterType="_int" resultMap="AdoptInsertResultset">
+	  	SELECT
+		      A.BOARD_CODE
+			, A.ADOPT_BREED
+			, A.ADOPT_GENDER
+			, A.ADOPT_AGE
+			, A.ADOPT_WEIGTH
+			, A.ADOPT_COLOR
+			, A.ADOPT_INTRODUCE
+			, A.ADOPT_PHONE
+			, A.ADOPT_CAUTION
+			, A.ADOPT_DELETE_YN
+			, A.STATE_CODE
+			, A.BOARD_DATE
+			, A.USER_CODE
+			, A.DOG_OR_CAT
+			, A.USER_LOCATION
+			, U.USER_NIKNAME
+		FROM ADOPT_BOARD A
+		JOIN USER_TABLE U ON (U.USER_CODE = A.USER_CODE)
+	    WHERE  A.BOARD_CODE = #{boardCode}
+	  	
+	  </select>
+<select id="selectMissingDetail" parameterType="int" resultMap="missingResultset">
+ 		SELECT
+ 		      M.BOARD_CODE
+ 		    , M.BOARD_DATE
+            , M.MISSING_DATE
+			, M.MISSING_AREA
+			, M.MISSING_PLACE
+			, M.MISSING_PHONE
+			, M.MISSING_BREED
+			, M.MISSING_GENDER
+			, M.MISSING_COLOR
+			, M.DOG_OR_CAT
+			, M.MISSING_AGE
+			, M.MISSING_WEIGTH
+			, M.MISSING_CHARACTER
+			, M.MISSING_REQUEST
+			, M.MISSING_DELETE_YN
+			, M.STATE_CODE
+			, M.USER_CODE
+			, U.USER_NIKNAME
+		FROM MISSING_BOARD M
+		JOIN USER_TABLE U ON (U.USER_CODE = M.USER_CODE)
+	    WHERE M.BOARD_CODE = #{boardCode}
+ 	</select>
+
+</mapper>

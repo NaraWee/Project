@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nobanryeo.petpal.admin.manage.dao.AdminManageMapper">
+	<resultMap id="userResultSet" type="UserInfoDTO">
+		<id column="USER_CODE" property="code" />
+		<result column="USER_ID" property="id" />
+		<result column="USER_PWD" property="pwd" />
+		<result column="USER_NAME" property="name" />
+		<result column="USER_NIKNAME" property="nikname" />
+		<result column="USER_PHONE" property="phone" />
+		<result column="USER_EMAIL" property="email" />
+		<result column="EMAIL_YN" property="emailYn" />
+		<result column="REPLY_YN" property="replyYn" />
+		<result column="WITHDRAW_YN" property="withdrawYn" />
+		<result column="REPORT_COUNT" property="reportCount" />
+		<result column="PERMISSON_SET" property="permisson" />
+	</resultMap>
+<insert id="insertAdmin" parameterType="UserInfoDTO">
+<selectKey keyProperty="code" order="BEFORE" resultType="_int">
+SELECT
+    USER_CODE_SEQ.CURRVAL
+FROM DUAL
+</selectKey>
+	    INSERT 
+	      INTO ADMIN_TABLE
+	    (
+	      USER_CODE
+	    , RETIRE_DATE
+	    
+	    )
+        VALUES
+        (
+         #{ code }
+        , null
+        )
+
+</insert>
+<select id="selectAdminDetail" resultMap="userResultSet">
+SELECT
+	USER_CODE,
+	USER_ID,
+	USER_NAME,
+	PERMISSON_SET,
+	USER_PWD,
+	USER_PHONE
+	,USER_EMAIL
+	
+	FROM USER_TABLE
+	WHERE USER_CODE =#{boardCode}
+</select>
+<select id="selectListCount" resultType="int">
+SELECT COUNT(*) 
+	FROM USER_TABLE
+	WHERE PERMISSON_SET >=2
+	<if test='searchCondition == "userId"'>
+	AND USER_ID LIKE '%' || #{searchValue} || '%' 
+								
+	</if>
+	<if test='searchCondition == "userName"'>
+	AND USER_NAME LIKE '%' || #{searchValue} || '%' 
+	</if>
+
+</select>
+<update id="updateAdmin" parameterType="UserInfoDTO">
+UPDATE USER_TABLE 
+		SET 
+			PERMISSON_SET = #{permissonCode}
+WHERE USER_CODE = #{ userCode }
+
+</update>
+
+
+<update id="updateAdminTable">
+UPDATE ADMIN_TABLE 
+		SET 
+			RETIRE_DATE = SYSDATE
+WHERE USER_CODE = #{ userCode }
+
+</update>
+<select id="selectAdminList" resultMap="userResultSet" parameterType="UserInfoDTO">
+SELECT
+        *
+        FROM( SELECT ROWNUM RNUM, G.*
+                    FROM (SELECT
+                                USER_CODE,
+                                USER_ID,
+                                USER_NAME,
+                                USER_EMAIL,
+                                PERMISSON_SET
+                                FROM USER_TABLE
+                                WHERE PERMISSON_SET >=2
+                                
+                                <if test='searchCondition == "userId"'>
+								AND USER_ID LIKE '%' || #{searchValue} || '%' 
+								
+								</if>
+								<if test='searchCondition == "userName"'>
+								AND USER_NAME LIKE '%' || #{searchValue} || '%' 
+								</if>
+								
+								<choose>
+									<when test="sortValue == 1">
+										ORDER BY PERMISSON_SET DESC, USER_CODE DESC
+												
+									</when>
+									<when test="sortValue == 2">
+										ORDER BY PERMISSON_SET ASC, USER_CODE DESC
+									</when>
+									<otherwise>
+										ORDER BY USER_CODE DESC
+									</otherwise>
+								</choose>
+                        )G
+            ) WHERE RNUM BETWEEN #{start} AND #{end}
+
+
+
+
+</select>
+</mapper>
+

@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nobanryeo.petpal.user.ad.dao.ShareInfoMapper">
+
+	<resultMap id="ShareInfoResultSet" type="ShareInfoDTO">
+		<id column="BOARD_CODE" property="boardCode"/>
+		<result column="BOARD_TITLE" property="boardTitle"/>
+		<result column="BOARD_CONTENT" property="boardContent"/>
+		<result column="BOARD_VIEWS" property="boardViews"/>
+		<result column="BOARD_POST_DATE" property="boardPostDate"/>
+		<result column="BOARD_DELETE_YN" property="boardDeleteYn"/>
+		<result column="DECISION_CODE" property="decisionCode"/>
+		<result column="USER_CODE" property="userCode"/>
+		<result column="USER_NIKNAME" property="userNickName"/>
+		<result column="PICTURE_CODE" property="pictureCode"/>
+		<result column="PICTURE_URL" property="pictureURL"/>
+		<result column="PICTURE_DELETE_YN" property="pictureDeleteYN"/>
+		<result column="PICTURE_NAME" property="pictureName"/>
+		<result column="PICTURE_NEW_NAME" property="pictureNewName"/>
+		<result column="PICTURE_UTIL_PATH" property="pictureUtilPath"/>
+ 	</resultMap>
+
+	<resultMap id="boardReplyResultSet" type="FreeBoardReplyDTO">
+		<id column="REPLY_CODE" property="replyCode"/>
+		<result column="REPLY_CONTENT" property="replyContent"/>
+		<result column="REPLY_DATE" property="replyDate"/>
+		<result column="REPLY_DELETE_YN" property="replyDeleteYN"/>
+		<result column="REPORT_YN" property="reportYN"/>
+		<result column="BOARD_CODE" property="boardCode"/>
+		<result column="USER_NIKNAME" property="userNickName"/>
+		<result column="USER_CODE" property="userCode"/>
+		<result column="USER_CODE1" property="userCode1"/>
+		<result column="REPLY_REPORT_TITLE" property="replyReportTitle"/>
+		<result column="REPLY_REPORT_CONTENT" property="replyReportContent"/>
+		<result column="REPLY_REPORT_DATE" property="replyReportDate"/>
+		<result column="DECISION_CODE" property="decisionCode"/>
+	</resultMap>
+	
+	<resultMap id="messageResultSet" type="MessageTableDTO">
+		<id column="MESSAGE_CODE" property="messageCode"/>
+		<result column="MESSAGE_CONTENT" property="messageContent"/>
+		<result column="MESSAGE_DATE" property="messageDate"/>
+		<result column="USER_CODE1" property="userCode1"/>
+		<result column="USER_CODE" property="userCode"/>
+		<result column="SEND_NICKNAME" property="sendUserNick"/>
+		<result column="RECEIVE_NICKNAME" property="receiveUserNick"/>
+	</resultMap>
+	
+	<resultMap id="SharePlaceResultSet" type="FriendlyPlaceDTO">
+		<id column="BOARD_CODE" property="boardCode"/>
+		<result column="BOARD_TITLE" property="boardTitle"/>
+		<result column="BOARD_CONTENT" property="boardContent"/>
+		<result column="BOARD_VIEWS" property="boardViews"/>
+		<result column="BOARD_POST_DATE" property="boardPostDate"/>
+		<result column="BOARD_DELETE_YN" property="boardDeleteYn"/>
+		<result column="DECISION_CODE" property="decisionCode"/>
+		<result column="USER_CODE" property="userCode"/>
+		<result column="PLACE_NAME" property="placeName"/>
+		<result column="PLACE_PHONE" property="placePhone"/>
+		<result column="PLACE_ADDRESS" property="placeAddress"/>
+		<result column="USER_NIKNAME" property="userNickName"/>
+		<result column="PICTURE_CODE" property="pictureCode"/>
+		<result column="PICTURE_URL" property="pictureURL"/>
+		<result column="PICTURE_DELETE_YN" property="pictureDeleteYN"/>
+		<result column="PICTURE_NAME" property="pictureName"/>
+		<result column="PICTURE_NEW_NAME" property="pictureNewName"/>
+		<result column="PICTURE_UTIL_PATH" property="pictureUtilPath"/>
+ 	</resultMap>
+	
+	
+ 	
+ 	<select id="selectShareInfoCount" resultType="int">
+        SELECT COUNT(*)
+          FROM INFO_BOARD A
+          JOIN USER_TABLE B ON(B.USER_CODE = A.USER_CODE)
+          JOIN DECISION_TABLE C ON(C.DECISION_CODE = A.DECISION_CODE)
+          JOIN INFO_PICTURE_MANAGE D ON(D.BOARD_CODE = A.BOARD_CODE)
+          JOIN PICTURE_TABLE E ON(E.PICTURE_CODE = D.PICTURE_CODE)
+         WHERE A.BOARD_DELETE_YN = 'N'
+           AND C.STATE_CODE = 2
+           AND E.PICTURE_DELETE_YN = 'N'
+	</select>
+ 	
+ 	<select id="selectShareInfoListExistImg" parameterType="ShareInfoDTO" resultMap="ShareInfoResultSet">
+ 		SELECT * 
+		  FROM (
+			     SELECT ROWNUM RN, F.* 
+			       FROM (
+ 		                  SELECT A.BOARD_TITLE
+ 		                       , A.BOARD_CONTENT
+ 		                       , A.BOARD_CODE
+ 		                       , B.USER_NIKNAME
+                               , E.PICTURE_UTIL_PATH
+ 		                    FROM INFO_BOARD A
+ 		                    JOIN USER_TABLE B ON(B.USER_CODE = A.USER_CODE)
+                            JOIN DECISION_TABLE C ON(C.DECISION_CODE = A.DECISION_CODE)
+                            JOIN INFO_PICTURE_MANAGE D ON(D.BOARD_CODE = A.BOARD_CODE)
+                            JOIN PICTURE_TABLE E ON(E.PICTURE_CODE = D.PICTURE_CODE)
+ 		                   WHERE A.BOARD_DELETE_YN = 'N'
+                             AND C.STATE_CODE = 2
+                             AND E.PICTURE_DELETE_YN = 'N'
+ 		                   ORDER BY A.BOARD_CODE DESC
+ 		                 ) F
+               )
+	     WHERE RN BETWEEN #{start} AND #{end}
+ 	</select>
+ 	
+ 	<update id="updateShareInfoViews" parameterType="ShareInfoDTO">
+ 		UPDATE INFO_BOARD
+ 		   SET BOARD_VIEWS = BOARD_VIEWS + 1
+ 		 WHERE BOARD_CODE = #{ boardCode }
+ 	</update>
+ 	
+ 	<select id="selectShareInfoDetail" parameterType="ShareInfoDTO" resultMap="ShareInfoResultSet">
+ 		SELECT A.BOARD_TITLE
+ 		     , A.BOARD_CONTENT
+ 		     , A.BOARD_VIEWS
+ 		     , B.USER_NIKNAME
+ 		     , A.BOARD_POST_DATE
+ 		     , A.BOARD_CODE
+ 		     , A.USER_CODE
+ 		  FROM INFO_BOARD A
+ 		  JOIN USER_TABLE B ON(B.USER_CODE = A.USER_CODE)
+ 		 WHERE A.BOARD_CODE = #{ boardCode }
+ 	</select>
+ 	
+ 	<select id="selectShareInfoReply" parameterType="FreeBoardReplyDTO" resultMap="boardReplyResultSet">
+ 		SELECT A.REPLY_CODE
+ 		     , D.USER_NIKNAME
+ 		     , A.REPLY_CONTENT
+ 		     , A.REPLY_DATE
+ 		     , A.REPLY_DELETE_YN
+ 		     , B.BOARD_CODE
+ 		     , D.USER_CODE
+ 		     , A.REPORT_YN
+ 		  FROM REPLY_MANAGE A
+ 		  JOIN INFO_BOARD_REPLY B ON(B.REPLY_CODE = A.REPLY_CODE)
+          JOIN INFO_BOARD C ON(C.BOARD_CODE = B.BOARD_CODE)
+          JOIN USER_TABLE D ON(D.USER_CODE = B.USER_CODE)
+ 		 WHERE B.BOARD_CODE = #{ boardCode }
+ 		 ORDER BY A.REPLY_CODE DESC
+ 	</select>
+ 	
+ 	<insert id="insertShareInfoReply" parameterType="FreeBoardReplyDTO">
+ 		INSERT ALL
+ 		  INTO REPLY_MANAGE
+ 		VALUES ( REPLY_CODE_SEQ.NEXTVAL
+ 		       , #{ replyContent }
+ 		       , SYSDATE
+ 		       , 'N'
+ 		       , 'N'
+ 		       , #{ userCode }
+ 		       )
+ 		  INTO INFO_BOARD_REPLY
+ 		VALUES ( #{ boardCode }
+ 		       , REPLY_CODE_SEQ.CURRVAL
+ 		       , #{ userCode }
+ 		       )
+ 		SELECT *
+          FROM DUAL
+ 	</insert>
+ 	
+ 	<insert id="insertShareInfoMessage" parameterType="MessageTableDTO">
+ 		<selectKey keyProperty="sendUserNick" order="BEFORE" resultType="string">
+			SELECT
+			       USER_NIKNAME
+			  FROM USER_TABLE
+			 WHERE USER_CODE = #{ userCode }
+		</selectKey>
+ 		INSERT
+ 		  INTO MESSAGE_TABLE
+ 	    VALUES ( MESSAGE_CODE_SEQ.NEXTVAL
+ 	           , #{ messageContent }
+ 	           , SYSDATE
+ 	           , #{ userCode1 }
+ 	           , #{ userCode }
+ 	           , #{ sendUserNick }
+		       , #{ receiveUserNick }
+ 	           )
+ 	</insert>
+ 	
+ 	<insert id="insertShareInfoReport" parameterType="FreeBoardReportDTO">
+		<selectKey keyProperty="reportTitle" order="BEFORE" resultType="string">
+			SELECT
+			       BOARD_TITLE
+			  FROM INFO_BOARD
+			 WHERE BOARD_CODE = #{ boardCode }
+		</selectKey>
+			INSERT ALL
+			  INTO REPORT_MANAGE
+			VALUES ( REPORT_MANAGE_SEQ.NEXTVAL
+			       , #{ reportTitle }
+			       , #{ reportContent }
+			       , SYSDATE
+			       , NULL
+			       , #{ userCode }
+			       )
+			  INTO INFO_BOARD_REPORT
+		    VALUES ( #{ boardCode }
+		           , REPORT_MANAGE_SEQ.CURRVAL
+		           )
+            SELECT *
+              FROM DUAL
+	</insert>
+	
+	<insert id="insertShareInfoReportReply" parameterType="FreeBoardReplyDTO">
+		<selectKey keyProperty="replyReportTitle" order="BEFORE" resultType="string">
+			SELECT
+			       REPLY_CONTENT
+			  FROM REPLY_MANAGE
+			 WHERE REPLY_CODE = #{ replyCode }
+		</selectKey>
+			INSERT 
+			  INTO REPLY_REPORT_TABLE
+			VALUES ( #{ userCode1 }
+			       , #{ replyCode }
+			       , #{ userCode }
+			       , #{ replyReportTitle }
+			       , #{ replyReportContent }
+			       , SYSDATE
+			       , null
+			       )
+	</insert>
+ 	
+ 	<select id="writeShareInfo" parameterType="ShareInfoDTO" resultMap="ShareInfoResultSet">
+ 		SELECT USER_NIKNAME
+		  FROM USER_TABLE
+		 WHERE USER_CODE = #{ userCode }
+	</select>
+	
+	<insert id="insertWriteShreInfo" parameterType="ShareInfoDTO">
+		INSERT ALL
+		  INTO INFO_BOARD
+		VALUES ( INFO_BOARD_SEQ.NEXTVAL
+		       , #{ boardTitle }
+		       , #{ boardContent }
+		       , 0
+		       , SYSDATE
+		       , 'N'
+		       , NULL
+		       , #{ userCode }	
+		       )
+		  INTO PICTURE_TABLE
+		VALUES ( PIC_CODE_SEQ.NEXTVAL
+		       , #{ pictureName }
+		       , #{ pictureURL }
+		       , SYSDATE
+		       , 'N'
+		       , #{ pictureNewName }
+		       , #{ pictureUtilPath }
+		       )
+		SELECT *
+          FROM DUAL
+	</insert>
+	
+	<select id="selectBoardCode" resultType="_int">
+		SELECT INFO_BOARD_SEQ.CURRVAL
+	  	  FROM DUAL
+	</select>
+	
+	<insert id="insertShareInfoManage" parameterType="ShareInfoDTO">
+		<selectKey keyProperty="pictureCode" order="BEFORE" resultType="int">
+			SELECT PIC_CODE_SEQ.CURRVAL
+	  	  	  FROM DUAL
+		</selectKey>
+		INSERT
+		  INTO INFO_PICTURE_MANAGE
+		VALUES ( #{ boardCode }
+		       , #{ pictureCode }
+		       )
+	</insert>
+	
+	<update id="updateModifyShareInfo" parameterType="ShareInfoDTO">
+		UPDATE INFO_BOARD 
+		   SET BOARD_TITLE = #{ boardTitle }
+		     , BOARD_CONTENT = #{ boardContent }
+		     , DECISION_CODE = NULL
+		 WHERE BOARD_CODE = #{ boardCode }
+	</update>
+	
+	<update id="updateModifyShareInfo2" parameterType="ShareInfoDTO">
+		<selectKey keyProperty="pictureCode" order="BEFORE" resultType="int">
+			SELECT PICTURE_CODE
+	  	  	  FROM INFO_PICTURE_MANAGE
+	  	  	 WHERE BOARD_CODE = #{ boardCode }
+		</selectKey>
+		UPDATE PICTURE_TABLE 
+		   SET PICTURE_NAME = #{ pictureName }
+		     , PICTURE_URL = #{ pictureURL }
+		     , PICTURE_NEW_NAME = #{ pictureNewName }
+		     , PICTURE_UTIL_PATH = #{ pictureUtilPath }
+		 WHERE PICTURE_CODE = #{ pictureCode }
+	</update>
+	
+	
+	
+	
+	
+	<select id="selectSharePlaceCount" resultType="int">
+		SELECT COUNT(*)
+		  FROM FRIENDLY_BOARD A
+ 		  JOIN USER_TABLE B ON(B.USER_CODE = A.USER_CODE)
+          JOIN DECISION_TABLE C ON(C.DECISION_CODE = A.DECISION_CODE)
+          JOIN FRIENDLY_PICTURE_MANAGE D ON(D.BOARD_CODE = A.BOARD_CODE)
+          JOIN PICTURE_TABLE E ON(E.PICTURE_CODE = D.PICTURE_CODE)
+ 		 WHERE A.BOARD_DELETE_YN = 'N'
+ 		 <include refid="search"></include>
+           AND C.STATE_CODE = 2
+           AND E.PICTURE_DELETE_YN = 'N'
+	</select>
+	
+	<sql id="search">
+		AND PLACE_ADDRESS LIKE '%' || #{keyWord} || '%'
+	</sql>
+	
+	<select id="selectSharePlaceListExistImg" parameterType="FriendlyPlaceDTO" resultMap="SharePlaceResultSet">
+		SELECT * 
+		  FROM (
+			     SELECT ROWNUM RN, F.* 
+			       FROM (
+ 		                  SELECT A.BOARD_TITLE
+ 		                       , A.BOARD_CONTENT
+ 		                       , A.BOARD_CODE
+ 		                       , B.USER_NIKNAME
+                               , E.PICTURE_UTIL_PATH
+                               , A.PLACE_ADDRESS
+ 		                    FROM FRIENDLY_BOARD A
+ 		                    JOIN USER_TABLE B ON(B.USER_CODE = A.USER_CODE)
+                            JOIN DECISION_TABLE C ON(C.DECISION_CODE = A.DECISION_CODE)
+                            JOIN FRIENDLY_PICTURE_MANAGE D ON(D.BOARD_CODE = A.BOARD_CODE)
+                            JOIN PICTURE_TABLE E ON(E.PICTURE_CODE = D.PICTURE_CODE)
+ 		                   WHERE A.BOARD_DELETE_YN = 'N'
+ 		                   <include refid="search"></include>
+                             AND C.STATE_CODE = 2
+                             AND E.PICTURE_DELETE_YN = 'N'
+ 		                   ORDER BY A.BOARD_CODE DESC
+ 		                 ) F
+               )
+	     WHERE RN BETWEEN #{start} AND #{end}
+ 	</select>
+ 	
+ 	<update id="updateSharePlaceViews" parameterType="FriendlyPlaceDTO">
+ 		UPDATE FRIENDLY_BOARD
+ 		   SET BOARD_VIEWS = BOARD_VIEWS + 1
+ 		 WHERE BOARD_CODE = #{ boardCode }
+ 	</update>
+ 	
+ 	<select id="selectSharePlaceDetail" parameterType="FriendlyPlaceDTO" resultMap="SharePlaceResultSet">
+ 		SELECT A.BOARD_TITLE
+ 		     , A.BOARD_CONTENT
+ 		     , A.BOARD_VIEWS
+ 		     , B.USER_NIKNAME
+ 		     , A.BOARD_POST_DATE
+ 		     , A.BOARD_CODE
+ 		     , A.USER_CODE
+ 		     , A.PLACE_NAME
+ 		     , A.PLACE_PHONE
+ 		     , A.PLACE_ADDRESS
+ 		  FROM FRIENDLY_BOARD A
+ 		  JOIN USER_TABLE B ON(B.USER_CODE = A.USER_CODE)
+ 		 WHERE A.BOARD_CODE = #{ boardCode }
+ 	</select>
+ 	
+ 	<select id="selectSharePlaceReply" parameterType="FreeBoardReplyDTO" resultMap="boardReplyResultSet">
+ 		SELECT A.REPLY_CODE
+ 		     , D.USER_NIKNAME
+ 		     , A.REPLY_CONTENT
+ 		     , A.REPLY_DATE
+ 		     , A.REPLY_DELETE_YN
+ 		     , B.BOARD_CODE
+ 		     , D.USER_CODE
+ 		     , A.REPORT_YN
+ 		  FROM REPLY_MANAGE A
+ 		  JOIN FRIENDLY_BOARD_REPLY B ON(B.REPLY_CODE = A.REPLY_CODE)
+          JOIN FRIENDLY_BOARD C ON(C.BOARD_CODE = B.BOARD_CODE)
+          JOIN USER_TABLE D ON(D.USER_CODE = B.USER_CODE)
+ 		 WHERE B.BOARD_CODE = #{ boardCode }
+ 		 ORDER BY A.REPLY_CODE DESC
+ 	</select>
+ 	
+ 	<insert id="insertSharePlaceReply" parameterType="FreeBoardReplyDTO">
+ 		INSERT ALL
+ 		  INTO REPLY_MANAGE
+ 		VALUES ( REPLY_CODE_SEQ.NEXTVAL
+ 		       , #{ replyContent }
+ 		       , SYSDATE
+ 		       , 'N'
+ 		       , 'N'
+ 		       , #{ userCode }
+ 		       )
+ 		  INTO FRIENDLY_BOARD_REPLY
+ 		VALUES ( #{ boardCode }
+ 		       , REPLY_CODE_SEQ.CURRVAL
+ 		       , #{ userCode }
+ 		       )
+ 		SELECT *
+          FROM DUAL
+ 	</insert>
+ 	
+ 	<insert id="insertSharePlaceReport" parameterType="FreeBoardReportDTO">
+		<selectKey keyProperty="reportTitle" order="BEFORE" resultType="string">
+			SELECT
+			       BOARD_TITLE
+			  FROM FRIENDLY_BOARD
+			 WHERE BOARD_CODE = #{ boardCode }
+		</selectKey>
+			INSERT ALL
+			  INTO REPORT_MANAGE
+			VALUES ( REPORT_MANAGE_SEQ.NEXTVAL
+			       , #{ reportTitle }
+			       , #{ reportContent }
+			       , SYSDATE
+			       , NULL
+			       , #{ userCode }
+			       )
+			  INTO FRIENDLY_BOARD_REPORT
+		    VALUES ( #{ boardCode }
+		           , REPORT_MANAGE_SEQ.CURRVAL
+		           )
+            SELECT *
+              FROM DUAL
+	</insert>
+	
+	<insert id="insertWriteSharePlace" parameterType="FriendlyPlaceDTO">
+		INSERT ALL
+		  INTO FRIENDLY_BOARD
+		VALUES ( FRIENDLY_BOARD_SEQ.NEXTVAL
+		       , #{ boardTitle }
+		       , #{ boardContent }
+		       , 0
+		       , SYSDATE
+		       , 'N'
+		       , NULL
+		       , #{ userCode }	
+		       , #{ placeName }
+		       , #{ placePhone }
+		       , #{ placeAddress }
+		       )
+		  INTO PICTURE_TABLE
+		VALUES ( PIC_CODE_SEQ.NEXTVAL
+		       , #{ pictureName }
+		       , #{ pictureURL }
+		       , SYSDATE
+		       , 'N'
+		       , #{ pictureNewName }
+		       , #{ pictureUtilPath }
+		       )
+		SELECT *
+          FROM DUAL
+	</insert>
+	
+	<select id="selectPlaceBoardCode" resultType="_int">
+		SELECT FRIENDLY_BOARD_SEQ.CURRVAL
+	  	  FROM DUAL
+	</select>
+	
+	<insert id="insertSharePlaceManage" parameterType="FriendlyPlaceDTO">
+		<selectKey keyProperty="pictureCode" order="BEFORE" resultType="int">
+			SELECT PIC_CODE_SEQ.CURRVAL
+	  	  	  FROM DUAL
+		</selectKey>
+		INSERT
+		  INTO FRIENDLY_PICTURE_MANAGE
+		VALUES ( #{ boardCode }
+		       , #{ pictureCode }
+		       )
+	</insert>
+	
+	<update id="updateModifySharePlace" parameterType="FriendlyPlaceDTO">
+		UPDATE FRIENDLY_BOARD 
+		   SET BOARD_TITLE = #{ boardTitle }
+		     , BOARD_CONTENT = #{ boardContent }
+		     , DECISION_CODE = NULL
+		     , PLACE_NAME = #{ placeName }
+		     , PLACE_PHONE = #{ placePhone }
+		     , PLACE_ADDRESS = #{ placeAddress }
+		 WHERE BOARD_CODE = #{ boardCode }
+	</update>
+	
+	<update id="updateModifySharePlace2" parameterType="FriendlyPlaceDTO">
+		<selectKey keyProperty="pictureCode" order="BEFORE" resultType="int">
+			SELECT PICTURE_CODE
+	  	  	  FROM FRIENDLY_PICTURE_MANAGE
+	  	  	 WHERE BOARD_CODE = #{ boardCode }
+		</selectKey>
+		UPDATE PICTURE_TABLE 
+		   SET PICTURE_NAME = #{ pictureName }
+		     , PICTURE_URL = #{ pictureURL }
+		     , PICTURE_NEW_NAME = #{ pictureNewName }
+		     , PICTURE_UTIL_PATH = #{ pictureUtilPath }
+		 WHERE PICTURE_CODE = #{ pictureCode }
+	</update>
+
+</mapper>

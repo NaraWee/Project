@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nobanryeo.petpal.admin.blacklist.dao.UserAdminMapper">
+	<resultMap id="AdminUser" type="UserInfoDTO">
+		<id column="USER_CODE" property="code"/>
+		<result column="USER_NAME" property="name" />
+		<result column="USER_ID" property="id" />
+		<result column="USER_EMAIL" property="email" />
+		<result column="WITHDRAW_YN" property="withdrawYn" />
+		<result column="REPORT_COUNT" property="reportCount" />
+	</resultMap>
+	
+	<!-- 전체 유저 수 -->
+	<select id="selectUserNumber" resultType="int">
+	  SELECT COUNT(*)
+	    FROM USER_TABLE
+	   WHERE PERMISSON_SET = 1
+	   <if test='category == "1"'>
+	   <![CDATA[
+	    AND REPORT_COUNT >= 3
+	    ]]>
+	   </if>
+	   <if test='category == "2"'>
+	     AND WITHDRAW_YN = 'Y'
+	   </if>
+	</select>
+	
+	<!-- 전체 유저 리스트 -->
+	<select id="selectUserList" resultMap="AdminUser" parameterType="AdminPageInfoDTO">
+	  SELECT * 
+		  FROM (
+			    SELECT ROWNUM RN, D.* 
+			      FROM (
+	  
+	  SELECT
+	         USER_CODE
+	       , USER_NAME
+	       , USER_ID
+	       , USER_EMAIL
+	       , WITHDRAW_YN
+	       , REPORT_COUNT
+        FROM USER_TABLE
+	   WHERE PERMISSON_SET = 1
+	   <if test='category == "1"'>
+	   <![CDATA[
+	     AND REPORT_COUNT >= 3
+	    ]]>
+	   </if>
+	   <if test='category == "2"'>
+	     AND WITHDRAW_YN = 'Y'
+	   </if>
+	   ORDER BY USER_CODE DESC
+						) D
+				  )
+	  WHERE RN BETWEEN #{start} AND #{end} 
+	</select>
+	
+	<!-- 검색 시 전체 유저 수 -->
+	<select id="searchUserNumber" resultType="int">
+	  SELECT COUNT(*)
+	    FROM USER_TABLE
+	   <choose>
+	   <when test='category == "1"'>
+	   <![CDATA[
+	   WHERE REPORT_COUNT >= 3
+	    ]]>
+	     AND USER_NAME LIKE '%' || #{ searchValue } || '%'
+	     AND PERMISSON_SET = 1
+	   </when>
+	   <when test='category == "2"'>
+	   WHERE WITHDRAW_YN = 'Y'
+	     AND USER_NAME LIKE '%' || #{ searchValue } || '%'
+	     AND PERMISSON_SET = 1
+	   </when>
+	   <otherwise>
+	   WHERE USER_NAME LIKE '%' || #{ searchValue } || '%'
+	     AND PERMISSON_SET = 1
+	   </otherwise>
+	   </choose>
+	</select>
+	
+    <!-- 검색 시 전체 유저 리스트 -->
+	<select id="searchUserList" resultMap="AdminUser" parameterType="AdminPageInfoDTO">
+	  SELECT * 
+		  FROM (
+			    SELECT ROWNUM RN, D.* 
+			      FROM (
+	  
+	  SELECT
+	         USER_CODE
+	       , USER_NAME
+	       , USER_ID
+	       , USER_EMAIL
+	       , WITHDRAW_YN
+	       , REPORT_COUNT
+        FROM USER_TABLE
+	  <choose>
+	   <when test='category == "1"'>
+	   <![CDATA[
+	   WHERE REPORT_COUNT >= 3
+	    ]]>
+	     AND USER_NAME LIKE '%' || #{ searchValue } || '%'
+	     AND PERMISSON_SET = 1
+	   </when>
+	   <when test='category == "2"'>
+	   WHERE WITHDRAW_YN = 'Y'
+	     AND USER_NAME LIKE '%' || #{ searchValue } || '%'
+	     AND PERMISSON_SET = 1
+	   </when>
+	   <otherwise>
+	   WHERE USER_NAME LIKE '%' || #{ searchValue } || '%'
+	     AND PERMISSON_SET = 1
+	   </otherwise>
+	   </choose>
+	   ORDER BY USER_CODE DESC
+						) D
+				  )
+	  WHERE RN BETWEEN #{start} AND #{end} 
+	</select>
+	
+	
+	  
+
+</mapper>

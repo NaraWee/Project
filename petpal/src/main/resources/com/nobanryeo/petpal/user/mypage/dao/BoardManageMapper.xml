@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nobanryeo.petpal.user.mypage.dao.BoardManageMapper">
+
+	<resultMap type="BoradAndCommentDTO" id="boardResultSet">
+		<id column="BOARD_CODE" property="boardCode"/>
+		<result column="BOARD_TITLE" property="boardTitle"/>
+		<result column="BOARD_CONTENT" property="boardContent"/>
+		<result column="BOARD_VIEWS" property="views"/>
+		<result column="BOARD_POST_DATE" property="postDate"/>
+		<result column="BOARD_DELETE_YN" property="deleteYn"/>
+		<result column="DECISION_CODE" property="dicisionCode"/>
+		<result column="BOARD_MAP_VALUE" property="boardMap"/>
+		<result column="USER_CODE" property="userCode"/>
+		<result column="REPLY_CODE" property="replyCode"/>
+		<result column="REPLY_CONTENT" property="replyContent"/>
+		<result column="REPLY_DATE" property="replyDate"/>
+		<result column="REPLY_DELETE_YN" property="replyDeleteYn"/>
+		<result column="REPORT_YN" property="reportYn"/>
+		<result column="STATE_CODE" property="state"/>
+		<result column="DECISION_REASON" property="dReason"/>
+		<result column="ADOPT_DELETE_YN" property="adoptDeleteYn"/>
+		<result column="MISSING_DELETE_YN" property="missingDeleteYn"/>
+	</resultMap>
+
+	
+  	<resultMap type="AdoptDTO" id="adoptResultset">
+  		<id column="BOARD_CODE" property="boardCode"/>
+  		<result column="ADOPT_BREED" property="adoptBreed"/>
+  		<result column="ADOPT_GENDER" property="adoptGender"/>
+  		<result column="ADOPT_AGE" property="adoptAge"/>
+  		<result column="ADOPT_WEIGTH" property="adoptWeight"/>
+  		<result column="ADOPT_COLOR" property="adoptColor"/>
+  		<result column="ADOPT_INTRODUCE" property="adoptIntroduce"/>
+  		<result column="ADOPT_PHONE" property="adoptPhone"/>
+  		<result column="ADOPT_CAUTION" property="adoptCaution"/>
+  		<result column="ADOPT_DELETE_YN" property="deleteYN"/>
+  		<result column="STATE_CODE" property="stateCode"/>
+  		<result column="BOARD_DATE" property="boardDate"/>
+  		<result column="USER_CODE" property="userCode"/>
+  		<result column="DOG_OR_CAT" property="dogOrcat"/>
+  		<result column="USER_LOCATION" property="address"/>
+  		<result column="USER_NIKNAME" property="userNickname"/>
+  	</resultMap>
+
+  	<resultMap type="MissingDTO" id="missingResultset">
+  		<id column="BOARD_CODE" property="boardCode"/>
+  		<result column="MISSING_DATE" property="missingDate"/>
+  		<result column="MISSING_AREA" property="area"/>
+  		<result column="MISSING_PLACE" property="place"/>
+  		<result column="MISSING_PHONE" property="phone"/>
+  		<result column="MISSING_BREED" property="breed"/>
+  		<result column="MISSING_GENDER" property="gender"/>
+  		<result column="MISSING_AGE" property="age"/>
+  		<result column="MISSING_WEIGTH" property="weigth"/>
+  		<result column="MISSING_CHARACTER" property="character"/>
+  		<result column="MISSING_REQUEST" property="request"/>
+  		<result column="MISSING_DELETE_YN" property="deleteYn"/>
+  		<result column="STATE_CODE" property="stateCode"/>
+  		<result column="USER_CODE" property="userCode"/>
+  		<result column="DOG_OR_CAT" property="dOc"/>
+  		<result column="MISSING_COLOR" property="color"/>
+  	</resultMap>
+  	
+	
+	<select id="selectMissingCount" resultType="int">
+		SELECT 
+		       COUNT(*)
+		  FROM MISSING_BOARD
+		 WHERE USER_CODE = #{ userCode } 
+		   AND MISSING_DELETE_YN = 'N'
+	</select>
+	
+	<select id="selectMissing" resultMap="missingResultset" parameterType="hashmap">
+		SELECT * 
+		  FROM (SELECT ROWNUM RN, A.* 
+		          FROM (SELECT 
+		                        BOARD_CODE
+                               ,MISSING_DATE
+                               ,MISSING_AREA
+                               ,MISSING_PLACE
+                               ,MISSING_PHONE
+                               ,MISSING_BREED
+                               ,MISSING_GENDER
+                               ,MISSING_AGE
+                               ,MISSING_WEIGTH
+                               ,MISSING_CHARACTER
+                               ,MISSING_REQUEST
+                               ,MISSING_DELETE_YN
+                               ,STATE_CODE
+                               ,USER_CODE
+                               ,DOG_OR_CAT
+                               ,MISSING_COLOR
+		          FROM MISSING_BOARD
+		         WHERE USER_CODE = #{ bcDTO.userCode }
+		           AND MISSING_DELETE_YN = 'N'
+		      ORDER BY BOARD_CODE DESC) A)
+			WHERE RN BETWEEN #{ pageInfo.start } AND #{ pageInfo.end }
+		      ORDER BY BOARD_CODE	
+	</select>
+	
+	<select id="selectAdoptCount" resultType="int">
+		SELECT 
+		       COUNT(*)
+		  FROM ADOPT_BOARD
+		 WHERE USER_CODE = #{ userCode }
+		   AND ADOPT_DELETE_YN = 'N'
+	</select>
+	
+	<select id="selectAdoptList" resultMap="adoptResultset" parameterType="hashmap">
+		SELECT * 
+		  FROM (SELECT ROWNUM RN, A.* 
+		          FROM (SELECT 
+		                        BOARD_CODE
+                              , ADOPT_BREED
+                              , ADOPT_GENDER
+                              , ADOPT_AGE
+                              , ADOPT_WEIGTH
+                              , ADOPT_COLOR
+                              , ADOPT_INTRODUCE
+                              , ADOPT_PHONE
+                              , ADOPT_CAUTION
+                              , ADOPT_DELETE_YN
+                              , STATE_CODE
+                              , BOARD_DATE
+                              , USER_CODE
+                              , DOG_OR_CAT
+                              , USER_LOCATION
+		          FROM ADOPT_BOARD
+		         WHERE USER_CODE = #{ bcDTO.userCode }
+		           AND ADOPT_DELETE_YN = 'N'
+		      ORDER BY BOARD_DATE DESC) A)
+			WHERE RN BETWEEN #{ pageInfo.start } AND #{ pageInfo.end }
+		      ORDER BY BOARD_DATE DESC	
+	</select>
+	
+	<select id="selectInfoCount" resultType="int">
+		SELECT 
+		       COUNT(*)
+		  FROM INFO_BOARD
+		 WHERE USER_CODE = #{ userCode } 
+		   AND BOARD_DELETE_YN = 'N'
+	</select>
+	
+	<select id="selectInfoList" resultMap="boardResultSet" parameterType="hashmap">
+		SELECT * 
+		  FROM (SELECT ROWNUM RN, A.* 
+		          FROM (SELECT 
+		                       A.BOARD_CODE
+                             , A.BOARD_TITLE
+                             , A.BOARD_CONTENT
+                             , A.BOARD_VIEWS
+                             , A.BOARD_POST_DATE
+                             , A.BOARD_DELETE_YN
+                             , A.DECISION_CODE
+                             , A.USER_CODE
+                             , B.STATE_CODE
+                             , B.DECISION_REASON
+		          FROM INFO_BOARD A
+		          LEFT JOIN DECISION_TABLE B ON(A.DECISION_CODE = B.DECISION_CODE)
+		         WHERE A.USER_CODE = #{ bcDTO.userCode }
+		           AND A.BOARD_DELETE_YN = 'N'
+		      ORDER BY A.BOARD_POST_DATE DESC) A)
+			WHERE RN BETWEEN #{ pageInfo.start } AND #{ pageInfo.end }
+		      ORDER BY BOARD_POST_DATE DESC	
+	</select>
+	
+	<select id="selectFreeCount" resultType="int">
+		SELECT 
+		       COUNT(*)
+		  FROM FREE_BOARD
+		 WHERE USER_CODE = #{ userCode } 
+		   AND BOARD_DELETE_YN = 'N'
+	</select>
+
+	<select id="selectFreeList" resultMap="boardResultSet" parameterType="hashmap">
+		SELECT * 
+		  FROM (SELECT ROWNUM RN, A.* 
+		          FROM (SELECT 
+		                       BOARD_CODE
+                             , BOARD_TITLE
+                             , BOARD_CONTENT
+                             , BOARD_VIEWS
+                             , BOARD_POST_DATE
+                             , BOARD_DELETE_YN
+                             , USER_CODE
+		          FROM FREE_BOARD
+		         WHERE USER_CODE = #{ bcDTO.userCode }
+		           AND BOARD_DELETE_YN = 'N'
+		      ORDER BY BOARD_POST_DATE DESC) A)
+			WHERE RN BETWEEN #{ pageInfo.start } AND #{ pageInfo.end }
+		      ORDER BY BOARD_POST_DATE DESC	
+	</select>
+	
+	<select id="selectShareCount" resultType="int">
+		SELECT 
+		       COUNT(*)
+		  FROM SHARE_BOARD
+		 WHERE USER_CODE = #{ userCode } 
+		   AND BOARD_DELETE_YN = 'N'
+	</select>
+
+	<select id="selectShareList" resultMap="boardResultSet" parameterType="hashmap">
+		SELECT * 
+		  FROM (SELECT ROWNUM RN, A.* 
+		          FROM (SELECT 
+		                       BOARD_CODE
+                             , BOARD_TITLE
+                             , BOARD_CONTENT
+                             , BOARD_VIEWS
+                             , BOARD_POST_DATE
+                             , BOARD_DELETE_YN
+                             , USER_CODE
+		          FROM SHARE_BOARD
+		         WHERE USER_CODE = #{ bcDTO.userCode }
+		           AND BOARD_DELETE_YN = 'N'
+		      ORDER BY BOARD_POST_DATE DESC) A)
+			WHERE RN BETWEEN #{ pageInfo.start } AND #{ pageInfo.end }
+		      ORDER BY BOARD_POST_DATE DESC	
+	</select>
+	
+	<select id="selectReviewCount" resultType="int">
+		SELECT 
+		       COUNT(*)
+		  FROM REVIEW_BOARD
+		 WHERE USER_CODE = #{ userCode }
+		   AND BOARD_DELETE_YN = 'N'
+	</select>
+	
+	<select id="selectReviewList" resultMap="boardResultSet" parameterType="hashmap">
+		SELECT * 
+		  FROM (SELECT ROWNUM RN, A.* 
+		          FROM (SELECT 
+		                       BOARD_CODE
+                             , BOARD_TITLE
+                             , BOARD_CONTENT
+                             , BOARD_VIEWS
+                             , BOARD_POST_DATE
+                             , BOARD_DELETE_YN
+                             , USER_CODE
+		          FROM REVIEW_BOARD
+		         WHERE USER_CODE = #{ bcDTO.userCode }
+		           AND BOARD_DELETE_YN = 'N'
+		      ORDER BY BOARD_POST_DATE DESC) A)
+			WHERE RN BETWEEN #{ pageInfo.start } AND #{ pageInfo.end }
+		      ORDER BY BOARD_POST_DATE DESC	
+	</select>
+	
+	<select id="selectFriendlyCount" resultType="int">
+		SELECT 
+		       COUNT(*)
+		  FROM FRIENDLY_BOARD
+		 WHERE USER_CODE = #{ userCode }
+		   AND BOARD_DELETE_YN = 'N'
+	</select>
+	
+	<select id="selectFriendlyList" resultMap="boardResultSet" parameterType="hashmap">
+		SELECT * 
+		  FROM (SELECT ROWNUM RN, A.* 
+		          FROM (SELECT 
+		                       A.BOARD_CODE
+                             , A.BOARD_TITLE
+                             , A.BOARD_CONTENT
+                             , A.BOARD_VIEWS
+                             , A.BOARD_POST_DATE
+                             , A.BOARD_DELETE_YN
+                             , A.USER_CODE
+                             , A.DECISION_CODE
+                             , B.STATE_CODE
+                             , B.DECISION_REASON
+		          FROM FRIENDLY_BOARD A
+		          LEFT JOIN DECISION_TABLE B ON(A.DECISION_CODE = B.DECISION_CODE)
+		         WHERE A.USER_CODE = #{ bcDTO.userCode }
+		           AND A.BOARD_DELETE_YN = 'N'
+		      ORDER BY BOARD_POST_DATE DESC) A)
+			WHERE RN BETWEEN #{ pageInfo.start } AND #{ pageInfo.end }
+		      ORDER BY BOARD_POST_DATE DESC	
+	</select>
+	
+	<update id="deleteMissingPost" parameterType="int" >
+		UPDATE MISSING_BOARD
+           SET MISSING_DELETE_YN = 'Y'
+         WHERE BOARD_CODE = #{ boardCode }
+	</update>
+	<update id="deleteAdoptPost" parameterType="int" >
+		UPDATE ADOPT_BOARD
+           SET ADOPT_DELETE_YN = 'Y'
+         WHERE BOARD_CODE = #{ boardCode }
+	</update>
+	
+	<update id="deleteInfoPost" parameterType="int" >
+		UPDATE INFO_BOARD
+           SET BOARD_DELETE_YN = 'Y'
+         WHERE BOARD_CODE = #{ boardCode }
+	</update>
+	<update id="deleteFreePost" parameterType="int" >
+		UPDATE FREE_BOARD
+           SET BOARD_DELETE_YN = 'Y'
+         WHERE BOARD_CODE = #{ boardCode }
+	</update>
+	<update id="deletePostShare" parameterType="int" >
+		UPDATE SHARE_BOARD
+           SET BOARD_DELETE_YN = 'Y'
+         WHERE BOARD_CODE = #{ boardCode }
+	</update>
+	<update id="deletePostReview" parameterType="int" >
+		UPDATE REVIEW_BOARD
+           SET BOARD_DELETE_YN = 'Y'
+         WHERE BOARD_CODE = #{ boardCode }
+	</update>
+	<update id="deletePostFriendly" parameterType="int" >
+		UPDATE FRIENDLY_BOARD
+           SET BOARD_DELETE_YN = 'Y'
+         WHERE BOARD_CODE = #{ boardCode }
+	</update>
+	<update id="deleteReply" parameterType="int" >
+		UPDATE REPLY_MANAGE
+           SET REPLY_DELETE_YN = 'Y'
+         WHERE REPLY_CODE = #{ replyCode }
+	</update>
+	
+	<select id="selectMissingReplyCount" resultType="int">
+		SELECT 
+               COUNT(*)
+          FROM REPLY_MANAGE A
+          JOIN MISSING_BOARD_REPLY B ON(A.REPLY_CODE = B.REPLY_CODE)
+         WHERE B.USER_CODE = #{ userCode }	
+           AND REPLY_DELETE_YN = 'N'
+      ORDER BY REPLY_DATE DESC	
+	</select>
+	
+	<select id="selectMissingReplyList" resultMap="boardResultSet" parameterType="hashmap">
+        SELECT * 
+		  FROM (SELECT ROWNUM RN, A.* 
+		          FROM (SELECT 
+		                       A.REPLY_CODE
+                             , A.REPLY_CONTENT
+                             , A.REPLY_DATE
+                             , A.REPLY_DELETE_YN
+                             , A.REPORT_YN
+		          FROM REPLY_MANAGE A
+                  JOIN MISSING_BOARD_REPLY B ON(A.REPLY_CODE = B.REPLY_CODE)
+		         WHERE B.USER_CODE = #{ bcDTO.userCode }	
+		           AND REPLY_DELETE_YN = 'N'
+		           AND REPORT_YN = 'N'
+		      ORDER BY REPLY_DATE DESC) A)
+			WHERE RN BETWEEN #{ pageInfo2.start } AND #{ pageInfo2.end }
+		      ORDER BY REPLY_DATE DESC 
+	</select>
+	
+	<select id="selectReplyCount" resultType="int">
+		SELECT 
+               COUNT(*)
+          FROM REPLY_MANAGE A
+          <if test='type.equals("A")'>
+          JOIN MISSING_BOARD_REPLY B ON(A.REPLY_CODE = B.REPLY_CODE)
+          </if>
+          <if test='type.equals("B")'>
+          JOIN ADOPT_BOARD_REPLY B ON(A.REPLY_CODE = B.REPLY_CODE)
+          </if>
+          <if test='type.equals("C")'>
+          JOIN INFO_BOARD_REPLY B ON(A.REPLY_CODE = B.REPLY_CODE)
+          </if>
+          <if test='type.equals("D")'>
+          JOIN FREE_BOARD_REPLY B ON(A.REPLY_CODE = B.REPLY_CODE)
+          </if>
+          <if test='type.equals("F")'>
+          JOIN REVIEW_BOARD_REPLY B ON(A.REPLY_CODE = B.REPLY_CODE)
+          </if>
+          <if test='type.equals("H")'>
+          JOIN FRIENDLY_BOARD_REPLY B ON(A.REPLY_CODE = B.REPLY_CODE)
+          </if>
+         WHERE B.USER_CODE = #{ userCode }	
+           AND REPLY_DELETE_YN = 'N'
+           AND REPORT_YN = 'N'
+      ORDER BY REPLY_DATE DESC	
+	</select>
+
+	<select id="selectReplyList" resultMap="boardResultSet" parameterType="hashmap">
+        SELECT * 
+		  FROM (SELECT ROWNUM RN, A.* 
+		          FROM (SELECT 
+		                       A.REPLY_CODE
+                             , A.REPLY_CONTENT
+                             , A.REPLY_DATE
+                             , A.REPLY_DELETE_YN
+                             , A.REPORT_YN
+                             , B.BOARD_CODE
+                  <choose>
+                  <when test='bcDTO.type eq "A"'>
+                  			 , C.MISSING_DELETE_YN
+                  </when>
+                  <when test='bcDTO.type eq "B"'>
+                  			 , C.ADOPT_DELETE_YN
+                  </when>
+                  <otherwise>
+                             , C.BOARD_DELETE_YN
+                  </otherwise>
+                  </choose>
+		          FROM REPLY_MANAGE A
+		          <if test='bcDTO.type eq "A"'>
+                  JOIN MISSING_BOARD_REPLY B ON(A.REPLY_CODE = B.REPLY_CODE)
+                  JOIN MISSING_BOARD C ON(B.BOARD_CODE = C.BOARD_CODE)
+		          </if>
+		          <if test='bcDTO.type eq "B"'>
+                  JOIN ADOPT_BOARD_REPLY B ON(A.REPLY_CODE = B.REPLY_CODE)
+                  JOIN ADOPT_BOARD C ON(B.BOARD_CODE = C.BOARD_CODE)
+		          </if>
+		          <if test='bcDTO.type eq "C"'>
+                  JOIN INFO_BOARD_REPLY B ON(A.REPLY_CODE = B.REPLY_CODE)
+                  JOIN INFO_BOARD C ON(B.BOARD_CODE = C.BOARD_CODE)
+		          </if>
+		          <if test='bcDTO.type eq "D"'>
+                  JOIN FREE_BOARD_REPLY B ON(A.REPLY_CODE = B.REPLY_CODE)
+                  JOIN FREE_BOARD C ON(B.BOARD_CODE = C.BOARD_CODE)
+		          </if>
+		          <if test='bcDTO.type eq "E"'>
+                  JOIN SHARE_BOARD_REPLY B ON(A.REPLY_CODE = B.REPLY_CODE)
+                  JOIN SHARE_BOARD C ON(B.BOARD_CODE = C.BOARD_CODE)
+		          </if>
+		          <if test='bcDTO.type eq "F"'>
+                  JOIN REVIEW_BOARD_REPLY B ON(A.REPLY_CODE = B.REPLY_CODE)
+                  JOIN REVIEW_BOARD C ON(B.BOARD_CODE = C.BOARD_CODE)
+		          </if>
+		          <if test='bcDTO.type eq "H"'>
+                  JOIN FRIENDLY_BOARD_REPLY B ON(A.REPLY_CODE = B.REPLY_CODE)
+                  JOIN FRIENDLY_BOARD C ON(B.BOARD_CODE = C.BOARD_CODE)
+		          </if>
+		         WHERE B.USER_CODE = #{ bcDTO.userCode }	
+		           AND REPLY_DELETE_YN = 'N'
+		           AND REPORT_YN = 'N'
+		      ORDER BY REPLY_DATE DESC) A)
+			WHERE RN BETWEEN #{ pageInfo2.start } AND #{ pageInfo2.end }
+		      ORDER BY REPLY_DATE DESC 
+	</select>
+
+
+</mapper>
+
