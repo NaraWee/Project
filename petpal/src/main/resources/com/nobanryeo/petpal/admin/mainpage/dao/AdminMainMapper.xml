@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nobanryeo.petpal.admin.mainpage.dao.AdminMainMapper">
+
+ <resultMap id="adAdmin" type="com.nobanryeo.petpal.admin.dto.AdAdminDTO">
+	  	<id property="adCode" column="AD_CODE"/>
+	  	<result property="adTitle" column="AD_TITLE"/>
+	  	<result property="adContent" column="AD_CONTENT"/>
+	  	<result property="companyNumber" column="COMPANY_NUMBER"/>
+	  	<result property="applyDate" column="APPLY_DATE"/>
+	  	<result property="stateCode" column="STATE_CODE"/>
+	  	<result property="adTypeCode" column="AD_TYPE_CODE"/>
+	  	<result property="postStartDate" column="POST_START_DATE"/>
+	  	<result property="postEndDate" column="POST_END_DATE"/>
+	  	<result property="postYn" column="POST_YN"/>
+	  	<result property="payDate1st" column="PAY_DATE_1ST"/>
+	  	<result property="payDate2nd" column="PAY_DATE_2ND"/>
+	  	<result property="cancelApplyDate" column="CANCEL_APPLY_DATE"/>
+	  	<result property="companyName" column="COMPANY_NAME"/>
+		<result property="companyPhone" column="COMPANY_PHONE"/>
+		<result property="companyEmail" column="COMPANY_EMAIL"/>
+		<result property="companyLocation" column="COMPANY_LOCATION"/>
+		<result property="leaderName" column="LEADER_NAME"/>
+	  	<result property="refundYn" column="REFUND_YN"/>
+	  	<result property="clickNum" column="CLICK_NUM"/>
+	  	<result property="price2nd" column="PRICE_2ND"/>
+	  	<result property="payUntilDate" column="PAY_UNTIL_DATE"/>
+	  	<result property="payStatus" column="PAY_STATUS"/>
+	  	<result property="taxBillDate" column="TAX_BILL_DATE"/>
+	  	<result property="taxPrice" column="TAX_PRICE"/>
+	  	<result property="calEndDate" column="CAL_END_DATE"/>
+	  	<result property="calApplyDate" column="CAL_APPLY_DATE"/>
+	  	<result property="industry" column="INDUSTRY"/>
+	  	<result property="industryDetail" column="INDUSTRY_DETAIL"/>
+	  	
+	  	
+	  	<!-- 유저코드에 대한 유저이름 가져옴 (유저코드가 매개) -->
+	  	<!-- 하나의 유저코드는 하나의 유저명만 가질 수 있음 -->	  
+	  	<association property="user" javaType="com.nobanryeo.petpal.user.dto.UserInfoDTO">
+	  		<id property="code" column="USER_CODE"/>
+			<result property="name" column="USER_NAME"/>
+			<result property="id" column="USER_ID"/>
+		</association>
+		 <association property="decision" javaType="com.nobanryeo.petpal.admin.dto.DecisionDTO">
+	   	 <id property="decisionCode" column="DECISION_CODE"/>
+	     <result property="decisionDate" column="DECISION_DATE"/>
+   	     <result property="decisionReason" column="DECISION_REASON"/>
+       </association>
+	  </resultMap>
+
+ <resultMap id="boardTotalViews" type="com.nobanryeo.petpal.admin.dto.BoardTotalViewsDTO">
+	  	<result property="boardType" column="BOARD_TYPE"/>
+	  	<result property="boardTotalViews" column="BOARD_TOTAL_VIEWS"/>
+ </resultMap>
+
+
+	  <!-- 월별 매출액 조회 -->
+	  <select id="selectMonthRevenue" resultType="int" parameterType="AdminPageInfoDTO">
+	  SELECT
+       SUM(S.MONTH_REVENUE)
+  FROM
+(
+    (SELECT    E.PAY_DATE_1ST
+            , SUM(E.TOTAL_PRICE) MONTH_REVENUE
+      FROM
+        (SELECT 
+                       D.AD_PRICE
+                     , A.PAY_DATE_1ST
+                     , NVL(B.CLICK,0)*150 PRICE_2ND
+                     , NVL(B.CLICK,0) CLICK_NUM
+                     , D.AD_PRICE + NVL(B.CLICK,0)*150 AS TOTAL_PRICE
+                FROM AD_APPLY_TABLE A
+                LEFT JOIN DECISION_TABLE B ON A.DECISION_CODE = B.DECISION_CODE
+                LEFT JOIN USER_TABLE C ON C.USER_CODE = A.USER_CODE
+                LEFT JOIN AD_MANAGE_TABLE D ON A.AD_TYPE_CODE = D.AD_TYPE_CODE
+                LEFT OUTER JOIN
+                         (SELECT AD_CODE, COUNT(*) CLICK
+                            FROM AD_CLICK_COUNT 
+                            GROUP BY AD_CODE) B ON (A.AD_CODE = B.AD_CODE)
+                  WHERE (( A.STATE_CODE = 2 OR A.STATE_CODE = 4)
+                    AND (A.PAY_DATE_1ST IS NOT NULL AND A.PAY_DATE_2ND IS NOT NULL))
+                    AND A.PAY_DATE_1ST  BETWEEN TRUNC(to_date(#{ fullMonth },'YYYYMMDD'),'MM')
+          AND LAST_DAY(to_DATE(#{ fullMonth },'YYYYMMDD')+ 0.99999)) E)
+UNION ALL
+    (SELECT 
+             F.PAY_DATE_1ST
+            ,SUM(F.SUM_AD_PRICE_1ST) MONTH_REVENUE
+        FROM
+        (SELECT 
+                       A.PAY_DATE_1ST
+                     , SUM(D.AD_PRICE) AS SUM_AD_PRICE_1ST
+                FROM AD_APPLY_TABLE A
+                LEFT JOIN DECISION_TABLE B ON A.DECISION_CODE = B.DECISION_CODE
+                LEFT JOIN USER_TABLE C ON C.USER_CODE = A.USER_CODE
+                LEFT JOIN AD_MANAGE_TABLE D ON A.AD_TYPE_CODE = D.AD_TYPE_CODE
+                LEFT OUTER JOIN
+                         (SELECT AD_CODE, COUNT(*) CLICK
+                            FROM AD_CLICK_COUNT 
+                            GROUP BY AD_CODE) B ON (A.AD_CODE = B.AD_CODE)
+                  WHERE (( A.STATE_CODE = 2 OR A.STATE_CODE = 4)
+                  AND (A.PAY_DATE_1ST IS NOT NULL AND A.PAY_DATE_2ND IS NULL ))
+                  GROUP BY A.PAY_DATE_1ST
+                  HAVING  A.PAY_DATE_1ST BETWEEN TRUNC(to_date(#{ fullMonth },'YYYYMMDD'),'MM')
+          AND LAST_DAY(to_DATE(#{ fullMonth },'YYYYMMDD')+ 0.99999) ) F) )S
+	  </select>
+	  
+	  <!-- 게시판별 조회수 조회 -->
+	  <select id="selectBoardTotalViews" resultMap="boardTotalViews">
+		SELECT NVL2(BOARD_CODE, '일반정보','N') BOARD_TYPE
+		     , SUM(BOARD_VIEWS) BOARD_TOTAL_VIEWS
+		  FROM INFO_BOARD
+		 GROUP BY NVL2(BOARD_CODE, '일반정보','N')
+		 UNION
+		SELECT NVL2(BOARD_CODE, '프렌들리플레이스','N') BOARD_TYPE
+		     , SUM(BOARD_VIEWS) BOARD_TOTAL_VIEWS
+		  FROM FRIENDLY_BOARD
+		 GROUP BY NVL2(BOARD_CODE, '프렌들리플레이스','N')
+		 UNION
+		SELECT NVL2(BOARD_CODE, '자유게시판','N') BOARD_TYPE
+		     , SUM(BOARD_VIEWS) BOARD_TOTAL_VIEWS
+		  FROM FREE_BOARD
+		 GROUP BY NVL2(BOARD_CODE, '자유게시판','N')
+		 UNION
+		SELECT NVL2(BOARD_CODE, '무료나눔','N') BOARD_TYPE
+		     , SUM(BOARD_VIEWS) BOARD_TOTAL_VIEWS
+		  FROM SHARE_BOARD
+		 GROUP BY NVL2(BOARD_CODE, '무료나눔','N')
+		 UNION 
+		SELECT NVL2(BOARD_CODE, '용품리뷰','N') BOARD_TYPE
+		     , SUM(BOARD_VIEWS) BOARD_TOTAL_VIEWS
+		  FROM REVIEW_BOARD
+		 GROUP BY NVL2(BOARD_CODE, '용품리뷰','N')
+	  </select>
+
+</mapper>

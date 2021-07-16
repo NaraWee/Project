@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="selectNoticeList">
+        SELECT 
+		       C.RNUM
+		     , C.NOTICE_NO
+		     , C.NOTICE_TITLE
+		     , C.NOTICE_WRITE_DATE
+		     , C.WRITER
+         FROM(
+		  	   SELECT
+      				  ROWNUM RNUM
+     			    , B.NOTICE_NO
+			        , B.NOTICE_TITLE
+			        , B.NOTICE_WRITE_DATE
+			        , B.WRITER
+				FROM(
+					 SELECT 
+                            A.NOTICE_NO
+						  , A.NOTICE_TITLE
+						  , A.NOTICE_WRITE_DATE
+						  , A.WRITER
+                       FROM NOTICE A
+                    )B
+              
+              )C
+         WHERE C.RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectNoitceTotalCount">
+       SELECT 
+             COUNT(*)
+         FROM NOTICE A
+	</entry>
+	
+	<entry key="selectNoticeDetail">
+        SELECT
+               NOTICE_TITLE
+             , WRITER
+             , NOTICE_WRITE_DATE
+             , NOTICE_CONTENT
+          FROM NOTICE
+         WHERE NOTICE_NO = ?
+	</entry>
+	
+	<entry key="insertNotice">
+        INSERT 
+          INTO NOTICE
+         (
+           NOTICE_NO
+          ,NOTICE_CONTENT
+          ,NOTICE_WRITE_DATE
+          ,USER_NO
+          ,NOTICE_TITLE
+          ,WRITER
+         )
+         VALUES
+         (
+         SEQ_NOTICE_NO.NEXTVAL
+        , ?
+        , SYSDATE
+        , DEFAULT
+        , ?
+        , ?
+        )
+	</entry>
+	
+	<entry key="updateNotice">
+        UPDATE NOTICE N
+           SET 
+               N.NOTICE_TITLE = ?
+             , N.WRITER = ?
+             , N.NOTICE_WRITE_DATE = SYSDATE
+             , N.NOTICE_CONTENT = ?
+         WHERE N.NOTICE_NO = ?
+	</entry>
+	
+	<entry key="deleteNotice">
+        DELETE 
+          FROM NOTICE  
+         WHERE NOTICE_NO = ?
+	</entry>
+	
+	<entry key="selectSearchWriter">
+        SELECT 
+		       C.RNUM
+		     , C.NOTICE_NO
+		     , C.NOTICE_TITLE
+		     , C.NOTICE_WRITE_DATE
+		     , C.WRITER
+         FROM(
+		  	   SELECT
+      				  ROWNUM RNUM
+     			    , B.NOTICE_NO
+			        , B.NOTICE_TITLE
+			        , B.NOTICE_WRITE_DATE
+			        , B.WRITER
+				FROM(
+					 SELECT 
+                            A.NOTICE_NO
+						  , A.NOTICE_TITLE
+						  , A.NOTICE_WRITE_DATE
+						  , A.WRITER
+                       FROM NOTICE A
+                    )B
+              
+              )C
+         WHERE C.RNUM BETWEEN ? AND ?
+           AND C.WRITER = ?
+	</entry>
+	
+	<entry key="searchNoticeCount">
+       SELECT 
+             COUNT(*)
+         FROM NOTICE A
+        WHERE WRITER = ?
+	</entry>
+
+	</properties>

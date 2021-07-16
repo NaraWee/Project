@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+
+	<entry key="selectOwnerInfo">
+	    SELECT
+	           *
+	      FROM OWNER_INFO
+	     WHERE OWNER_NO = ?
+	</entry>
+	
+	<entry key="selectReportList">
+		SELECT B.RNUM
+    		  , B.REPORT_NO
+              , B.WRITER_TYPE
+              , B.REPORT_REASON
+              , B.MEMBER_NO
+              , B.REPORT_DATE
+              , B.REPORT_TITLE
+              , B.REPORT_STATUS
+              , B.REPORTED_TYPE
+              , B.REPORTED_NO
+        FROM (SELECT ROWNUM RNUM
+    		  , A.REPORT_NO
+              , A.WRITER_TYPE
+              , A.REPORT_REASON
+              , A.MEMBER_NO
+              , A.REPORT_DATE
+              , A.REPORT_TITLE
+              , A.REPORT_STATUS
+              , A.REPORTED_TYPE
+              , A.REPORTED_NO
+        FROM (SELECT
+    		    REPORT_NO
+              , WRITER_TYPE
+              , REPORT_REASON
+              , MEMBER_NO
+              , REPORT_DATE
+              , REPORT_TITLE
+              , REPORT_STATUS
+              , REPORTED_TYPE
+              , REPORTED_NO
+  		  FROM REPORT
+ 		 WHERE MEMBER_NO = ?
+ 		 ORDER BY REPORT_NO DESC)A)B
+ 		 WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selctReportDetail">
+ 		SELECT
+      		   *
+		  FROM REPORT R
+		 WHERE R.REPORT_NO = ? 
+	</entry>
+
+	<entry key="selectRejectReason">
+	  SELECT
+        	 REPORT_ANSWER
+  		FROM REPORT_HISTORY
+ 	   WHERE REPORT_NO = ?
+	</entry>
+	
+	<entry key="ownerWithdrawUpdate">
+	 UPDATE OWNER_INFO
+ 	    SET OWNER_WITHDRAW_YN = 'Y'
+          , OWNER_WITHDATE = SYSDATE
+      WHERE OWNER_NO = ?
+	</entry>
+	
+	<entry key="selectTaxBillList">
+	 SELECT Y.RNUM
+            , Y.REQUEST_NO
+	        , Y.REQUEST_DATE
+	        , Y.ACCOMO_NO
+	        , Y.RESPONSE_YN
+	        , Y.STL_NO
+	        , Y.ACCOMO_NAME
+      FROM (SELECT ROWNUM RNUM
+	        , X.REQUEST_NO
+	        , X.REQUEST_DATE
+	        , X.ACCOMO_NO
+	        , X.RESPONSE_YN
+	        , X.STL_NO
+	        , X.ACCOMO_NAME
+      FROM (SELECT
+	          B.REQUEST_NO
+	        , B.REQUEST_DATE
+	        , B.ACCOMO_NO
+	        , B.RESPONSE_YN
+	        , B.STL_NO
+	        , A.ACCOMO_NAME
+	   FROM REQUEST_TAX_BILL B
+	   JOIN ACCOMO_INFO A ON(B.ACCOMO_NO = A.ACCOMO_NO)
+	  WHERE A.OWNER_NO = ?
+      ORDER BY B.REQUEST_NO DESC)X)Y
+      WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectAccomoNames">
+	    SELECT
+               *
+          FROM ACCOMO_INFO
+         WHERE OWNER_NO = ?
+	</entry>
+	
+	<entry key="selectAccomoNo">
+	
+		SELECT 
+               ACCOMO_NO
+             , ACCOMO_NAME
+          FROM ACCOMO_INFO
+         WHERE ACCOMO_NAME = ?
+	</entry>
+	
+	<entry key="insertRequestTaxBill">
+ 		INSERT
+  		INTO REQUEST_TAX_BILL
+		VALUES
+		(
+ 		  SEQUENCE_REQUEST_NO.NEXTVAL
+		, SYSDATE
+		, ?
+		, DEFAULT
+		, (SELECT A.STL_NO 
+ 		   FROM SETTLEMENT A, REQUEST_STL B
+		   WHERE A.ACCOMO_NO = B.ACCOMO_NO
+  		   AND A.ACCOMO_NO = ?
+   		   AND B.REQUEST_STL_NO = ?)
+		)
+	</entry>
+	
+	<entry key="selectStl">
+		SELECT Y.RNUM
+		     , Y.REQUEST_STL_NO
+		     , Y.ACCOMO_NO
+		     , Y.REQUEST_DATE
+		     , Y.STL_YN
+		     , Y.ACCOMO_NAME
+        FROM (SELECT ROWNUM RNUM
+		     , X.REQUEST_STL_NO
+		     , X.ACCOMO_NO
+		     , X.REQUEST_DATE
+		     , X.STL_YN
+		     , X.ACCOMO_NAME
+        FROM (SELECT
+		       A.REQUEST_STL_NO
+		     , A.ACCOMO_NO
+		     , A.REQUEST_DATE
+		     , A.STL_YN
+		     , B.ACCOMO_NAME
+		  FROM REQUEST_STL A, ACCOMO_INFO B
+		 WHERE A.ACCOMO_NO = B.ACCOMO_NO
+		   AND B.OWNER_NO = ?
+		 ORDER BY A.REQUEST_STL_NO DESC)X)Y
+		 WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectImagePath">
+
+	  SELECT
+			 THUMBNAIL_PATH
+		FROM ATTACHMENT A
+		JOIN REPORT R ON(R.REPORT_NO = A.REF_NO)
+	   WHERE CATEGORY_NO = 6
+		 AND R.REPORT_NO = ?
+	</entry>
+	
+	<entry key="selectAccomo">
+		SELECT
+		       ACCOMO_NAME
+		     , ACCOMO_NO
+		  FROM ACCOMO_INFO
+		 WHERE OWNER_NO = ?
+	</entry>
+	
+	<entry key="insertStl">
+		 INSERT INTO REQUEST_STL
+ 		 VALUES
+ 		 (
+  		   SEQ_STL_NO.NEXTVAL
+ 		 , ?
+ 		 , SYSDATE
+ 		 , 'N'
+ 		 )
+	</entry>
+	
+	<entry key="reportTotalCount">
+       SELECT 
+               COUNT(*)
+  		  FROM REPORT
+ 		 WHERE MEMBER_NO = ?
+	</entry>
+	
+	<entry key="stlTotalCount">
+		SELECT 
+               COUNT(*)
+		  FROM REQUEST_STL A, ACCOMO_INFO B
+		 WHERE A.ACCOMO_NO = B.ACCOMO_NO
+		   AND B.OWNER_NO = ?
+	</entry>
+	
+	<entry key="taxTotalCount">
+		SELECT 
+               COUNT(*)
+	 	  FROM REQUEST_TAX_BILL B
+	 	  JOIN ACCOMO_INFO A ON(B.ACCOMO_NO = A.ACCOMO_NO)
+	 	 WHERE A.OWNER_NO = ?
+	</entry>
+	
+	<entry key="selectreportedCount">
+	      SELECT 
+                 COUNT(*)
+            FROM REPORT
+           WHERE REPORTED_TYPE = 'owner'
+             AND REPORT_STATUS = 'Y'
+             AND REPORTED_NO = ?
+	
+	</entry>
+	
+	<entry key="updatePwd">
+	     UPDATE OWNER_INFO
+            SET OWNER_PWD = ?
+          WHERE OWNER_NO = ?
+
+	
+	</entry>
+	
+	
+	<entry key="insertWithdraw">
+		 INSERT 
+		   INTO WITHDRAW_REASON
+		 VALUES
+		 (
+		   SEQ_WITHDRAW_NO.NEXTVAL
+		 , ?
+		 , ?
+		 , 'owner'
+		 )
+	
+	</entry>
+	
+	<entry key="updatePhoneNo">
+		UPDATE OWNER_INFO
+		   SET OWNER_PHONE = ?
+		 WHERE OWNER_NO = ?
+	
+	</entry>
+	
+	<entry key="selectAccomoList">
+	         SELECT 
+               *
+           FROM ACCOMO_INFO C
+           JOIN ATTACHMENT A ON(C.ACCOMO_NO = A.REF_NO)
+          WHERE CATEGORY_NO = 3
+            AND OWNER_NO = ?
+            AND VISIBLE_YN = 'Y'
+	</entry>
+	
+	
+</properties>

@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="noticeSelect2">
+		SELECT NOTICE_TITLE
+        	 , NOTICE_CONTENT
+        	 , NOTICE_WRITE_DATE
+        	 , NOTICE_NO
+          FROM NOTICE
+         WHERE WRITER = '사용자'
+	</entry>
+	<entry key="noticeSelect">
+		SELECT B.RNUM
+             , B.NOTICE_TITLE
+        	 , B.NOTICE_CONTENT
+        	 , B.NOTICE_WRITE_DATE
+        	 , B.NOTICE_NO
+          FROM ( SELECT ROWNUM RNUM
+                      , A.NOTICE_TITLE
+        		      , A.NOTICE_CONTENT
+        		      , A.NOTICE_WRITE_DATE
+        		      , A.NOTICE_NO
+                   FROM ( SELECT NOTICE_TITLE
+        		               , NOTICE_CONTENT
+        		               , NOTICE_WRITE_DATE
+        		               , NOTICE_NO
+        		            FROM NOTICE
+        		           WHERE WRITER = '사용자'
+                         ) A
+                 ) B
+          WHERE B.RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="eventSelect2">
+		SELECT E.EVENT_TITLE
+		     , E.EVENT_NO
+             , E.EVENT_START
+             , E.EVENT_END
+             , A.THUMBNAIL_PATH
+          FROM EVENT E
+          JOIN ATTACHMENT A ON(A.REF_NO = E.EVENT_NO)
+         WHERE CATEGORY_NO = 7
+	</entry>
+	<entry key="eventSelect">
+		SELECT C.RNUM
+             , C.EVENT_TITLE
+        	 , C.EVENT_NO
+             , C.EVENT_START
+             , C.EVENT_END
+             , C.THUMBNAIL_PATH
+          FROM ( SELECT ROWNUM RNUM
+                      , B.EVENT_TITLE
+        		      , B.EVENT_NO
+                      , B.EVENT_START
+                      , B.EVENT_END
+                      , B.THUMBNAIL_PATH
+                   FROM ( SELECT E.EVENT_TITLE
+        		               , E.EVENT_NO
+                               , E.EVENT_START
+                               , E.EVENT_END
+                               , A.THUMBNAIL_PATH
+                            FROM EVENT E
+                            JOIN ATTACHMENT A ON(A.REF_NO = E.EVENT_NO)
+                           WHERE CATEGORY_NO = 7
+                         )B
+               ) C
+         WHERE C.RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="adminQnAListSelect2">
+		SELECT ADMIN_QNA_NO
+		     , ADMIN_QNA_TITLE
+		     , ADMIN_QNA_DATE
+		     , ADMIN_ANSWER_YN
+		     , ADMIN_QNA_CONTENT
+		  FROM ADMIN_QNA
+		 WHERE ADMIN_QNA_WRITER = 'U'
+		   AND MEMBER_NO = ? 
+		 ORDER BY ADMIN_QNA_DATE DESC
+	</entry>
+	<entry key="adminQnAListSelect">
+		SELECT B.RNUM
+             , B.ADMIN_QNA_NO
+        	 , B.ADMIN_QNA_TITLE
+        	 , B.ADMIN_QNA_DATE
+        	 , B.ADMIN_ANSWER_YN
+        	 , B.ADMIN_QNA_CONTENT
+          FROM ( SELECT ROWNUM RNUM
+                      , A.ADMIN_QNA_NO
+        		      , A.ADMIN_QNA_TITLE
+        		      , A.ADMIN_QNA_DATE
+        		      , A.ADMIN_ANSWER_YN
+        		      , A.ADMIN_QNA_CONTENT
+                   FROM ( SELECT ADMIN_QNA_NO
+        		               , ADMIN_QNA_TITLE
+        		               , ADMIN_QNA_DATE
+                               , ADMIN_ANSWER_YN
+        		               , ADMIN_QNA_CONTENT
+        		            FROM ADMIN_QNA
+        		           WHERE ADMIN_QNA_WRITER = 'U'
+        		             AND MEMBER_NO = ? 
+        		           ORDER BY ADMIN_QNA_DATE DESC
+                         ) A
+              ) B
+         WHERE B.RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="ownerQnAListSelect2">
+		SELECT O.OWNER_QNA_NO
+		     , O.OWNER_QNA_TITLE
+		     , O.OWNER_QNA_CONTENT
+		     , O.OWNER_QNA_DATE
+		     , O.OWNER_ANSWER_YN
+		     , A.ACCOMO_NAME
+		     , O.ACCOMO_NO
+		  FROM OWNER_QNA O
+		  JOIN ACCOMO_INFO A ON(A.ACCOMO_NO = O.ACCOMO_NO)
+		 WHERE USER_NO = ?
+		ORDER BY O.OWNER_QNA_DATE DESC
+	</entry>
+	<entry key="ownerQnAListSelect">
+		SELECT C.RNUM
+             , C.OWNER_QNA_NO
+        	 , C.OWNER_QNA_TITLE
+        	 , C.OWNER_QNA_CONTENT
+        	 , C.OWNER_QNA_DATE
+        	 , C.OWNER_ANSWER_YN
+        	 , C.ACCOMO_NAME
+        	 , C.ACCOMO_NO
+          FROM ( SELECT ROWNUM RNUM
+                      , B.OWNER_QNA_NO
+        		      , B.OWNER_QNA_TITLE
+        		      , B.OWNER_QNA_CONTENT
+        		      , B.OWNER_QNA_DATE
+        		      , B.OWNER_ANSWER_YN
+        		      , B.ACCOMO_NAME
+        		      , B.ACCOMO_NO
+                   FROM ( SELECT O.OWNER_QNA_NO
+        		               , O.OWNER_QNA_TITLE
+        		               , O.OWNER_QNA_CONTENT
+        		               , O.OWNER_QNA_DATE
+        		               , O.OWNER_ANSWER_YN
+        		               , A.ACCOMO_NAME
+        		               , O.ACCOMO_NO
+        		            FROM OWNER_QNA O
+                            JOIN ACCOMO_INFO A ON(A.ACCOMO_NO = O.ACCOMO_NO)
+        		           WHERE USER_NO = ?
+        		          ORDER BY O.OWNER_QNA_DATE DESC
+                         ) B
+              ) C
+         WHERE C.RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="adminQnAContentSelect">
+		SELECT A.ADMIN_QNA_TITLE
+		     , A.ADMIN_QNA_DATE
+		     , A.ADMIN_ANSWER_YN
+		     , A.ADMIN_QNA_CONTENT
+		     , AA.ANSWER_CONTENT
+		  FROM ADMIN_QNA A
+		  JOIN ADMIN_ANSWER AA ON(AA.ADMIN_QNA_NO = A.ADMIN_QNA_NO)
+		 WHERE ADMIN_QNA_WRITER = 'U'
+		   AND A.MEMBER_NO = ?
+		   AND A.ADMIN_QNA_NO = ?
+	</entry>
+	<entry key="adminQnAContentSelectTwo">
+		SELECT A.ADMIN_QNA_TITLE
+		     , A.ADMIN_QNA_DATE
+		     , A.ADMIN_ANSWER_YN
+		     , A.ADMIN_QNA_CONTENT
+		  FROM ADMIN_QNA A
+		 WHERE ADMIN_QNA_WRITER = 'U'
+		   AND A.MEMBER_NO = ?
+		   AND A.ADMIN_QNA_NO = ?
+	</entry>
+	
+	<entry key="ownerQnAContentSelect">
+		SELECT O.OWNER_QNA_TITLE
+		     , O.OWNER_QNA_CONTENT
+		     , O.OWNER_QNA_DATE
+		     , O.OWNER_ANSWER_YN
+		     , A.ACCOMO_NAME
+		     , O.ACCOMO_NO
+		     , OA.OWNER_ANSWER_CONTENT
+		  FROM OWNER_QNA O
+		  JOIN ACCOMO_INFO A ON(A.ACCOMO_NO = O.ACCOMO_NO)
+		  JOIN OWNER_ANSWER OA ON(OA.OWNER_QNA_NO = O.OWNER_QNA_NO)
+		 WHERE O.USER_NO = ?
+		   AND O.OWNER_QNA_NO = ?
+	</entry>
+	<entry key="ownerQnAContentSelectTwo">
+		SELECT O.OWNER_QNA_TITLE
+		     , O.OWNER_QNA_CONTENT
+		     , O.OWNER_QNA_DATE
+		     , O.OWNER_ANSWER_YN
+		     , A.ACCOMO_NAME
+		     , O.ACCOMO_NO
+		  FROM OWNER_QNA O
+		  JOIN ACCOMO_INFO A ON(A.ACCOMO_NO = O.ACCOMO_NO)
+		 WHERE O.USER_NO = ?
+		   AND O.OWNER_QNA_NO = ?
+	</entry>
+	
+	<entry key="adminQnAInsert">
+		INSERT
+		  INTO ADMIN_QNA
+		     ( ADMIN_QNA_NO
+             , ADMIN_QNA_TITLE
+             , ADMIN_QNA_DATE
+             , ADMIN_ANSWER_YN
+             , ADMIN_QNA_WRITER
+             , ADMIN_QNA_CONTENT
+             , MEMBER_NO
+		     )
+		VALUES
+		     ( SQU_ADMIN_QNA.NEXTVAL
+		     , ?
+		     , SYSDATE
+		     , DEFAULT
+		     , 'U'
+		     , ?
+		     , ?
+		     )
+	</entry>
+	
+
+</properties>

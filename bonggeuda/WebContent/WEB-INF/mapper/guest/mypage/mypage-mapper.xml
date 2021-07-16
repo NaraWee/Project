@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="point">
+		SELECT POINT
+		  FROM POINT
+		 WHERE USER_NO = ?
+    </entry>
+    
+    <entry key="pointHistory2">
+    	SELECT A.POINT_PATH
+     	     , A.GU_DATE
+             , A.POINT
+             , A.GETUSE_TYPE_GU
+  	      FROM POINT_HISTORY A
+  		  JOIN POINT P ON(P.POINT_NO = A.POINT_NO)
+          WHERE P.USER_NO = ?
+          ORDER BY A.GU_DATE DESC
+    </entry>
+    
+    <entry key="pointHistory">
+		SELECT
+      	       C.RNUM
+    	     , C.POINT_PATH
+             , C.GU_DATE
+    		 , C.POINT
+    	     , C.GETUSE_TYPE_GU
+		 FROM (
+                SELECT ROWNUM RNUM
+                     , B.POINT_PATH
+                     , B.GU_DATE
+                     , B.POINT
+                     , B.GETUSE_TYPE_GU
+                 FROM (
+		                SELECT A.POINT_PATH
+     	                     , A.GU_DATE
+                             , A.POINT
+                             , A.GETUSE_TYPE_GU
+  	                      FROM POINT_HISTORY A
+  		                  JOIN POINT P ON(P.POINT_NO = A.POINT_NO)
+                         WHERE P.USER_NO = ?
+                         ORDER BY A.GU_DATE DESC
+                       ) B
+               ) C
+         WHERE C.RNUM  BETWEEN ? AND ?     
+    </entry>
+    
+    <entry key="couponCount">
+		SELECT COUNT(*)
+          FROM COUPON
+         WHERE COUPON_USE_YN = 'N'
+           AND USER_NO = ?
+    </entry>
+    
+    <entry key="couponList">
+		SELECT  B.RNUM
+             , B.COUPON_NAME
+             , B.COUPON_DISCOUNT
+	         , B.COUPON_CONDITION
+	         , B.COUPON_START
+	         , B.COUPON_END	
+          FROM (
+                SELECT ROWNUM RNUM
+                     , A.COUPON_NAME
+		            , A.COUPON_DISCOUNT
+		            , A.COUPON_CONDITION
+		            , A.COUPON_START
+		            , A.COUPON_END
+                 FROM (
+                        SELECT COUPON_NAME
+		                     , COUPON_DISCOUNT
+		                     , COUPON_CONDITION
+                             , COUPON_START
+                             , COUPON_END
+		                  FROM COUPON
+		                 WHERE COUPON_USE_YN = 'N'
+		                   AND USER_NO = ?
+                       ) A
+               ) B
+         WHERE B.RNUM BETWEEN ? AND ?
+    </entry>
+
+    <entry key="myinfoSelect">
+		SELECT USER_NICKNAME
+		     , USER_PHONE
+		     , REPORT_COUNT
+		  FROM USER_INFO
+		 WHERE USER_NO = ?
+    </entry>
+    
+    <entry key="nickNameUpdate">
+		UPDATE USER_INFO
+		   SET USER_NICKNAME = ?
+		 WHERE USER_NO = ?
+    </entry>
+    
+    <entry key="phoneUpdate">
+		UPDATE USER_INFO
+		   SET USER_PHONE = ?
+		 WHERE USER_NO = ?
+    </entry>
+    
+    <entry key="passwordUpdate">
+		UPDATE USER_INFO
+		   SET USER_PWD = ?
+		 WHERE USER_NO = ?
+    </entry>
+    
+    <entry key="withdrawUpdate">
+		UPDATE USER_INFO
+		   SET USER_WITHDRAW_YN = 'Y'
+		     , WITHDRAWDATE = ?
+		 WHERE USER_NO = ?
+    </entry>
+    
+    <entry key="withdrawInsert">
+		INSERT
+		  INTO WITHDRAW_REASON
+		     ( WITHDRAW_NO
+             , MEMBER_NO
+             , WITHDRAW_REASON
+             , WRITER_TYPE
+		     )
+		VALUES
+		     ( SEQ_WITHDRAW_NO.NEXTVAL
+		     , ?
+		     , ?
+		     , 'user'
+		     )
+    </entry>
+    
+    <entry key="reportListSelect2">
+    	SELECT R.REPORT_NO
+        	 , R.REPORT_TITLE
+        	 , A.ACCOMO_NAME
+        	 , R.REPORT_DATE
+        	 , R.REPORT_STATUS
+          FROM REPORT R
+          JOIN ACCOMO_INFO A ON(A.ACCOMO_NO = R.REPORTED_NO)
+         WHERE R.WRITER_TYPE = 'guest'
+           AND R.MEMBER_NO = ?
+           AND R.REPORTED_TYPE = 'owner'
+         ORDER BY R.REPORT_NO DESC
+    </entry>
+    <entry key="reportListSelect">
+		SELECT C.RNUM
+             , C.REPORT_NO
+        	 , C.REPORT_TITLE
+        	 , C.ACCOMO_NAME
+        	 , C.REPORT_DATE
+        	 , C.REPORT_STATUS
+          FROM (
+                 SELECT ROWNUM RNUM
+                      , B.REPORT_NO
+        		      , B.REPORT_TITLE
+        		      , B.ACCOMO_NAME
+        		      , B.REPORT_DATE
+        		      , B.REPORT_STATUS
+                   FROM (
+                          SELECT R.REPORT_NO
+        		               , R.REPORT_TITLE
+        		               , A.ACCOMO_NAME
+        		               , R.REPORT_DATE
+        		               , R.REPORT_STATUS
+                            FROM REPORT R
+                            JOIN ACCOMO_INFO A ON(A.ACCOMO_NO = R.REPORTED_NO)
+                           WHERE R.WRITER_TYPE = 'guest'
+        		             AND R.MEMBER_NO = ?
+        		             AND R.REPORTED_TYPE = 'owner'
+        		           ORDER BY R.REPORT_NO DESC
+                         ) B
+               ) C
+         WHERE C.RNUM BETWEEN ? AND ?
+    </entry>
+    
+    <entry key="reportContent">
+		SELECT R.REPORT_TITLE
+		     , A.ACCOMO_NAME
+		     , R.REPORT_DATE
+		     , R.REPORT_REASON
+		     , RH.REPORT_ANSWER
+		  FROM REPORT R
+		  JOIN ACCOMO_INFO A ON(A.ACCOMO_NO = R.REPORTED_NO)
+		  JOIN REPORT_HISTORY RH ON(RH.REPORT_NO = R.REPORT_NO)
+		 WHERE R.WRITER_TYPE = 'guest'
+		   AND R.MEMBER_NO = ?
+		   AND R.REPORTED_TYPE = 'owner'
+		   AND R.REPORT_NO = ?
+    </entry>
+    <entry key="reportContentTwo">
+		SELECT R.REPORT_TITLE
+		     , A.ACCOMO_NAME
+		     , R.REPORT_DATE
+		     , R.REPORT_REASON
+		  FROM REPORT R
+		  JOIN ACCOMO_INFO A ON(A.ACCOMO_NO = R.REPORTED_NO)
+		 WHERE R.WRITER_TYPE = 'guest'
+		   AND R.MEMBER_NO = ?
+		   AND R.REPORTED_TYPE = 'owner'
+		   AND R.REPORT_NO = ?
+    </entry>
+    
+    <entry key="reportImgSelect">
+		SELECT THUMBNAIL_PATH
+		  FROM REPORT R
+		  JOIN ACCOMO_INFO A ON(A.ACCOMO_NO = R.REPORTED_NO)
+		  JOIN ATTACHMENT AT ON(AT.REF_NO = R.REPORT_NO)
+		 WHERE R.WRITER_TYPE = 'guest'
+		   AND R.MEMBER_NO = ?
+		   AND R.REPORTED_TYPE = 'owner'
+		   AND R.REPORT_NO = ?
+		   AND AT.CATEGORY_NO = 6
+    </entry>
+    
+    <entry key="userNicknameSelect">
+		SELECT COUNT(*)
+		  FROM USER_INFO
+		 WHERE USER_NICKNAME = ?
+    </entry>
+    
+    <entry key="userBookListSelect">
+		SELECT BL.BOOK_NO
+		     , BL.BOOK_CHECK_DATE
+		     , BL.BOOK_CHECKOUT_DATE
+		     , BL.BOOK_APPROVE_YN
+		     , BL.BOOK_CHECK_IN
+		     , RI.ROOM_NAME
+		     , AI.ACCOMO_NAME
+		     , A.THUMBNAIL_PATH
+		  FROM BOOK_LIST BL
+		  JOIN ROOM_INFO RI ON(RI.ROOM_NO = BL.ROOM_NO)
+		  JOIN ACCOMO_INFO AI ON(AI.ACCOMO_NO = RI.ACCOMO_NO)
+		  JOIN ATTACHMENT A ON(A.REF_NO = RI.ROOM_NO)
+		 WHERE BL.USER_NO = ?
+		   AND BL.BOOK_STATUS_YNC = 'N'
+		   AND A.CATEGORY_NO = 4
+		 ORDER BY BL.BOOK_NO DESC
+    </entry>
+    
+    <entry key="userCompleteBookListSelect">
+		SELECT BL.BOOK_NO
+		     , BL.BOOK_CHECK_DATE
+		     , BL.BOOK_CHECKOUT_DATE
+		     , BL.BOOK_APPROVE_YN
+		     , BL.BOOK_CHECK_IN
+		     , RI.ROOM_NAME
+		     , AI.ACCOMO_NAME
+		     , A.THUMBNAIL_PATH
+		  FROM BOOK_LIST BL
+		  JOIN ROOM_INFO RI ON(RI.ROOM_NO = BL.ROOM_NO)
+		  JOIN ACCOMO_INFO AI ON(AI.ACCOMO_NO = RI.ACCOMO_NO)
+		  JOIN ATTACHMENT A ON(A.REF_NO = RI.ROOM_NO)
+		 WHERE BL.USER_NO = ?
+		   AND BL.BOOK_STATUS_YNC = 'Y'
+		   AND A.CATEGORY_NO = 4
+		 ORDER BY BL.BOOK_NO DESC
+    </entry>
+    
+    <entry key="userCancleBookListSelect">
+		SELECT BL.BOOK_NO
+		     , BL.BOOK_CHECK_DATE
+		     , BL.BOOK_CHECKOUT_DATE
+		     , BL.BOOK_APPROVE_YN
+		     , BL.BOOK_CHECK_IN
+		     , RI.ROOM_NAME
+		     , AI.ACCOMO_NAME
+		     , A.THUMBNAIL_PATH
+		  FROM BOOK_LIST BL
+		  JOIN ROOM_INFO RI ON(RI.ROOM_NO = BL.ROOM_NO)
+		  JOIN ACCOMO_INFO AI ON(AI.ACCOMO_NO = RI.ACCOMO_NO)
+		  JOIN ATTACHMENT A ON(A.REF_NO = RI.ROOM_NO)
+		 WHERE BL.USER_NO = ?
+		   AND BL.BOOK_STATUS_YNC = 'C'
+		   AND A.CATEGORY_NO = 4
+		 ORDER BY BL.BOOK_NO DESC
+    </entry>
+    
+    <entry key="userCancleContentSelect">
+    	SELECT
+               BL.BOOK_CHECK_DATE
+             , BL.BOOK_CHECKOUT_DATE
+             , BL.BOOK_CHECK_IN
+             , AI.CHECK_OUT
+             , AI.ACCOMO_NAME
+             , RI.ROOM_NAME
+             , BL.BOOK_NO
+             , BL.BOOK_USER_NAME
+             , BL.BOOK_PHONE
+             , CH.CANCLE_AMOUNT
+             , A.THUMBNAIL_PATH
+             , AI.ACCOMO_NO
+             , RI.ROOM_NO
+             , P.PAYMENT_TIME
+          FROM BOOK_LIST BL
+          JOIN ROOM_INFO RI ON(RI.ROOM_NO = BL.ROOM_NO)
+          JOIN ACCOMO_INFO AI ON(AI.ACCOMO_NO = RI.ACCOMO_NO)
+          JOIN PAYMENT P ON(P.BOOK_NO = BL.BOOK_NO)
+          JOIN CANCLE_HISTORY CH ON(CH.PAYMENT_NO = P.PAYMENT_NO)
+          JOIN ATTACHMENT A ON(A.REF_NO = RI.ROOM_NO)
+         WHERE BL.USER_NO = ?
+           AND BL.BOOK_STATUS_YNC = 'C'
+           AND A.CATEGORY_NO = 4
+           AND BL.BOOK_NO = ?
+   </entry>
+   
+   <entry key="userCompleteContentSelect">
+    	SELECT
+               BL.BOOK_CHECK_DATE
+             , BL.BOOK_CHECKOUT_DATE
+             , BL.BOOK_CHECK_IN
+             , AI.CHECK_OUT
+             , AI.ACCOMO_NAME
+             , RI.ROOM_NAME
+             , BL.BOOK_NO
+             , BL.BOOK_USER_NAME
+             , BL.BOOK_PHONE
+             , P.PAYMENT_AMOUNT
+             , A.THUMBNAIL_PATH
+          FROM BOOK_LIST BL
+          JOIN ROOM_INFO RI ON(RI.ROOM_NO = BL.ROOM_NO)
+          JOIN ACCOMO_INFO AI ON(AI.ACCOMO_NO = RI.ACCOMO_NO)
+          JOIN PAYMENT P ON(P.BOOK_NO = BL.BOOK_NO)
+          JOIN ATTACHMENT A ON(A.REF_NO = RI.ROOM_NO)
+         WHERE BL.USER_NO = ?
+           AND BL.BOOK_STATUS_YNC = 'Y'
+           AND A.CATEGORY_NO = 4
+           AND BL.BOOK_NO = ?
+   </entry>
+   
+   <entry key="userBookContentSelect">
+    	SELECT
+               BL.BOOK_CHECK_DATE
+             , BL.BOOK_CHECKOUT_DATE
+             , BL.BOOK_CHECK_IN
+             , AI.CHECK_OUT
+             , AI.ACCOMO_NAME
+             , RI.ROOM_NAME
+             , BL.BOOK_NO
+             , BL.BOOK_USER_NAME
+             , BL.BOOK_PHONE
+             , P.PAYMENT_AMOUNT
+             , A.THUMBNAIL_PATH
+             , BL.BOOK_APPROVE_YN
+          FROM BOOK_LIST BL
+          JOIN ROOM_INFO RI ON(RI.ROOM_NO = BL.ROOM_NO)
+          JOIN ACCOMO_INFO AI ON(AI.ACCOMO_NO = RI.ACCOMO_NO)
+          JOIN PAYMENT P ON(P.BOOK_NO = BL.BOOK_NO)
+          JOIN ATTACHMENT A ON(A.REF_NO = RI.ROOM_NO)
+         WHERE BL.USER_NO = ?
+           AND BL.BOOK_STATUS_YNC = 'N'
+           AND A.CATEGORY_NO = 4
+           AND BL.BOOK_NO = ?
+   </entry>
+   
+   <entry key="userBookCancleSelect">
+    	SELECT
+               BL.BOOK_CHECK_DATE
+             , BL.BOOK_CHECKOUT_DATE
+             , BL.BOOK_CHECK_IN
+             , AI.CHECK_OUT
+             , AI.ACCOMO_NAME
+             , RI.ROOM_NAME
+             , BL.BOOK_NO
+             , BL.BOOK_USER_NAME
+             , BL.BOOK_PHONE
+             , P.PAYMENT_AMOUNT
+             , A.THUMBNAIL_PATH
+             , P.PAYMENT_METHOD
+             , P.PAYMENT_NO
+             , AI.ACCOMO_NO
+             , RI.ROOM_NO
+             , P.PAYMENT_TIME
+             , BL.BOOK_APPROVE_YN
+          FROM BOOK_LIST BL
+          JOIN ROOM_INFO RI ON(RI.ROOM_NO = BL.ROOM_NO)
+          JOIN ACCOMO_INFO AI ON(AI.ACCOMO_NO = RI.ACCOMO_NO)
+          JOIN PAYMENT P ON(P.BOOK_NO = BL.BOOK_NO)
+          JOIN ATTACHMENT A ON(A.REF_NO = RI.ROOM_NO)
+         WHERE BL.USER_NO = ?
+           AND BL.BOOK_STATUS_YNC = 'N'
+           AND A.CATEGORY_NO = 4
+           AND BL.BOOK_NO = ?
+   </entry>
+   
+   <entry key="cancelHistoryInsert">
+   		INSERT
+   		  INTO CANCLE_HISTORY
+   		     ( REASON_CANCLE
+             , REFUND_STATUS
+             , CANCLE_NO
+             , PAYMENT_NO
+             , CANCLE_DATE
+             , CANCLE_AMOUNT
+   		     )
+   		VALUES
+   		     ( ?
+   		     , DEFAULT
+   		     , SQU_CANCLE_HISTORY.NEXTVAL
+   		     , ?
+   		     , SYSDATE
+   		     , ?
+   		     )
+   </entry>
+   
+   <entry key="cancelBookListUpdate">
+   		UPDATE BOOK_LIST
+   		   SET BOOK_STATUS_YNC = 'C'
+   		 WHERE USER_NO = ?
+   		   AND BOOK_NO = ?
+   </entry>
+   
+   <entry key="salesHistoryInsert">
+   		INSERT
+   		  INTO SALES_HISTORY
+   		     ( SALES_NO
+             , ACCOMO_NO
+             , ROOM_NO
+             , SALES_DATE
+             , SALES_PRICE
+             , PAYMENT_NO
+             , STL_YN
+             )
+        VALUES
+             ( SEQ_SALES_NUMBER.NEXTVAL
+             , ?
+             , ?
+             , ?
+             , ?
+             , ?
+             , DEFAULT
+             )
+   </entry>
+   
+   <entry key="reviewInfoSelect">
+   		SELECT AI.ACCOMO_NAME
+             , RI.ROOM_NAME
+             , BL.BOOK_NO
+          FROM BOOK_LIST BL
+          JOIN ROOM_INFO RI ON(RI.ROOM_NO = BL.ROOM_NO)
+          JOIN ACCOMO_INFO AI ON(RI.ACCOMO_NO = AI.ACCOMO_NO)
+         WHERE USER_NO = ?
+           AND BOOK_NO = ?
+   </entry>
+   
+   <entry key="reviewInsert">
+   		INSERT
+   		  INTO REVIEW
+   		     ( REVIEW_NO
+             , REVIEW_CONTENT
+             , STAR_POINT
+             , BOOK_NO
+             , REVIEW_TITLE
+   		     )
+   		VALUES
+   		     ( SQU_REVIEW.NEXTVAL
+   		     , ?
+   		     , ?
+   		     , ?
+   		     , ?
+   		     )
+   </entry>
+   
+   <entry key="insertReviewAttachment">
+        INSERT
+          INTO ATTACHMENT
+             ( ATTACHMENT_NO
+             , CATEGORY_NO
+             , ORIGIN_NAME
+             , SAVE_NAME
+             , SAVE_PATH
+             , FILE_TYPE
+             , THUMBNAIL_PATH
+             , ATTACHMENT_STATUS
+             , REF_NO
+             )
+        VALUES
+             ( SEQ_ATTACHMENT_NO.NEXTVAL
+              , ?
+              , ?
+              , ?
+              , ?
+              , ?
+              , ?
+              , 'Y'
+              , SQU_REVIEW.CURRVAL
+              )
+    </entry>
+    
+    <entry key="reviewHistorySelect">
+    	SELECT *
+    	  FROM REVIEW
+    	 WHERE BOOK_NO = ?   
+    </entry>
+
+</properties>

@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="selectAccomoInfo">
+        SELECT 
+               ACCOMO_NO
+             , OWNER_NO
+             , ACCOMO_NAME
+             , CEO_NAME
+             , ACCOMO_TYPE
+             , REGISTRATION_NO
+             , ACCOMO_ADDRESS
+             , ACCOMO_EMAIL
+             , ACCOMO_HOMEPAGE
+             , ACCOMO_FACILITY
+             , ACCOMO_PATH
+             , ACCOMO_NEAR
+             , ACCOMO_RULE
+             , ACCOMO_PARKING
+             , CHECK_IN
+             , CHECK_OUT
+             , PEAK_DATE_START
+             , PEAK_DATE_END 
+             , THUMBNAIL_PATH
+          FROM ACCOMO_INFO AI
+          JOIN ATTACHMENT AM ON(AI.ACCOMO_NO = AM.REF_NO)
+         WHERE ACCOMO_TYPE = ?
+           AND CATEGORY_NO = ?
+           AND AI.VISIBLE_YN = 'Y'
+    </entry>
+    <entry key="selectMinPrice">
+        SELECT
+               AI.ACCOMO_NO
+             , MIN(RI.ROOM_FEE) 최저가
+          FROM ACCOMO_INFO AI
+          JOIN ROOM_INFO RI ON(AI.ACCOMO_NO = RI.ACCOMO_NO)
+         WHERE ACCOMO_TYPE = ? 
+         GROUP BY AI.ACCOMO_NO
+    </entry>
+    <entry key="selectReviewScore">
+        SELECT
+               AI.ACCOMO_NO
+             , ROUND(AVG(RV.STAR_POINT),1) 평점
+          FROM ACCOMO_INFO AI
+          JOIN ROOM_INFO RI ON (AI.ACCOMO_NO = RI.ACCOMO_NO)
+          JOIN BOOK_LIST BL ON(RI.ROOM_NO = BL.ROOM_NO)
+          JOIN REVIEW RV ON(BL.BOOK_NO = RV.BOOK_NO)
+         WHERE ACCOMO_TYPE = ? 
+         GROUP BY AI.ACCOMO_NO
+    </entry>
+    <entry key="selectOneAccomo">
+        SELECT 
+               ACCOMO_NO
+             , OWNER_NO
+             , ACCOMO_NAME
+             , CEO_NAME
+             , ACCOMO_TYPE
+             , REGISTRATION_NO
+             , ACCOMO_ADDRESS
+             , ACCOMO_EMAIL
+             , ACCOMO_HOMEPAGE
+             , ACCOMO_FACILITY
+             , ACCOMO_PATH
+             , ACCOMO_NEAR
+             , ACCOMO_RULE
+             , ACCOMO_PARKING
+             , CHECK_IN
+             , CHECK_OUT
+             , PEAK_DATE_START
+             , PEAK_DATE_END
+             , AM.THUMBNAIL_PATH
+          FROM ACCOMO_INFO AI
+          JOIN ATTACHMENT AM ON(AI.ACCOMO_NO = AM.REF_NO) 
+         WHERE ACCOMO_NO = ?
+           AND CATEGORY_NO = ?
+    </entry>
+    <entry key="selectOneAccomoReviewScoe">
+        SELECT 
+               AI.ACCOMO_NO
+             , ROUND(AVG(RV.STAR_POINT),1) 평점
+          FROM ACCOMO_INFO AI
+          JOIN ROOM_INFO RI ON(AI.ACCOMO_NO = RI.ACCOMO_NO)
+          JOIN BOOK_LIST BL ON(RI.ROOM_NO = BL.ROOM_NO)
+          JOIN REVIEW RV ON(BL.BOOK_NO = RV.BOOK_NO)
+         WHERE AI.ACCOMO_NO = ?
+         GROUP BY AI.ACCOMO_NO
+    </entry>
+    <entry key="selectRoomList">
+        SELECT
+               ROOM_NO
+             , ACCOMO_NO
+             , ROOM_NAME
+             , ROOM_MAX
+             , ROOM_INTRO
+             , ROOM_FEE
+             , PEAK_FEE
+             , THUMBNAIL_PATH
+          FROM ROOM_INFO RI
+          JOIN ATTACHMENT AC ON(RI.ROOM_NO = AC.REF_NO)
+         WHERE ACCOMO_NO = ?
+           AND CATEGORY_NO = ?
+           AND ROOM_VISIBLE_YN = 'Y'
+    </entry>
+    <entry key="insertOwnerQnA">
+        INSERT 
+          INTO OWNER_QNA
+        VALUES (
+               SQU_OWNER_QNA.NEXTVAL
+             , ?
+             , ?
+             , ?
+             , DEFAULT
+             , ?
+             , ?
+             )    
+    </entry>
+    <entry key="selectUserPoint">
+        SELECT
+               POINT_NO
+             , USER_NO
+             , POINT
+          FROM POINT
+         WHERE USER_NO = ?      
+    </entry>
+    <entry key="selectUserCoupon">
+        SELECT
+               COUPON_NO
+             , COUPON_START
+             , COUPON_END
+             , COUPON_CONDITION
+             , COUPON_USE_YN
+             , USER_NO
+             , COUPON_NAME
+             , COUPON_DISCOUNT
+          FROM COUPON   
+         WHERE USER_NO = ?
+           AND COUPON_USE_YN = 'N'      
+    </entry>
+    <entry key="insertBookInfo">
+        INSERT
+          INTO BOOK_LIST
+        VALUES
+             (
+               SEQ_BOOK_NO.NEXTVAL
+             , ?
+             , ?
+             , ?
+             , ?
+             , DEFAULT
+             , ?
+             , ?
+             , ?
+             , ?
+             , DEFAULT
+             , ?
+             )
+    </entry>
+    <entry key="selectBookNoSequence">
+		SELECT 
+		       SEQ_BOOK_NO.CURRVAL
+		  FROM DUAL
+	</entry>
+    <entry key="selectBestReview">
+        SELECT 
+               ROWNUM
+             , V.리뷰번호
+             , V.리뷰내용
+             , V.별점
+             , V.예약번호
+             , V.리뷰제목
+             , V.좋아요
+             , V.닉네임
+          FROM (SELECT
+                       RV.REVIEW_NO 리뷰번호
+                     , RV.REVIEW_CONTENT 리뷰내용
+                     , RV.STAR_POINT 별점
+                     , RV.BOOK_NO 예약번호
+                     , RV.REVIEW_TITLE 리뷰제목
+                     , COUNT(UPDOWN_STATUS) 좋아요
+                     , UI.USER_NICKNAME 닉네임
+                  FROM REVIEW RV   
+                  JOIN REVIEW_HISTORY RVH ON(RV.REVIEW_NO = RVH.REVIEW_NO)
+                  JOIN BOOK_LIST BL ON(RV.BOOK_NO = BL.BOOK_NO)
+                  JOIN ROOM_INFO RI ON(BL.ROOM_NO = RI.ROOM_NO)
+                  JOIN USER_INFO UI ON(BL.USER_NO = UI.USER_NO)
+                 WHERE UPDOWN_STATUS = 'U'
+                   AND RI.ACCOMO_NO = ?
+                 GROUP BY RV.REVIEW_NO,RV.REVIEW_CONTENT, RV.STAR_POINT, RV.BOOK_NO, RV.REVIEW_TITLE,UI.USER_NICKNAME
+                 ORDER BY 좋아요 DESC
+               ) V
+         WHERE ROWNUM &lt;=3
+    </entry>
+    <entry key="selectUpCount">
+        SELECT
+               RVH.REVIEW_NO 리뷰번호
+             , COUNT(UPDOWN_STATUS) 좋아요
+          FROM REVIEW_HISTORY RVH
+          JOIN REVIEW RV ON (RVH.REVIEW_NO = RV.REVIEW_NO)
+          JOIN BOOK_LIST BL ON (RV.BOOK_NO = BL.BOOK_NO)
+          JOIN ROOM_INFO RI ON (BL.ROOM_NO = RI.ROOM_NO)
+         WHERE UPDOWN_STATUS = 'U'
+           AND ACCOMO_NO = ?
+         GROUP BY RVH.REVIEW_NO
+    </entry>
+    <entry key="selectDownCount">
+        SELECT
+               RVH.REVIEW_NO 리뷰번호
+             , COUNT(UPDOWN_STATUS) 싫어요
+          FROM REVIEW_HISTORY RVH
+          JOIN REVIEW RV ON (RVH.REVIEW_NO = RV.REVIEW_NO)
+          JOIN BOOK_LIST BL ON (RV.BOOK_NO = BL.BOOK_NO)
+          JOIN ROOM_INFO RI ON (BL.ROOM_NO = RI.ROOM_NO)
+         WHERE UPDOWN_STATUS = 'D'
+           AND ACCOMO_NO = ?
+         GROUP BY RVH.REVIEW_NO
+    </entry>
+    <entry key="selectAccomoReviewPicture">
+        SELECT 
+               RV.REVIEW_NO 리뷰번호
+             , AT.THUMBNAIL_PATH 사진
+          FROM REVIEW RV
+          JOIN ATTACHMENT AT ON(RV.REVIEW_NO = AT.REF_NO)
+          JOIN BOOK_LIST BL ON(RV.BOOK_NO = BL.BOOK_NO)
+          JOIN ROOM_INFO RI ON(BL.ROOM_NO = RI.ROOM_NO)
+         WHERE ACCOMO_NO = ?
+           AND AT.CATEGORY_NO = ?
+    </entry>
+    <entry key="insertPaymentInfo">
+        INSERT
+          INTO PAYMENT
+        VALUES(
+               SEQ_PAYMENT_NO.NEXTVAL
+              , ?
+              , ?
+              , ?
+              , ?
+              , ?
+              , ?
+              , ?
+              )
+    </entry>
+    <entry key="selectPaymentNoSequence">
+		SELECT 
+		       SEQ_PAYMENT_NO.CURRVAL
+		  FROM DUAL
+	</entry>
+    <entry key="insertGetPoint">
+        INSERT 
+          INTO POINT_HISTORY
+        VALUES(
+               ?
+             , SQU_POINT_HISTORY.NEXTVAL
+             , ?
+             , ?
+             , ?
+             , ?
+             , ?
+             )
+    </entry>
+    <entry key="couponUseInsert">
+        INSERT
+          INTO COUPON_USE_HISTORY
+        VALUES(
+               SQU_COUPON_USE_HISTORY.NEXTVAL
+             , ?
+             , ?
+             , ?
+             )
+    </entry>
+    <entry key="insertPointUse">
+        INSERT 
+          INTO POINT_HISTORY
+        VALUES(
+               ?
+             , SQU_POINT_HISTORY.NEXTVAL
+             , ?
+             , ?
+             , ?
+             , ?
+             , ?
+             )
+    </entry>
+    <entry key="selectRoomInfo">
+        SELECT
+               ROOM_NO
+             , ACCOMO_NO
+             , ROOM_NAME
+             , ROOM_MAX
+             , ROOM_INTRO
+             , ROOM_FEE
+             , PEAK_FEE
+          FROM ROOM_INFO
+         WHERE ROOM_NO = ?    
+    </entry>
+    <entry key="selectCouponDiscount">
+        SELECT
+               COUPON_DISCOUNT 할인금액
+          FROM COUPON
+         WHERE COUPON_NO = ?      
+    </entry>
+    <entry key="selectRivewStatus">
+        SELECT 
+               REVIEW_NO 리뷰번호
+             , UPDOWN_STATUS 상태
+          FROM REVIEW_HISTORY
+         WHERE USER_NO=?     
+    </entry>
+    <entry key="selectReviewHistory">
+        SELECT
+               REVIEW_HISTORY_NO  이력번호
+          FROM REVIEW_HISTORY
+         WHERE USER_NO = ? 
+           AND REVIEW_NO = ?       
+    </entry>
+    <entry key="insertReviewHistory">
+        INSERT
+          INTO REVIEW_HISTORY
+        VALUES(
+               SEQ_RVW_HIS.NEXTVAL
+             , ?
+             , ?
+             , ?
+              )
+    </entry>
+    <entry key="updateReviewHistory">
+        UPDATE REVIEW_HISTORY
+           SET UPDOWN_STATUS = ?
+         WHERE REVIEW_HISTORY_NO = ?
+    </entry>
+    <entry key="selectOneRvUpCnt">
+        SELECT
+               COUNT(UPDOWN_STATUS) 업
+          FROM REVIEW_HISTORY
+         WHERE UPDOWN_STATUS = 'U' 
+           AND REVIEW_NO = ?
+         GROUP BY REVIEW_NO
+    </entry>
+    <entry key="selectOneRvDwnCnt">
+        SELECT
+               COUNT(UPDOWN_STATUS) 다운
+          FROM REVIEW_HISTORY
+         WHERE UPDOWN_STATUS = 'D' 
+           AND REVIEW_NO = ?
+         GROUP BY REVIEW_NO
+    </entry>
+</properties>

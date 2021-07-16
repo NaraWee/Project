@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+ <mapper namespace="com.nobanryeo.petpal.user.adopt.dao.MissingMapper">
+ 	
+	<resultMap type="MissingPictureDTO" id="missingResultMap">
+		<result column="BOARD_CODE" property="boardCode"/>
+		<result column="BOARD_DATE" property="boardDate"/>
+		<result column="MISSING_DATE" property="missingDate"/>
+		<result column="MISSING_AREA" property="missingArea"/>
+		<result column="MISSING_PLACE" property="missingPlace"/>
+		<result column="MISSING_PHONE" property="missingPhone"/>
+		<result column="MISSING_BREED" property="missingBreed"/>
+		<result column="MISSING_COLOR" property="missingColor"/>
+		<result column="MISSING_GENDER" property="missingGender"/>
+		<result column="MISSING_AGE" property="missingAge"/>
+		<result column="MISSING_WEIGTH" property="mssingWeight"/>
+		<result column="MISSING_CHARACTER" property="missingCharacter"/>
+		<result column="MISSING_REQUEST" property="missingRequest"/>
+		<result column="MISSING_DELETE_YN" property="missingDeleteYN"/>
+		<result column="STATE_NAME" property="stateName"/>
+		<result column="USER_CODE" property="userCode"/>
+		<result column="DOG_OR_CAT" property="dogOrcat"/>
+  		<result column="USER_NIKNAME" property="userNickname"/>		
+		<result column="PICTURE_CODE" property="pictureCode"/>
+  		<result column="PICTURE_URL" property="pictureURL"/>
+  		<result column="PICTURE_DELETE_YN" property="pictureDeleteYN"/>
+  		<result column="PICTURE_NAME" property="pictureName"/>
+  		<result column="PICTURE_NEW_NAME" property="pictureNewName"/>
+  		<result column="PICTURE_UTIL_PATH" property="pictureUtilPath"/>
+	</resultMap>
+	
+	 <resultMap type="MissingDTO" id="missingResultset">
+  		<id column="BOARD_CODE" property="boardCode"/>
+  		<result column="BOARD_DATE" property="boardDate"/>
+  		<result column="MISSING_DATE" property="missingDate"/>
+  		<result column="MISSING_AREA" property="area"/>
+  		<result column="MISSING_PLACE" property="place"/>
+  		<result column="MISSING_PHONE" property="phone"/>
+  		<result column="MISSING_BREED" property="breed"/>
+  		<result column="MISSING_GENDER" property="gender"/>
+  		<result column="USER_NIKNAME" property="userNickname"/>
+  		<result column="MISSING_AGE" property="age"/>
+  		<result column="MISSING_WEIGTH" property="weigth"/>
+  		<result column="MISSING_CHARACTER" property="character"/>
+  		<result column="MISSING_REQUEST" property="request"/>
+  		<result column="MISSING_DELETE_YN" property="deleteYn"/>
+  		<result column="STATE_CODE" property="stateCode"/>
+  		<result column="USER_CODE" property="userCode"/>
+  		<result column="DOG_OR_CAT" property="dOc"/>
+  		<result column="MISSING_COLOR" property="color"/>
+  	</resultMap>	
+	
+	<resultMap type="PictureDTO" id="pictureInsertResultset">
+  		<id column="PICTURE_CODE" property="pictureCode"/>
+  		<result column="PICTURE_NAME" property="pictureName"/>
+  		<result column="PICTURE_URL" property="pictureURL"/>
+  		<result column="PICTURE_UPLOAD_DATE" property="pictureUploadDate"/>
+  		<result column="PICTURE_DELETE_YN" property="pictureDeleteYN"/>
+  		<result column="PICTURE_NEW_NAME" property="pictureNewName"/>
+  		<result column="PICTURE_UTIL_PATH" property="pictureUtilPath"/>
+  	</resultMap>
+	
+	<resultMap type="AdoptReplyDTO" id="replyResultset">
+		<result column="REPLY_CODE" property="replyCode"/>
+		<result column="REPLY_CONTENT" property="replyContent"/>
+		<result column="REPLY_DATE" property="replyDate"/>
+		<result column="REPLY_DELETE_YN" property="replyDeleteYN"/>
+		<result column="REPORT_YN" property="reportYN"/>
+		<result column="USER_NIKNAME" property="userNickname"/>
+		<result column="replyUser" property="replyUserCode"/>
+		<result column="boardUser" property="boardUserCode"/>
+		<result column="BOARD_CODE" property="boardCode"/>
+		<result column="REPLY_REPORT_TITLE" property="replyReportTitle"/>
+		<result column="REPLY_REPORT_CONTENT" property="replyReportContent"/>
+		<result column="REPLY_REPORT_DATE" property="replyReportDate"/>
+		<result column="DECISION_CODE" property="decisionCode"/>
+	</resultMap>
+	
+	<resultMap id="messageResultSet" type="MessageTableDTO">
+		<id column="MESSAGE_CODE" property="messageCode"/>
+		<result column="MESSAGE_CONTENT" property="messageContent"/>
+		<result column="MESSAGE_DATE" property="messageDate"/>
+		<result column="USER_CODE1" property="userCode1"/>
+		<result column="USER_CODE" property="userCode"/>
+		<result column="SEND_NICKNAME" property="sendUserNick"/>
+		<result column="RECEIVE_NICKNAME" property="receiveUserNick"/>
+	</resultMap>
+ 
+ 	<resultMap id="reportResultSet" type="FreeBoardReportDTO">
+		<id column="REPORT_CODE" property="reportCode"/>
+		<result column="REPORT_TITLE" property="reportTitle"/>
+		<result column="REPORT_CONTENT" property="reportContent"/>
+		<result column="REPORT_DATE" property="reportDate"/>
+		<result column="DECISION_CODE" property="decisionCode"/>
+		<result column="USER_CODE" property="userCode"/>
+		<result column="BOARD_CODE" property="boardCode"/>
+	</resultMap>
+	
+ 	<select id="selectMissingList" parameterType="MissingPictureDTO" resultMap="missingResultMap" >
+ 		SELECT
+ 		      M.BOARD_CODE
+ 		    , M.BOARD_DATE
+            , M.MISSING_DATE
+			, M.MISSING_AREA
+			, M.MISSING_PLACE
+			, M.MISSING_BREED
+			, M.MISSING_GENDER
+			, M.MISSING_COLOR
+			, M.MISSING_AGE
+			, M.MISSING_WEIGTH
+			, M.MISSING_CHARACTER
+			, M.MISSING_REQUEST
+			, M.MISSING_DELETE_YN
+			, S.STATE_NAME
+			, M.USER_CODE
+			, M.DOG_OR_CAT
+			, P.PICTURE_UTIL_PATH
+			, P.PICTURE_DELETE_YN
+		    , P.PICTURE_CODE
+		    , U.USER_NIKNAME
+		 FROM MISSING_BOARD M
+		 JOIN MISSING_PICTURE_MANAGE MP ON (M.BOARD_CODE = MP.BOARD_CODE)
+		 JOIN PICTURE_TABLE P ON (P.PICTURE_CODE = MP.PICTURE_CODE)
+		 JOIN USER_TABLE U ON (U.USER_CODE = M.USER_CODE)
+         JOIN STATE_TABLE S ON(S.STATE_CODE = M.STATE_CODE)
+		WHERE M.MISSING_DELETE_YN = 'N'
+		  AND P.PICTURE_DELETE_YN = 'N'
+        ORDER BY M.BOARD_DATE DESC
+ 	</select>
+ 
+ 	<insert id="insertMissingInfo" parameterType="MissingDTO">
+ 		INSERT
+ 		  INTO MISSING_BOARD
+ 		VALUES
+ 		(
+ 		  MISSING_BOARD_SEQ.NEXTVAL
+	    , #{missingDate}
+	    , #{area}
+	    , #{place}
+	    , #{phone}
+	    , #{breed}
+	    , #{gender}
+	    , #{age}
+	    , #{weigth}
+	    , #{character}
+	    , #{request}
+	    , 'N'
+	    ,  1
+	    , #{userCode}
+	    , #{dOc}
+	    , #{color}
+	    , SYSDATE
+ 		)
+ 		<selectKey keyProperty="boardCode" order="AFTER" resultType="int">
+ 			SELECT
+ 			      MISSING_BOARD_SEQ.CURRVAL
+ 			  FROM DUAL
+ 		</selectKey>
+ 		
+ 	</insert>
+ 	<insert id="insertPicture" parameterType="PictureDTO" >
+ 		INSERT 
+	  	 INTO PICTURE_TABLE
+	  	VALUES
+	  	(
+	  	  PIC_CODE_SEQ.NEXTVAL
+	  	, #{pictureName}
+	  	, #{pictureURL}
+	  	, SYSDATE
+	  	, 'N'
+	  	, #{pictureNewName}
+	  	, #{pictureUtilPath}
+	  	)
+ 	</insert>
+ 	
+ 	<insert id="insertMidTab" >
+ 		<selectKey keyProperty="pictureCode" order="BEFORE" resultType="int">
+	  	SELECT
+	  	      PIC_CODE_SEQ.CURRVAL
+	  	  FROM DUAL
+	  </selectKey>
+ 	    INSERT
+	  	INTO MISSING_PICTURE_MANAGE
+	  	(
+	  	  BOARD_CODE
+	  	, PICTURE_CODE
+	  	)
+	  	VALUES
+	  	(
+	  	#{boardCode}
+	   ,#{pictureCode}
+	  	)
+ 	</insert>
+ 	
+ 	<select id="selectMissingDetail" parameterType="int" resultMap="missingResultset">
+ 		SELECT
+ 		      M.BOARD_CODE
+ 		    , M.BOARD_DATE
+            , M.MISSING_DATE
+			, M.MISSING_AREA
+			, M.MISSING_PLACE
+			, M.MISSING_PHONE
+			, M.MISSING_BREED
+			, M.MISSING_GENDER
+			, M.MISSING_COLOR
+			, M.DOG_OR_CAT
+			, M.MISSING_AGE
+			, M.MISSING_WEIGTH
+			, M.MISSING_CHARACTER
+			, M.MISSING_REQUEST
+			, M.MISSING_DELETE_YN
+			, M.STATE_CODE
+			, M.USER_CODE
+			, U.USER_NIKNAME
+		FROM MISSING_BOARD M
+		JOIN USER_TABLE U ON (U.USER_CODE = M.USER_CODE)
+	   WHERE M.MISSING_DELETE_YN = 'N'
+	     AND M.BOARD_CODE = #{boardCode}
+ 	</select>
+ 	
+ 	<select id="selectMissingDetailPicture" parameterType="int" resultMap="pictureInsertResultset">
+ 		SELECT 
+               P.PICTURE_CODE
+              ,P.PICTURE_UTIL_PATH
+              ,p.PICTURE_NEW_NAME
+           FROM PICTURE_TABLE P
+           JOIN MISSING_PICTURE_MANAGE MP ON (P.PICTURE_CODE = MP.PICTURE_CODE)
+           JOIN MISSING_BOARD M ON (M.BOARD_CODE = MP.BOARD_CODE)
+          WHERE M.BOARD_CODE = #{boardCode}
+            AND P.PICTURE_DELETE_YN = 'N'
+ 	</select>
+ 	
+ 	<select id="selectAllMissingReply" parameterType="_int" resultMap="replyResultset">
+	  	SELECT 
+		      R.REPLY_CODE
+		    , R.REPLY_CONTENT
+		    , R.REPLY_DATE
+		    , R.REPLY_DELETE_YN
+		    , R.REPORT_YN
+		    , R.USER_CODE as replyUser
+		    , U.USER_NIKNAME
+		    , M.BOARD_CODE
+		    , M.USER_CODE as boardUser
+		  FROM REPLY_MANAGE R
+		  JOIN MISSING_BOARD_REPLY MB ON(R.REPLY_CODE = MB.REPLY_CODE)
+		  JOIN MISSING_BOARD M ON (M.BOARD_CODE =  MB.BOARD_CODE)
+		  JOIN USER_TABLE U ON (U.USER_CODE = R.USER_CODE)
+		 WHERE M.BOARD_CODE = #{boardCode}
+		 ORDER BY R.REPLY_DATE DESC
+		
+	  </select>
+	  
+	   <insert id="insertReply" parameterType="AdoptReplyDTO">
+	  	INSERT
+	  	  INTO REPLY_MANAGE 
+	  	VALUES
+	  	(
+	  		REPLY_CODE_SEQ.NEXTVAL
+		  , #{replyContent}
+          , SYSDATE
+          , 'N'
+          , 'N'
+          , #{replyUserCode}
+	  	)
+	  </insert>
+	  
+	  <insert id="insertReplyBoard" parameterType="AdoptReplyDTO">
+		  <selectKey keyProperty="replyCode" order="BEFORE" resultType="int">
+		  	SELECT
+		  	      REPLY_CODE_SEQ.CURRVAL
+		  	  FROM DUAL
+		  </selectKey>
+		  INSERT
+		    INTO MISSING_BOARD_REPLY
+		  VALUES
+		  (
+		    #{boardCode}
+		  , #{replyCode}
+		  , #{replyUserCode}
+		  )
+	  </insert>
+	  
+	  <insert id="insertMessage" parameterType="MessageTableDTO">
+		  INSERT
+		  	  INTO MESSAGE_TABLE
+		  	VALUES
+		  	(
+			  MESSAGE_CODE_SEQ.NEXTVAL
+			, #{messageContent}
+			, SYSDATE
+			, #{userCode1}
+			, #{userCode}
+			, #{sendUserNick}
+			, #{receiveUserNick}
+		  	)
+	  
+	  </insert>
+	  <insert id="insertBoardReport" parameterType="FreeBoardReportDTO">
+	  	INSERT
+	  	  INTO REPORT_MANAGE
+	  	VALUES
+	  	(
+	  	 REPORT_MANAGE_SEQ.NEXTVAL
+	   , #{reportTitle}
+	   , #{reportContent}
+	   , SYSDATE
+	   , DEFAULT
+	   , #{userCode}
+	  	)
+	  
+	  </insert>
+	  <insert id="insertBoardReportMid" parameterType="FreeBoardReportDTO">
+	  	<selectKey keyProperty="reportCode" order="BEFORE" resultType="int">
+	  		SELECT
+		  	      REPORT_MANAGE_SEQ.CURRVAL
+		  	  FROM DUAL
+	  	</selectKey>
+	  	INSERT
+	  	  INTO MISSING_BOARD_REPORT
+	  	VALUES
+	  	(
+	  	 #{boardCode}
+	   , #{reportCode}
+	  	)
+	  </insert>
+	  <insert id="insertReplyReport" parameterType="AdoptReplyDTO">
+	    <selectKey keyProperty="replyReportTitle" order="BEFORE" resultType="String">
+	    	SELECT
+	    	       REPLY_CONTENT
+	    	  FROM REPLY_MANAGE
+	    	 WHERE REPLY_CODE = #{replyCode}
+	    </selectKey>
+	  	INSERT
+	  	  INTO REPLY_REPORT_TABLE
+	  	VALUES
+	  	 (
+	  	  #{boardUserCode}
+	  	, #{replyCode}
+	  	, #{replyUserCode}
+	  	, #{replyReportTitle}
+	  	, #{replyReportContent}
+	  	, SYSDATE
+	  	, DEFAULT
+	  	 )
+	  </insert>
+	  
+	  <select id="selectSearchList" parameterType="String" resultMap="missingResultMap">
+		  SELECT
+	 		      M.BOARD_CODE
+	 		    , M.BOARD_DATE
+	            , M.MISSING_DATE
+				, M.MISSING_AREA
+				, M.MISSING_PLACE
+				, M.MISSING_BREED
+				, M.MISSING_GENDER
+				, M.MISSING_COLOR
+				, M.MISSING_AGE
+				, M.MISSING_WEIGTH
+				, M.MISSING_CHARACTER
+				, M.MISSING_REQUEST
+				, M.MISSING_DELETE_YN
+				, S.STATE_NAME
+				, M.USER_CODE
+				, M.DOG_OR_CAT
+				, P.PICTURE_UTIL_PATH
+				, P.PICTURE_DELETE_YN
+			    , P.PICTURE_CODE
+			    , U.USER_NIKNAME
+			 FROM MISSING_BOARD M
+			 JOIN MISSING_PICTURE_MANAGE MP ON (M.BOARD_CODE = MP.BOARD_CODE)
+			 JOIN PICTURE_TABLE P ON (P.PICTURE_CODE = MP.PICTURE_CODE)
+			 JOIN USER_TABLE U ON (U.USER_CODE = M.USER_CODE)
+	         JOIN STATE_TABLE S ON(S.STATE_CODE = M.STATE_CODE)
+			WHERE M.MISSING_DELETE_YN = 'N'
+			  AND P.PICTURE_DELETE_YN = 'N'
+			  AND M.MISSING_AREA LIKE '%' ||#{keyword}|| '%'
+			  OR M.MISSING_PLACE LIKE '%' ||#{keyword}|| '%'
+	        ORDER BY M.BOARD_DATE DESC
+	  
+	  </select>
+	  
+	  <update id="putMissingStatus" parameterType="int">
+	  	  UPDATE MISSING_BOARD
+	         SET STATE_CODE = 2
+	       WHERE BOARD_CODE = #{boardCode}
+	  
+	  </update>
+	  
+	  <select id="selectPicture" parameterType="PictureDTO" resultMap="pictureInsertResultset">
+	        SELECT 
+			       PICTURE_CODE
+			  FROM MISSING_PICTURE_MANAGE
+			 WHERE BOARD_CODE = #{boardCode}
+	  </select>
+	  
+	  <update id="deletePicture" parameterType="PictureDTO">
+	  		UPDATE PICTURE_TABLE P
+   			   SET P.PICTURE_DELETE_YN = 'Y'
+   			 WHERE P.PICTURE_CODE = #{pictureCode}
+	  </update>
+	  
+	  <update id="updateMissingInfo" parameterType="MissingDTO">
+	       UPDATE MISSING_BOARD M
+	          SET 
+		          M.BOARD_DATE = #{missingDate}
+	            , M.MISSING_DATE = #{missingDate}
+				, M.MISSING_AREA = #{area}
+				, M.MISSING_PLACE = #{place}
+				, M.MISSING_PHONE = #{phone}
+				, M.MISSING_BREED = #{breed}
+				, M.MISSING_GENDER = #{gender}
+				, M.MISSING_AGE = #{age}
+				, M.MISSING_WEIGTH = #{weigth}
+				, M.MISSING_CHARACTER = #{character}
+				, M.MISSING_REQUEST = #{request}
+				, M.MISSING_COLOR = #{color}
+				, M.DOG_OR_CAT = #{dOc}
+		   WHERE M.BOARD_CODE = #{boardCode}
+	   
+	  </update>
+ </mapper> 

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment/>
+	<entry key="selectNotice">
+		SELECT
+			   NOTICE_TITLE
+		     , NOTICE_CONTENT
+		     , NOTICE_WRITE_DATE
+		     , NOTICE_NO
+		  FROM NOTICE
+		 WHERE WRITER = '업체' 
+	     ORDER BY NOTICE_NO DESC
+	</entry>
+	
+	<entry key="selectQuestion">
+       SELECT  A.RNUM
+             , A.ADMIN_QNA_NO
+		     , A.ADMIN_QNA_TITLE
+		     , A.ADMIN_QNA_DATE
+		     , A.ADMIN_ANSWER_YN
+		     , A.ADMIN_QNA_WRITER
+		     , A.ADMIN_QNA_CONTENT       
+          FROM (SELECT ROWNUM RNUM
+             , B.ADMIN_QNA_NO
+		     , B.ADMIN_QNA_TITLE
+		     , B.ADMIN_QNA_DATE
+		     , B.ADMIN_ANSWER_YN
+		     , B.ADMIN_QNA_WRITER
+		     , B.ADMIN_QNA_CONTENT
+          FROM (SELECT ADMIN_QNA_NO
+		     , ADMIN_QNA_TITLE
+		     , ADMIN_QNA_DATE
+		     , ADMIN_ANSWER_YN
+		     , ADMIN_QNA_WRITER
+		     , ADMIN_QNA_CONTENT
+          FROM ADMIN_QNA
+		 WHERE ADMIN_QNA_WRITER = 'O'
+		   AND MEMBER_NO = ?
+		 ORDER BY ADMIN_QNA_NO DESC) B) A
+    WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectContent">
+		SELECT A.ADMIN_QNA_TITLE
+		     , A.ADMIN_QNA_DATE
+		     , A.ADMIN_ANSWER_YN
+		     , A.ADMIN_QNA_CONTENT
+<!-- 		     , B.ANSWER_CONTENT
+		     , B.ANSWER_DATE -->
+		  FROM ADMIN_QNA A
+<!-- 		  JOIN ADMIN_ANSWER B ON(B.ADMIN_QNA_NO = A.ADMIN_QNA_NO)
+ -->		 WHERE ADMIN_QNA_WRITER = 'O'
+		   AND A.MEMBER_NO = ?
+		   AND A.ADMIN_QNA_NO = ?     
+	</entry>
+	
+ 	<entry key="selectAnswer">
+		SELECT 
+		       B.ANSWER_CONTENT
+		     , B.ANSWER_DATE
+		  FROM ADMIN_ANSWER B
+		  JOIN ADMIN_QNA A ON(A.ADMIN_QNA_NO = B.ADMIN_QNA_NO)
+		 WHERE ADMIN_QNA_WRITER = 'O'
+		   AND A.MEMBER_NO = ?
+		   AND A.ADMIN_QNA_NO = ?     
+	</entry>
+	
+	<entry key="insertQuestion">
+		INSERT INTO ADMIN_QNA
+		VALUES
+		(
+		  SQU_ADMIN_QNA.NEXTVAL
+		, ?
+		, SYSDATE
+		, DEFAULT
+		, 'O'
+		, ?
+		, ?
+		)
+	</entry>
+	
+	<entry key="selectTotalCount">
+        SELECT 
+               COUNT(*) 
+          FROM ADMIN_QNA
+         WHERE ADMIN_QNA_WRITER = 'O' 
+           AND MEMBER_NO = ?
+	</entry>
+	
+</properties>

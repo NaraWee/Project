@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nobanryeo.petpal.admin.ask.dao.AskMapper">
+
+<resultMap id="askResultSet" type="AskDTO">
+		<id column="BOARD_CODE" property="boardCode" />
+		<result column="BOARD_TITLE" property="boardTitle" />
+		<result column="BOARD_CONTENT" property="boardContent" />
+		<result column="QUESTION_TYPE" property="questionType" />
+		<result column="BOARD_POST_DATE" property="postDate" />
+		<result column="USER_ID" property="userId" />
+		<result column="STATE_NAME" property="state" />
+	</resultMap>
+<resultMap id="askDetailSet" type="AskDetailDTO">
+		<id column="BOARD_CODE" property="boardCode" />
+		<result column="USER_ID" property="userId" />
+		<result column="USER_NAME" property="userName" />
+		<result column="BOARD_TITLE" property="boardTitle" />
+		<result column="BOARD_POST_DATE" property="postDate" />
+		<result column="BOARD_CONTENT" property="boardContent" />
+		<result column="ADMIN_REPLY_CONTENT" property="replyContent" />
+		
+	</resultMap>
+	<select id="selectListCount" resultType="int">
+	   SELECT COUNT(*) FROM QUESTION_BOARD
+	   <where>
+		<if test='category == "1"'>
+		QUESTION_TYPE = 1
+		</if>
+		<if test='category == "2"'>
+		QUESTION_TYPE = 2
+		</if>
+	   </where>
+	
+	</select>	
+	
+	<select id="selectSearchCount" resultType="int">
+	   SELECT COUNT(*) FROM QUESTION_BOARD A
+	   
+	   	
+	   	<if test='searchCondition == "userId"'>
+	   	JOIN USER_TABLE B ON(A.USER_CODE = B.USER_CODE)
+		WHERE B.USER_ID LIKE '%' || #{searchValue} || '%' 
+		
+		</if>
+		<if test='searchCondition == "boardTitle"'>
+		WHERE A.BOARD_TITLE LIKE '%' || #{searchValue} || '%' 
+		</if>
+		<if test='category == "1"'>
+		AND A.QUESTION_TYPE = 1
+
+		</if>
+		<if test='category == "2"'>
+		AND A.QUESTION_TYPE = 2
+		</if>
+		
+	   
+		
+	
+	</select>	
+	
+	<select id="selectList" resultMap="askResultSet" parameterType="AskDTO">
+			SELECT
+            A.RNUM,
+            A.BOARD_CODE,
+            A.BOARD_TITLE,
+		    A.BOARD_CONTENT,
+		    A.QUESTION_TYPE,
+		    A.BOARD_POST_DATE,
+		    A.STATE_NAME,
+		    A.USER_ID
+            FROM (SELECT ROWNUM RNUM,
+                                B.BOARD_CODE,
+                                B.BOARD_TITLE,
+                                B.BOARD_CONTENT,
+                                B.QUESTION_TYPE,
+                                B.BOARD_POST_DATE,
+                                B.STATE_NAME,
+                                B.USER_ID
+                                FROM (SELECT 
+                                            C.BOARD_CODE,
+                                		    C.BOARD_TITLE,
+                                            C.BOARD_CONTENT,
+                                            C.QUESTION_TYPE,
+                                            C.BOARD_POST_DATE,
+                                            D.STATE_NAME,
+                                            E.USER_ID
+                                            FROM QUESTION_BOARD C
+                                            
+                                           
+                                            JOIN STATE_TABLE D ON(C.STATE_CODE = D.STATE_CODE)
+                                            JOIN USER_TABLE E ON(C.USER_CODE = E.USER_CODE)
+                                             <where>
+											<if test='category == "1"'>
+											C.QUESTION_TYPE = 1
+											</if>
+											<if test='category == "2"'>
+											C.QUESTION_TYPE = 2
+											</if>
+										   </where>
+                                            ORDER BY C.BOARD_CODE DESC
+                                            
+                                    )B
+                        )A
+                        WHERE A.RNUM BETWEEN #{start} AND #{end}
+	</select>
+	
+	<select id="selectSearchAsk" resultMap="askResultSet" parameterType="AskDTO">
+			SELECT
+            A.RNUM,
+            A.BOARD_CODE,
+            A.BOARD_TITLE,
+		    A.BOARD_CONTENT,
+		    A.QUESTION_TYPE,
+		    A.BOARD_POST_DATE,
+		    A.STATE_NAME,
+		    A.USER_ID
+            FROM (SELECT ROWNUM RNUM,
+                                B.BOARD_CODE,
+                                B.BOARD_TITLE,
+                                B.BOARD_CONTENT,
+                                B.QUESTION_TYPE,
+                                B.BOARD_POST_DATE,
+                                B.STATE_NAME,
+                                B.USER_ID
+                                FROM (SELECT 
+                                            C.BOARD_CODE,
+                                		    C.BOARD_TITLE,
+                                            C.BOARD_CONTENT,
+                                            C.QUESTION_TYPE,
+                                            C.BOARD_POST_DATE,
+                                            D.STATE_NAME,
+                                            E.USER_ID
+                                            FROM QUESTION_BOARD C
+                                            JOIN STATE_TABLE D ON(C.STATE_CODE = D.STATE_CODE)
+                                            JOIN USER_TABLE E ON(C.USER_CODE = E.USER_CODE)
+                                            <where>
+							                    <if test='category == "1"'>
+											     	C.QUESTION_TYPE = 1
+											    </if>
+											    <if test='category == "2"'>
+											     	C.QUESTION_TYPE = 2
+											    </if>
+											    <if test='searchCondition == "userId"'>
+												AND E.USER_ID LIKE '%' || #{searchValue} || '%' 
+												</if>
+												<if test='searchCondition == "boardTitle"'>
+												AND C.BOARD_TITLE LIKE '%' || #{searchValue} || '%' 
+												</if>
+										   </where>
+                                            
+                                            
+											<choose>
+											<when test="sortValue == 1">
+												ORDER BY D.STATE_NAME DESC ,C.BOARD_CODE DESC
+											
+											</when>
+											<when test="sortValue == 2">
+												ORDER BY D.STATE_NAME ASC ,C.BOARD_CODE DESC
+											</when>
+											<otherwise>
+												ORDER BY C.BOARD_CODE DESC
+											</otherwise>
+											</choose>
+                                            
+                                    )B
+                                    
+                                    
+                        )A
+                        WHERE A.RNUM BETWEEN #{start} AND #{end}
+	</select>
+		<select id="selectListDetail" resultMap="askDetailSet" parameterType="AskDetailDTO">
+			SELECT
+		A.BOARD_CODE,
+	    B.USER_ID,
+	    B.USER_NAME,
+	    A.BOARD_TITLE,
+	    A.BOARD_POST_DATE,
+	    A.BOARD_CONTENT,
+	    A.ADMIN_REPLY_CONTENT
+	    FROM QUESTION_BOARD A
+	    JOIN USER_TABLE B ON(A.USER_CODE = B.USER_CODE)
+	    WHERE A.BOARD_CODE =#{boardCode} 
+	</select>
+	
+	<update id="updateReply" parameterType="AskDetailDTO">
+		UPDATE QUESTION_BOARD 
+		   SET 
+			   ADMIN_REPLY_CONTENT = #{ message }
+	     WHERE BOARD_CODE = #{ boardCode }
+	 </update>
+	 <update id="updateState">
+	 	UPDATE QUESTION_BOARD 
+		   SET 
+			   STATE_CODE = 2
+	     WHERE BOARD_CODE = #{ boardCode }
+	 
+	 
+	 </update>
+	
+</mapper>

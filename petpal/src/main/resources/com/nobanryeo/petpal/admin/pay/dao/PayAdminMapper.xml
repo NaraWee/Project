@@ -1,0 +1,1105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nobanryeo.petpal.admin.pay.dao.PayAdminMapper">
+
+ <resultMap id="adAdmin" type="com.nobanryeo.petpal.admin.dto.AdAdminDTO">
+	  	<id property="adCode" column="AD_CODE"/>
+	  	<result property="adTitle" column="AD_TITLE"/>
+	  	<result property="adContent" column="AD_CONTENT"/>
+	  	<result property="companyNumber" column="COMPANY_NUMBER"/>
+	  	<result property="applyDate" column="APPLY_DATE"/>
+	  	<result property="stateCode" column="STATE_CODE"/>
+	  	<result property="adTypeCode" column="AD_TYPE_CODE"/>
+	  	<result property="postStartDate" column="POST_START_DATE"/>
+	  	<result property="postEndDate" column="POST_END_DATE"/>
+	  	<result property="postYn" column="POST_YN"/>
+	  	<result property="payDate1st" column="PAY_DATE_1ST"/>
+	  	<result property="payDate2nd" column="PAY_DATE_2ND"/>
+	  	<result property="cancelApplyDate" column="CANCEL_APPLY_DATE"/>
+	  	<result property="companyName" column="COMPANY_NAME"/>
+		<result property="companyPhone" column="COMPANY_PHONE"/>
+		<result property="companyEmail" column="COMPANY_EMAIL"/>
+		<result property="companyLocation" column="COMPANY_LOCATION"/>
+		<result property="leaderName" column="LEADER_NAME"/>
+	  	<result property="refundYn" column="REFUND_YN"/>
+	  	<result property="clickNum" column="CLICK_NUM"/>
+	  	<result property="price2nd" column="PRICE_2ND"/>
+	  	<result property="payUntilDate" column="PAY_UNTIL_DATE"/>
+	  	<result property="payDate" column="PAY_DATE"/>
+	  	<result property="payStatus" column="PAY_STATUS"/>
+	  	<result property="payNewStatus" column="PAY_NEW_STATUS"/>
+	  	<result property="taxBillDate" column="TAX_BILL_DATE"/>
+	  	<result property="taxPrice" column="TAX_PRICE"/>
+	  	<result property="calEndDate" column="CAL_END_DATE"/>
+	  	<result property="calApplyDate" column="CAL_APPLY_DATE"/>
+	  	<result property="industry" column="INDUSTRY"/>
+	  	<result property="industryDetail" column="INDUSTRY_DETAIL"/>
+	  	
+	  	
+	  	<!-- 유저코드에 대한 유저이름 가져옴 (유저코드가 매개) -->
+	  	<!-- 하나의 유저코드는 하나의 유저명만 가질 수 있음 -->	  
+	  	<association property="user" javaType="com.nobanryeo.petpal.user.dto.UserInfoDTO">
+	  		<id property="code" column="USER_CODE"/>
+			<result property="name" column="USER_NAME"/>
+			<result property="id" column="USER_ID"/>
+		</association>
+		 <association property="decision" javaType="com.nobanryeo.petpal.admin.dto.DecisionDTO">
+	   	 <id property="decisionCode" column="DECISION_CODE"/>
+	     <result property="decisionDate" column="DECISION_DATE"/>
+   	     <result property="decisionReason" column="DECISION_REASON"/>
+       </association>
+	  </resultMap>
+
+	<!-- 총 광고 결제 관리 갯수 조회 -->
+	 <select id="selectAdPayList" resultType="int" parameterType="AdminPageInfoDTO">
+		SELECT COUNT(*)
+		FROM AD_APPLY_TABLE A
+		LEFT JOIN DECISION_TABLE B ON A.DECISION_CODE = B.DECISION_CODE
+		<choose>
+         <when test='category == "1"'>
+         WHERE (A.STATE_CODE = 2
+		  AND (A.CANCEL_APPLY_DATE IS NULL
+		  AND A.PAY_DATE_1ST IS NULL
+		  <![CDATA[
+		  AND TRUNC(SYSDATE) - TRUNC(B.DECISION_DATE) <= 3)
+		  ]]>
+		   OR (A.PAY_DATE_1ST IS NOT NULL 
+          AND A.PAY_DATE_2ND IS NULL
+           <![CDATA[
+          AND TRUNC(SYSDATE) - TRUNC(A.POST_END_DATE) <= 7))
+           ]]>
+          AND REFUND_YN = 'N'
+         </when>
+         <when test='category == "2"'>
+          WHERE (( A.STATE_CODE = 2 OR A.STATE_CODE = 4)
+          AND (A.PAY_DATE_1ST IS NOT NULL
+           OR A.PAY_DATE_2ND IS NOT NULL))
+          AND REFUND_YN = 'N'
+         </when>	
+         <when test='category =="3"'>
+          WHERE ( A.STATE_CODE = 2
+		  AND (A.CANCEL_APPLY_DATE IS NULL
+		  AND A.PAY_DATE_1ST IS NULL
+		  <![CDATA[
+		  AND TRUNC(SYSDATE) - TRUNC(B.DECISION_DATE) > 3)
+		   ]]>
+		   OR (A.PAY_DATE_1ST IS NOT NULL 
+          AND A.PAY_DATE_2ND IS NULL
+          <![CDATA[
+          AND TRUNC(SYSDATE) - TRUNC(A.POST_END_DATE) > 7))
+          ]]>
+          AND REFUND_YN = 'N'
+         </when>
+         <when test='category=="4"'>
+         WHERE (A.STATE_CODE = 4 
+          AND A.PAY_DATE_1ST IS NULL
+          <![CDATA[
+          AND (TRUNC(A.CANCEL_APPLY_DATE) - TRUNC(B.DECISION_DATE) <= 3))
+          ]]>
+          AND REFUND_YN = 'N'
+         </when>
+         <when test='category=="5"'>
+         WHERE REFUND_YN = 'Y'
+         </when>
+         <otherwise>
+		WHERE ((A.STATE_CODE = 2
+		  AND (A.CANCEL_APPLY_DATE IS NULL
+		  AND A.PAY_DATE_1ST IS NULL
+		  <![CDATA[
+		  AND TRUNC(SYSDATE) - TRUNC(B.DECISION_DATE) <= 3)
+		     ]]>
+		   OR (A.PAY_DATE_1ST IS NOT NULL 
+          AND A.PAY_DATE_2ND IS NULL
+           <![CDATA[
+          AND TRUNC(SYSDATE) - TRUNC(A.POST_END_DATE) <= 7))
+          ]]>
+           OR (( A.STATE_CODE = 2 OR A.STATE_CODE = 4)
+          AND (A.PAY_DATE_1ST IS NOT NULL
+           OR A.PAY_DATE_2ND IS NOT NULL))
+           
+            OR ( A.STATE_CODE = 2
+		  AND (A.CANCEL_APPLY_DATE IS NULL
+		  AND A.PAY_DATE_1ST IS NULL
+		   <![CDATA[
+		  AND TRUNC(SYSDATE) - TRUNC(B.DECISION_DATE) > 3)
+		  ]]>
+		   OR (A.PAY_DATE_1ST IS NOT NULL 
+          AND A.PAY_DATE_2ND IS NULL
+          <![CDATA[
+          AND TRUNC(SYSDATE) - TRUNC(A.POST_END_DATE) > 7))
+          ]]>
+          
+           OR (A.STATE_CODE = 4 
+          AND A.PAY_DATE_1ST IS NULL
+          <![CDATA[
+          AND (TRUNC(A.CANCEL_APPLY_DATE) - TRUNC(B.DECISION_DATE) <= 3)))
+          ]]>
+         </otherwise>	
+         </choose>
+         <if test='fullMonth != 0'>
+		  AND PAY_DATE BETWEEN  TRUNC(to_date(#{ fullMonth },'YYYYMMDD'),'MM')
+          AND LAST_DAY(to_DATE(#{ fullMonth },'YYYYMMDD')+ 0.99999)
+		</if>
+	  </select>
+	  
+	  <!-- 광고 결제 관리 조회 -->
+	  <select id="selectAdPayAllList" resultMap="adAdmin" parameterType="AdminPageInfoDTO">
+		SELECT * 
+		  FROM (
+			    SELECT ROWNUM RN, D.* 
+			      FROM (
+		SELECT 
+			   A.AD_CODE
+			 , A.PAY_DATE
+			 , A.PAY_NEW_STATUS
+			 , NVL(B.CLICK,0) CLICK_NUM
+             , NVL(B.CLICK,0)*150 PRICE_2ND
+			 , A.USER_CODE
+			 , C.USER_NAME
+			 , C.USER_ID
+			 , A.AD_TITLE
+			 , A.COMPANY_NUMBER
+			 , A.APPLY_DATE
+			 , A.STATE_CODE
+			 , B.DECISION_DATE
+			 , A.POST_START_DATE
+             , A.POST_END_DATE
+             , A.CANCEL_APPLY_DATE
+             , A.POST_YN
+             , A.PAY_DATE_1ST
+             , A.PAY_DATE_2ND 
+             , A.REFUND_YN
+             , A.AD_TYPE_CODE
+             , NVL2(A.PAY_DATE_1ST, B.DECISION_DATE, A.POST_END_DATE) PAY_UNTIL_DATE
+             , NVL2(A.PAY_DATE_1ST,'납부완료','납부취소') PAY_STATUS
+		FROM AD_APPLY_TABLE A
+		LEFT JOIN DECISION_TABLE B ON A.DECISION_CODE = B.DECISION_CODE
+		LEFT JOIN USER_TABLE C ON C.USER_CODE = A.USER_CODE
+		LEFT OUTER JOIN
+	  			 (SELECT AD_CODE, COUNT(*) CLICK
+           		    FROM AD_CLICK_COUNT 
+                    GROUP BY AD_CODE) B ON (A.AD_CODE = B.AD_CODE)
+		<choose>
+         <when test='category == "1"'>
+         WHERE (A.STATE_CODE = 2
+		  AND (A.CANCEL_APPLY_DATE IS NULL
+		  AND A.PAY_DATE_1ST IS NULL
+		  <![CDATA[
+		  AND TRUNC(SYSDATE) - TRUNC(B.DECISION_DATE) <= 3)
+		  ]]>
+		   OR (A.PAY_DATE_1ST IS NOT NULL 
+          AND A.PAY_DATE_2ND IS NULL
+           <![CDATA[
+          AND TRUNC(SYSDATE) - TRUNC(A.POST_END_DATE) <= 7))
+           ]]>
+          AND REFUND_YN = 'N'
+         </when>
+         <when test='category == "2"'>
+          WHERE (( A.STATE_CODE = 2 OR A.STATE_CODE = 4)
+          AND (A.PAY_DATE_1ST IS NOT NULL
+           OR A.PAY_DATE_2ND IS NOT NULL))
+          AND REFUND_YN = 'N'
+         </when>	
+         <when test='category =="3"'>
+          WHERE ( A.STATE_CODE = 2
+		  AND (A.CANCEL_APPLY_DATE IS NULL
+		  AND A.PAY_DATE_1ST IS NULL
+		  <![CDATA[
+		  AND TRUNC(SYSDATE) - TRUNC(B.DECISION_DATE) > 3)
+		   ]]>
+		   OR (A.PAY_DATE_1ST IS NOT NULL 
+          AND A.PAY_DATE_2ND IS NULL
+          <![CDATA[
+          AND TRUNC(SYSDATE) - TRUNC(A.POST_END_DATE) > 7))
+          ]]>
+          AND REFUND_YN = 'N'
+         </when>
+         <when test='category=="4"'>
+         WHERE (A.STATE_CODE = 4 
+          AND A.PAY_DATE_1ST IS NULL
+          <![CDATA[
+          AND (TRUNC(A.CANCEL_APPLY_DATE) - TRUNC(B.DECISION_DATE) <= 3))
+          ]]>
+          AND REFUND_YN = 'N'
+         </when>
+         <when test='category=="5"'>
+         WHERE REFUND_YN = 'Y'
+         </when>
+         <otherwise>
+		WHERE ((A.STATE_CODE = 2
+		  AND (A.CANCEL_APPLY_DATE IS NULL
+		  AND A.PAY_DATE_1ST IS NULL
+		  <![CDATA[
+		  AND TRUNC(SYSDATE) - TRUNC(B.DECISION_DATE) <= 3)
+		     ]]>
+		   OR (A.PAY_DATE_1ST IS NOT NULL 
+          AND A.PAY_DATE_2ND IS NULL
+           <![CDATA[
+          AND TRUNC(SYSDATE) - TRUNC(A.POST_END_DATE) <= 7))
+          ]]>
+           OR (( A.STATE_CODE = 2 OR A.STATE_CODE = 4)
+          AND (A.PAY_DATE_1ST IS NOT NULL
+           OR A.PAY_DATE_2ND IS NOT NULL))
+           
+            OR ( A.STATE_CODE = 2
+		  AND (A.CANCEL_APPLY_DATE IS NULL
+		  AND A.PAY_DATE_1ST IS NULL
+		   <![CDATA[
+		  AND TRUNC(SYSDATE) - TRUNC(B.DECISION_DATE) > 3)
+		  ]]>
+		   OR (A.PAY_DATE_1ST IS NOT NULL 
+          AND A.PAY_DATE_2ND IS NULL
+          <![CDATA[
+          AND TRUNC(SYSDATE) - TRUNC(A.POST_END_DATE) > 7))
+          ]]>
+          
+           OR (A.STATE_CODE = 4 
+          AND A.PAY_DATE_1ST IS NULL
+          <![CDATA[
+          AND (TRUNC(A.CANCEL_APPLY_DATE) - TRUNC(B.DECISION_DATE) <= 3)))
+          ]]>
+         </otherwise>	
+         </choose>
+         <if test='fullMonth != 0'>
+		  AND PAY_DATE BETWEEN  TRUNC(to_date(#{ fullMonth },'YYYYMMDD'),'MM')
+          AND LAST_DAY(to_DATE(#{ fullMonth },'YYYYMMDD')+ 0.99999)
+		</if>
+          ORDER BY A.AD_CODE DESC
+						) D
+				  )
+			WHERE RN BETWEEN #{start} AND #{end} 
+	  </select>
+	  
+	  
+	   <!-- 광고 결제 디테일 조회 -->
+	  <select id="selectPayAdminDetail" resultMap="adAdmin" parameterType="int">
+	  SELECT 
+			   A.AD_CODE
+			 , A.PAY_DATE
+			 , A.PAY_NEW_STATUS
+			 , NVL(B.CLICK,0) CLICK_NUM
+             , NVL(B.CLICK,0)*150 PRICE_2ND
+			 , A.USER_CODE
+			 , C.USER_NAME
+			 , C.USER_ID
+			 , A.AD_TITLE
+			 , A.COMPANY_NAME
+			 , A.COMPANY_PHONE
+			 , A.COMPANY_NUMBER
+			 , A.COMPANY_EMAIL
+			 , A.APPLY_DATE
+			 , A.STATE_CODE
+			 , B.DECISION_DATE
+			 , A.POST_START_DATE
+             , A.POST_END_DATE
+             , A.CANCEL_APPLY_DATE
+             , A.POST_YN
+             , A.PAY_DATE_1ST
+             , A.PAY_DATE_2ND 
+             , A.AD_TYPE_CODE
+             , NVL2(A.PAY_DATE_1ST, B.DECISION_DATE, A.POST_END_DATE) PAY_UNTIL_DATE
+		FROM AD_APPLY_TABLE A
+		LEFT JOIN DECISION_TABLE B ON A.DECISION_CODE = B.DECISION_CODE
+		LEFT JOIN USER_TABLE C ON C.USER_CODE = A.USER_CODE
+		LEFT OUTER JOIN
+	  			 (SELECT AD_CODE, COUNT(*) CLICK
+           		    FROM AD_CLICK_COUNT 
+                    GROUP BY AD_CODE) B ON (A.AD_CODE = B.AD_CODE)
+       WHERE A.AD_CODE = #{adCode}
+	  </select>
+
+
+	<!-- 검색 시 총 광고 결제 관리 갯수 조회 -->
+	 <select id="searchAdPayList" resultType="int" parameterType="AdminPageInfoDTO">
+		SELECT COUNT(*)
+		FROM AD_APPLY_TABLE A
+		LEFT JOIN USER_TABLE C ON C.USER_CODE = A.USER_CODE
+		LEFT JOIN DECISION_TABLE B ON A.DECISION_CODE = B.DECISION_CODE
+		<choose>
+         <when test='category == "1"'>
+         WHERE (A.STATE_CODE = 2
+		  AND (A.CANCEL_APPLY_DATE IS NULL
+		  AND A.PAY_DATE_1ST IS NULL
+		  <![CDATA[
+		  AND TRUNC(SYSDATE) - TRUNC(B.DECISION_DATE) <= 3)
+		  ]]>
+		   OR (A.PAY_DATE_1ST IS NOT NULL 
+          AND A.PAY_DATE_2ND IS NULL
+           <![CDATA[
+          AND TRUNC(SYSDATE) - TRUNC(A.POST_END_DATE) <= 7))
+           ]]>
+          AND REFUND_YN = 'N'
+         </when>
+         <when test='category == "2"'>
+          WHERE (( A.STATE_CODE = 2 OR A.STATE_CODE = 4)
+          AND (A.PAY_DATE_1ST IS NOT NULL
+           OR A.PAY_DATE_2ND IS NOT NULL))
+          AND REFUND_YN = 'N'
+         </when>	
+         <when test='category =="3"'>
+          WHERE ( A.STATE_CODE = 2
+		  AND (A.CANCEL_APPLY_DATE IS NULL
+		  AND A.PAY_DATE_1ST IS NULL
+		  <![CDATA[
+		  AND TRUNC(SYSDATE) - TRUNC(B.DECISION_DATE) > 3)
+		   ]]>
+		   OR (A.PAY_DATE_1ST IS NOT NULL 
+          AND A.PAY_DATE_2ND IS NULL
+          <![CDATA[
+          AND TRUNC(SYSDATE) - TRUNC(A.POST_END_DATE) > 7))
+          ]]>
+          AND REFUND_YN = 'N'
+         </when>
+         <when test='category=="4"'>
+         WHERE (A.STATE_CODE = 4 
+          AND A.PAY_DATE_1ST IS NULL
+          <![CDATA[
+          AND (TRUNC(A.CANCEL_APPLY_DATE) - TRUNC(B.DECISION_DATE) <= 3))
+          ]]>
+          AND REFUND_YN = 'N'
+         </when>
+         <when test='category=="5"'>
+         WHERE REFUND_YN = 'Y'
+         </when>
+         <otherwise>
+		WHERE ((A.STATE_CODE = 2
+		  AND (A.CANCEL_APPLY_DATE IS NULL
+		  AND A.PAY_DATE_1ST IS NULL
+		  <![CDATA[
+		  AND TRUNC(SYSDATE) - TRUNC(B.DECISION_DATE) <= 3)
+		     ]]>
+		   OR (A.PAY_DATE_1ST IS NOT NULL 
+          AND A.PAY_DATE_2ND IS NULL
+           <![CDATA[
+          AND TRUNC(SYSDATE) - TRUNC(A.POST_END_DATE) <= 7))
+          ]]>
+           OR (( A.STATE_CODE = 2 OR A.STATE_CODE = 4)
+          AND (A.PAY_DATE_1ST IS NOT NULL
+           OR A.PAY_DATE_2ND IS NOT NULL))
+           
+            OR ( A.STATE_CODE = 2
+		  AND (A.CANCEL_APPLY_DATE IS NULL
+		  AND A.PAY_DATE_1ST IS NULL
+		   <![CDATA[
+		  AND TRUNC(SYSDATE) - TRUNC(B.DECISION_DATE) > 3)
+		  ]]>
+		   OR (A.PAY_DATE_1ST IS NOT NULL 
+          AND A.PAY_DATE_2ND IS NULL
+          <![CDATA[
+          AND TRUNC(SYSDATE) - TRUNC(A.POST_END_DATE) > 7))
+          ]]>
+          
+           OR (A.STATE_CODE = 4 
+          AND A.PAY_DATE_1ST IS NULL
+          <![CDATA[
+          AND (TRUNC(A.CANCEL_APPLY_DATE) - TRUNC(B.DECISION_DATE) <= 3)))
+          ]]>
+         </otherwise>	
+         </choose>
+         AND C.USER_NAME LIKE '%' || #{ searchValue } || '%'
+	  </select>
+		
+	 <!-- 검색 시 광고 결제 관리 조회 -->
+	  <select id="searchAdPayAllList" resultMap="adAdmin" parameterType="AdminPageInfoDTO">
+		SELECT * 
+		  FROM (
+			    SELECT ROWNUM RN, D.* 
+			      FROM (
+		SELECT 
+			   A.AD_CODE
+			 , A.PAY_DATE
+			 , A.PAY_NEW_STATUS
+			 , NVL(B.CLICK,0) CLICK_NUM
+             , NVL(B.CLICK,0)*150 PRICE_2ND
+			 , A.USER_CODE
+			 , C.USER_NAME
+			 , C.USER_ID
+			 , A.AD_TITLE
+			 , A.COMPANY_NUMBER
+			 , A.APPLY_DATE
+			 , A.STATE_CODE
+			 , B.DECISION_DATE
+			 , A.POST_START_DATE
+             , A.POST_END_DATE
+             , A.CANCEL_APPLY_DATE
+             , A.POST_YN
+             , A.PAY_DATE_1ST
+             , A.PAY_DATE_2ND 
+             , A.REFUND_YN
+             , A.AD_TYPE_CODE
+             , NVL2(A.PAY_DATE_1ST, B.DECISION_DATE, A.POST_END_DATE) PAY_UNTIL_DATE
+		FROM AD_APPLY_TABLE A
+		LEFT JOIN DECISION_TABLE B ON A.DECISION_CODE = B.DECISION_CODE
+		LEFT JOIN USER_TABLE C ON C.USER_CODE = A.USER_CODE
+		LEFT OUTER JOIN
+	  			 (SELECT AD_CODE, COUNT(*) CLICK
+           		    FROM AD_CLICK_COUNT 
+                    GROUP BY AD_CODE) B ON (A.AD_CODE = B.AD_CODE)
+		<choose>
+         <when test='category == "1"'>
+         WHERE (A.STATE_CODE = 2
+		  AND (A.CANCEL_APPLY_DATE IS NULL
+		  AND A.PAY_DATE_1ST IS NULL
+		  <![CDATA[
+		  AND TRUNC(SYSDATE) - TRUNC(B.DECISION_DATE) <= 3)
+		  ]]>
+		   OR (A.PAY_DATE_1ST IS NOT NULL 
+          AND A.PAY_DATE_2ND IS NULL
+           <![CDATA[
+          AND TRUNC(SYSDATE) - TRUNC(A.POST_END_DATE) <= 7))
+           ]]>
+          AND REFUND_YN = 'N'
+         </when>
+         <when test='category == "2"'>
+          WHERE (( A.STATE_CODE = 2 OR A.STATE_CODE = 4)
+          AND (A.PAY_DATE_1ST IS NOT NULL
+           OR A.PAY_DATE_2ND IS NOT NULL))
+          AND REFUND_YN = 'N'
+         </when>	
+         <when test='category =="3"'>
+          WHERE ( A.STATE_CODE = 2
+		  AND (A.CANCEL_APPLY_DATE IS NULL
+		  AND A.PAY_DATE_1ST IS NULL
+		  <![CDATA[
+		  AND TRUNC(SYSDATE) - TRUNC(B.DECISION_DATE) > 3)
+		   ]]>
+		   OR (A.PAY_DATE_1ST IS NOT NULL 
+          AND A.PAY_DATE_2ND IS NULL
+          <![CDATA[
+          AND TRUNC(SYSDATE) - TRUNC(A.POST_END_DATE) > 7))
+          ]]>
+          AND REFUND_YN = 'N'
+         </when>
+         <when test='category=="4"'>
+         WHERE (A.STATE_CODE = 4 
+          AND A.PAY_DATE_1ST IS NULL
+          <![CDATA[
+          AND (TRUNC(A.CANCEL_APPLY_DATE) - TRUNC(B.DECISION_DATE) <= 3))
+          ]]>
+          AND REFUND_YN = 'N'
+         </when>
+         <when test='category=="5"'>
+         WHERE REFUND_YN = 'Y'
+         </when>
+         <otherwise>
+		WHERE ((A.STATE_CODE = 2
+		  AND (A.CANCEL_APPLY_DATE IS NULL
+		  AND A.PAY_DATE_1ST IS NULL
+		  <![CDATA[
+		  AND TRUNC(SYSDATE) - TRUNC(B.DECISION_DATE) <= 3)
+		     ]]>
+		   OR (A.PAY_DATE_1ST IS NOT NULL 
+          AND A.PAY_DATE_2ND IS NULL
+           <![CDATA[
+          AND TRUNC(SYSDATE) - TRUNC(A.POST_END_DATE) <= 7))
+          ]]>
+           OR (( A.STATE_CODE = 2 OR A.STATE_CODE = 4)
+          AND (A.PAY_DATE_1ST IS NOT NULL
+           OR A.PAY_DATE_2ND IS NOT NULL))
+           
+            OR ( A.STATE_CODE = 2
+		  AND (A.CANCEL_APPLY_DATE IS NULL
+		  AND A.PAY_DATE_1ST IS NULL
+		   <![CDATA[
+		  AND TRUNC(SYSDATE) - TRUNC(B.DECISION_DATE) > 3)
+		  ]]>
+		   OR (A.PAY_DATE_1ST IS NOT NULL 
+          AND A.PAY_DATE_2ND IS NULL
+          <![CDATA[
+          AND TRUNC(SYSDATE) - TRUNC(A.POST_END_DATE) > 7))
+          ]]>
+          
+           OR (A.STATE_CODE = 4 
+          AND A.PAY_DATE_1ST IS NULL
+          <![CDATA[
+          AND (TRUNC(A.CANCEL_APPLY_DATE) - TRUNC(B.DECISION_DATE) <= 3)))
+          ]]>
+         </otherwise>	
+         </choose>
+          AND C.USER_NAME LIKE '%' || #{ searchValue } || '%'
+          ORDER BY A.AD_CODE DESC
+						) D
+				  )
+			WHERE RN BETWEEN #{start} AND #{end}
+         
+	  </select>
+	  
+	  <!-- 세금계산서 총 갯수 구하기 -->
+	  <select id="selectTaxList" resultType="int" parameterType="AdminPageInfoDTO">
+		SELECT COUNT(*) 
+		  FROM (
+				SELECT NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE))TAX_BILL_DATE
+				  FROM AD_APPLY_TABLE A
+				 WHERE NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE)) IS NOT NULL
+		<choose>
+        <when test='category == "2"'>
+          AND (A.CANCEL_APPLY_DATE IS NOT NULL
+          <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) > 7)
+           ]]>
+           OR (A.CANCEL_APPLY_DATE IS NULL
+           <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) > 7))
+           ]]>
+        </when>
+        <when test='category == "1"'>
+          AND (A.CANCEL_APPLY_DATE IS NOT NULL
+          	  <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) <= 7)
+          ]]>
+           OR (A.CANCEL_APPLY_DATE IS NULL
+           	  <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) <= 7))
+          ]]>
+        </when>
+        <otherwise>
+		)
+		</otherwise>
+       </choose>
+	  </select>
+	  
+	  <!-- 월별 조회 시 세금계산서 총 갯수 구하기 -->
+	  <select id="selectTaxMonthList" resultType="int" parameterType="AdminPageInfoDTO">
+		SELECT COUNT(*) 
+		  FROM (
+				SELECT NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE))TAX_BILL_DATE
+				  FROM AD_APPLY_TABLE A
+				 WHERE NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE)) IS NOT NULL
+		<choose>
+        <when test='category == "2"'>
+          AND ((A.CANCEL_APPLY_DATE IS NOT NULL
+          <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) > 7)
+           ]]>
+           OR (A.CANCEL_APPLY_DATE IS NULL
+           <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) > 7))
+           ]]>
+          AND NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE)) BETWEEN  TRUNC(to_date(#{ fullMonth },'YYYYMMDD'),'MM')
+          AND LAST_DAY(to_DATE(#{ fullMonth },'YYYYMMDD')+ 0.99999))
+        </when>
+        <when test='category == "1"'>
+          AND ((A.CANCEL_APPLY_DATE IS NOT NULL
+          	  <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) <= 7)
+          ]]>
+           OR (A.CANCEL_APPLY_DATE IS NULL
+           	  <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) <= 7))
+          ]]>
+          AND NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE)) BETWEEN  TRUNC(to_date(#{ fullMonth },'YYYYMMDD'),'MM')
+          AND LAST_DAY(to_DATE(#{ fullMonth },'YYYYMMDD')+ 0.99999))
+        </when>
+        <otherwise>
+		  AND NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE)) BETWEEN  TRUNC(to_date(#{ fullMonth },'YYYYMMDD'),'MM')
+          AND LAST_DAY(to_DATE(#{ fullMonth },'YYYYMMDD')+ 0.99999))
+		</otherwise>
+       </choose>
+	  </select>
+	  
+	
+		   <!-- 세금계산서 관리 목록 조회 -->
+	  <select id="selectTaxAllList" resultMap="adAdmin" parameterType="AdminPageInfoDTO">
+		SELECT * 
+		  FROM (
+			    SELECT ROWNUM RN, D.* 
+			      FROM (
+
+		SELECT 
+			   A.AD_CODE
+			 , NVL(B.CLICK,0) CLICK_NUM
+             , NVL(B.CLICK,0)*150 PRICE_2ND
+             , NVL(B.CLICK,0)*150*0.1 TAX_PRICE
+             , NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE))TAX_BILL_DATE
+			 , A.USER_CODE
+			 , C.USER_NAME
+			 , C.USER_ID
+			 , A.AD_TITLE
+			 , A.COMPANY_NUMBER
+			 , A.CANCEL_APPLY_DATE
+			 , TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) CAL_END_DATE
+			 , TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) CAL_APPLY_DATE
+		FROM AD_APPLY_TABLE A
+		LEFT JOIN DECISION_TABLE B ON A.DECISION_CODE = B.DECISION_CODE
+		LEFT JOIN USER_TABLE C ON C.USER_CODE = A.USER_CODE
+		LEFT OUTER JOIN
+	  			 (SELECT AD_CODE, COUNT(*) CLICK
+           		    FROM AD_CLICK_COUNT 
+                    GROUP BY AD_CODE) B ON (A.AD_CODE = B.AD_CODE)
+        WHERE NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE)) IS NOT NULL
+         <choose>
+        <when test='category == "2"'>
+          AND (A.CANCEL_APPLY_DATE IS NOT NULL
+          <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) > 7)
+           ]]>
+           OR (A.CANCEL_APPLY_DATE IS NULL
+           <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) > 7)
+           ]]>
+        </when>
+        <when test='category == "1"'>
+          AND (A.CANCEL_APPLY_DATE IS NOT NULL
+          	  <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) <= 7)
+          ]]>
+           OR (A.CANCEL_APPLY_DATE IS NULL
+           	  <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) <= 7)
+          ]]>
+        </when>
+       </choose>
+          ORDER BY A.AD_CODE DESC
+						) D
+				  )
+			WHERE RN BETWEEN #{start} AND #{end}
+	</select>
+	
+	  <!-- 세금계산서 월별 관리 목록 조회 -->
+	  <select id="selectTaxMonthAllList" resultMap="adAdmin" parameterType="AdminPageInfoDTO">
+		SELECT * 
+		  FROM (
+			    SELECT ROWNUM RN, D.* 
+			      FROM (
+
+		SELECT 
+			   A.AD_CODE
+			 , NVL(B.CLICK,0) CLICK_NUM
+             , NVL(B.CLICK,0)*150 PRICE_2ND
+             , NVL(B.CLICK,0)*150*0.1 TAX_PRICE
+             , NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE))TAX_BILL_DATE
+			 , A.USER_CODE
+			 , C.USER_NAME
+			 , C.USER_ID
+			 , A.AD_TITLE
+			 , A.COMPANY_NUMBER
+			 , A.CANCEL_APPLY_DATE
+			 , TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) CAL_END_DATE
+			 , TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) CAL_APPLY_DATE
+		FROM AD_APPLY_TABLE A
+		LEFT JOIN DECISION_TABLE B ON A.DECISION_CODE = B.DECISION_CODE
+		LEFT JOIN USER_TABLE C ON C.USER_CODE = A.USER_CODE
+		LEFT OUTER JOIN
+	  			 (SELECT AD_CODE, COUNT(*) CLICK
+           		    FROM AD_CLICK_COUNT 
+                    GROUP BY AD_CODE) B ON (A.AD_CODE = B.AD_CODE)
+        WHERE NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE)) IS NOT NULL
+         <choose>
+        <when test='category == "2"'>
+          AND ((A.CANCEL_APPLY_DATE IS NOT NULL
+          <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) > 7)
+           ]]>
+           OR (A.CANCEL_APPLY_DATE IS NULL
+           <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) > 7))
+           ]]>
+          AND NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE)) BETWEEN  TRUNC(to_date(#{ fullMonth },'YYYYMMDD'),'MM')
+          AND LAST_DAY(to_DATE(#{ fullMonth },'YYYYMMDD')+ 0.99999)
+        </when>
+        <when test='category == "1"'>
+          AND ((A.CANCEL_APPLY_DATE IS NOT NULL
+          	  <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) <= 7)
+          ]]>
+           OR (A.CANCEL_APPLY_DATE IS NULL
+           	  <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) <= 7))
+          AND NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE)) BETWEEN  TRUNC(to_date(#{ fullMonth },'YYYYMMDD'),'MM')
+          AND LAST_DAY(to_DATE(#{ fullMonth },'YYYYMMDD')+ 0.99999)
+          ]]>
+        </when>
+        <otherwise>
+          AND NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE)) BETWEEN  TRUNC(to_date(#{ fullMonth },'YYYYMMDD'),'MM')
+          AND LAST_DAY(to_DATE(#{ fullMonth },'YYYYMMDD')+ 0.99999)
+        </otherwise>
+       </choose>
+          ORDER BY A.AD_CODE DESC
+						) D
+				  )
+			WHERE RN BETWEEN #{start} AND #{end}
+	</select>
+	
+	
+	 <!-- 세금계산서 관리 현재 페이지 갯수 조회 -->
+	  <select id="selectTaxNumber" resultType="int" parameterType="AdminPageInfoDTO">
+		SELECT COUNT(E.RN) 
+	  	 FROM 
+	  	(
+		SELECT * 
+		  FROM (
+			    SELECT ROWNUM RN, D.* 
+			      FROM (
+		SELECT 
+			   A.AD_CODE
+			 , NVL(B.CLICK,0) CLICK_NUM
+             , NVL(B.CLICK,0)*150 PRICE_2ND
+             , NVL(B.CLICK,0)*150*0.1 TAX_PRICE
+             , NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE))TAX_BILL_DATE
+			 , A.USER_CODE
+			 , C.USER_NAME
+			 , C.USER_ID
+			 , A.AD_TITLE
+			 , A.COMPANY_NUMBER
+			 , TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) CAL_END_DATE
+			 , TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) CAL_APPLY_DATE
+		FROM AD_APPLY_TABLE A
+		LEFT JOIN DECISION_TABLE B ON A.DECISION_CODE = B.DECISION_CODE
+		LEFT JOIN USER_TABLE C ON C.USER_CODE = A.USER_CODE
+		LEFT OUTER JOIN
+	  			 (SELECT AD_CODE, COUNT(*) CLICK
+           		    FROM AD_CLICK_COUNT 
+                    GROUP BY AD_CODE) B ON (A.AD_CODE = B.AD_CODE)
+        WHERE NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE)) IS NOT NULL
+       <choose>
+        <when test='category == "2"'>
+          AND (A.CANCEL_APPLY_DATE IS NOT NULL
+          <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) > 7)
+           ]]>
+           OR (A.CANCEL_APPLY_DATE IS NULL
+           <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) > 7)
+           ]]>
+        </when>
+        <when test='category == "1"'>
+          AND (A.CANCEL_APPLY_DATE IS NOT NULL
+          	  <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) <= 7)
+          ]]>
+           OR (A.CANCEL_APPLY_DATE IS NULL
+           	  <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) <= 7)
+          ]]>
+        </when>
+       </choose>
+          ORDER BY A.AD_CODE DESC
+						) D
+				  )
+			WHERE RN BETWEEN #{start} AND #{end}) E
+	</select>
+	
+	  <!-- 월별 조회 시 세금계산서 관리 현재 페이지 갯수 조회 -->
+	  <select id="selectTaxMonthNumber" resultType="int" parameterType="AdminPageInfoDTO">
+		SELECT COUNT(E.RN) 
+	  	 FROM 
+	  	(
+		SELECT * 
+		  FROM (
+			    SELECT ROWNUM RN, D.* 
+			      FROM (
+		SELECT 
+			   A.AD_CODE
+			 , NVL(B.CLICK,0) CLICK_NUM
+             , NVL(B.CLICK,0)*150 PRICE_2ND
+             , NVL(B.CLICK,0)*150*0.1 TAX_PRICE
+             , NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE))TAX_BILL_DATE
+			 , A.USER_CODE
+			 , C.USER_NAME
+			 , C.USER_ID
+			 , A.AD_TITLE
+			 , A.COMPANY_NUMBER
+			 , TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) CAL_END_DATE
+			 , TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) CAL_APPLY_DATE
+		FROM AD_APPLY_TABLE A
+		LEFT JOIN DECISION_TABLE B ON A.DECISION_CODE = B.DECISION_CODE
+		LEFT JOIN USER_TABLE C ON C.USER_CODE = A.USER_CODE
+		LEFT OUTER JOIN
+	  			 (SELECT AD_CODE, COUNT(*) CLICK
+           		    FROM AD_CLICK_COUNT 
+                    GROUP BY AD_CODE) B ON (A.AD_CODE = B.AD_CODE)
+        WHERE NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE)) IS NOT NULL
+       <choose>
+        <when test='category == "2"'>
+          AND ((A.CANCEL_APPLY_DATE IS NOT NULL
+          <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) > 7)
+           ]]>
+           OR (A.CANCEL_APPLY_DATE IS NULL
+           <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) > 7))
+           ]]>
+          AND NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE)) BETWEEN  TRUNC(to_date(#{ fullMonth },'YYYYMMDD'),'MM')
+          AND LAST_DAY(to_DATE(#{ fullMonth },'YYYYMMDD')+ 0.99999)
+        </when>
+        <when test='category == "1"'>
+          AND ((A.CANCEL_APPLY_DATE IS NOT NULL
+          	  <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) <= 7)
+          ]]>
+           OR (A.CANCEL_APPLY_DATE IS NULL
+           	  <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) <= 7))
+          ]]>
+          AND NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE)) BETWEEN  TRUNC(to_date(#{ fullMonth },'YYYYMMDD'),'MM')
+          AND LAST_DAY(to_DATE(#{ fullMonth },'YYYYMMDD')+ 0.99999)
+        </when>
+        <otherwise>
+          AND NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE)) BETWEEN  TRUNC(to_date(#{ fullMonth },'YYYYMMDD'),'MM')
+          AND LAST_DAY(to_DATE(#{ fullMonth },'YYYYMMDD')+ 0.99999)
+        </otherwise>
+       </choose>
+          ORDER BY A.AD_CODE DESC
+						) D
+				  )
+			WHERE RN BETWEEN #{start} AND #{end}) E
+	</select>
+	
+	<!-- 광고 결제 디테일 조회 -->
+	  <select id="selectTaxDetail" resultMap="adAdmin" parameterType="int">
+	 	SELECT 
+			   A.AD_CODE
+			 , NVL(B.CLICK,0) CLICK_NUM
+             , NVL(B.CLICK,0)*150 PRICE_2ND
+             , NVL(B.CLICK,0)*150*0.1 TAX_PRICE
+             , NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE))TAX_BILL_DATE
+			 , A.USER_CODE
+			 , C.USER_NAME
+			 , C.USER_ID
+			 , A.AD_TITLE
+			 , A.COMPANY_NAME
+			 , A.COMPANY_NUMBER
+			 , A.AD_TYPE_CODE
+			 , A.COMPANY_LOCATION
+			 , A.LEADER_NAME
+			 , A.INDUSTRY
+			 , A.INDUSTRY_DETAIL
+			 , TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) CAL_END_DATE
+			 , TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) CAL_APPLY_DATE
+		FROM AD_APPLY_TABLE A
+		LEFT JOIN DECISION_TABLE B ON A.DECISION_CODE = B.DECISION_CODE
+		LEFT JOIN USER_TABLE C ON C.USER_CODE = A.USER_CODE
+		LEFT OUTER JOIN
+	  			 (SELECT AD_CODE, COUNT(*) CLICK
+           		    FROM AD_CLICK_COUNT 
+                    GROUP BY AD_CODE) B ON (A.AD_CODE = B.AD_CODE)
+        WHERE NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE)) IS NOT NULL
+          AND A.AD_CODE = #{adCode}
+	  </select>
+	
+	  <!-- 검색 시 세금계산서 갯수 조회 -->
+	  <select id="searchTaxList" resultType="int" parameterType="AdminPageInfoDTO">	
+		SELECT 
+		       COUNT(*)
+			   FROM AD_APPLY_TABLE A
+			   LEFT JOIN DECISION_TABLE B ON A.DECISION_CODE = B.DECISION_CODE
+			   LEFT JOIN USER_TABLE C ON C.USER_CODE = A.USER_CODE
+			   LEFT OUTER JOIN
+			  	    (SELECT AD_CODE, COUNT(*) CLICK
+		           		    FROM AD_CLICK_COUNT 
+		                    GROUP BY AD_CODE) B ON (A.AD_CODE = B.AD_CODE)
+         WHERE NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE)) IS NOT NULL
+        <choose>
+        <when test='category == "2"'>
+          AND ((A.CANCEL_APPLY_DATE IS NOT NULL
+          <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) > 7)
+           ]]>
+           OR (A.CANCEL_APPLY_DATE IS NULL
+           <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) > 7))
+           ]]>
+        </when>
+        <when test='category == "1"'>
+          AND ((A.CANCEL_APPLY_DATE IS NOT NULL
+          	  <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) <= 7)
+          ]]>
+           OR (A.CANCEL_APPLY_DATE IS NULL
+           	  <![CDATA[
+          AND TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) <= 7))
+          ]]>
+        </when>
+       </choose>
+         AND C.USER_NAME LIKE '%'|| #{ searchValue } || '%'
+	  </select>
+
+	 <!-- 검색 시 세금계산서 조회 -->
+	  <select id="searchTaxAllList" resultMap="adAdmin" parameterType="AdminPageInfoDTO">	
+		SELECT * 
+		  FROM (
+			    SELECT ROWNUM RN, D.* 
+			      FROM (
+		SELECT 
+			   A.AD_CODE
+			 , NVL(B.CLICK,0) CLICK_NUM
+             , NVL(B.CLICK,0)*150 PRICE_2ND
+             , NVL(B.CLICK,0)*150*0.1 TAX_PRICE
+             , NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE))TAX_BILL_DATE
+			 , A.USER_CODE
+			 , C.USER_NAME
+			 , C.USER_ID
+			 , A.AD_TITLE
+			 , A.COMPANY_NUMBER
+			 , TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) CAL_END_DATE
+			 , TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) CAL_APPLY_DATE
+		FROM AD_APPLY_TABLE A
+		LEFT JOIN DECISION_TABLE B ON A.DECISION_CODE = B.DECISION_CODE
+		LEFT JOIN USER_TABLE C ON C.USER_CODE = A.USER_CODE
+		LEFT OUTER JOIN
+	  			 (SELECT AD_CODE, COUNT(*) CLICK
+           		    FROM AD_CLICK_COUNT 
+                    GROUP BY AD_CODE) B ON (A.AD_CODE = B.AD_CODE)
+        WHERE NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE)) IS NOT NULL
+	        <choose>
+	        <when test='category == "2"'>
+	          AND ((A.CANCEL_APPLY_DATE IS NOT NULL
+	          <![CDATA[
+	          AND TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) > 7)
+	           ]]>
+	           OR (A.CANCEL_APPLY_DATE IS NULL
+	           <![CDATA[
+	          AND TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) > 7))
+	           ]]>
+	        </when>
+	        <when test='category == "1"'>
+	          AND ((A.CANCEL_APPLY_DATE IS NOT NULL
+	          	  <![CDATA[
+	          AND TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) <= 7)
+	          ]]>
+	           OR (A.CANCEL_APPLY_DATE IS NULL
+	           	  <![CDATA[
+	          AND TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) <= 7))
+	          ]]>
+	        </when>
+	       </choose>
+          AND C.USER_NAME LIKE '%'|| #{ searchValue } || '%'
+            ORDER BY A.AD_CODE DESC
+						) D
+				  )
+			WHERE RN BETWEEN #{start} AND #{end}
+       </select>
+	
+	 <!-- 검색 시  현재 페이지에 보이는 세금계산서 개수 조회 -->
+	  <select id="searchTaxNumber" resultType="int" parameterType="AdminPageInfoDTO">	
+		SELECT COUNT(E.RN) 
+		  	 FROM 
+		  	(SELECT * 
+			  FROM (
+				    SELECT ROWNUM RN, D.* 
+				      FROM (
+			SELECT 
+				   A.AD_CODE
+				 , NVL(B.CLICK,0) CLICK_NUM
+	             , NVL(B.CLICK,0)*150 PRICE_2ND
+	             , NVL(B.CLICK,0)*150*0.1 TAX_PRICE
+	             , NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE))TAX_BILL_DATE
+				 , A.USER_CODE
+				 , C.USER_NAME
+				 , C.USER_ID
+				 , A.AD_TITLE
+				 , A.COMPANY_NUMBER
+				 , TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) CAL_END_DATE
+				 , TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) CAL_APPLY_DATE
+			FROM AD_APPLY_TABLE A
+			LEFT JOIN DECISION_TABLE B ON A.DECISION_CODE = B.DECISION_CODE
+			LEFT JOIN USER_TABLE C ON C.USER_CODE = A.USER_CODE
+			LEFT OUTER JOIN
+		  			 (SELECT AD_CODE, COUNT(*) CLICK
+	           		    FROM AD_CLICK_COUNT 
+	                    GROUP BY AD_CODE) B ON (A.AD_CODE = B.AD_CODE)
+	        WHERE NVL2(CANCEL_APPLY_DATE, LAST_DAY(CANCEL_APPLY_DATE), LAST_DAY(POST_END_DATE)) IS NOT NULL
+	       		 <choose>
+			        <when test='category == "2"'>
+			          AND ((A.CANCEL_APPLY_DATE IS NOT NULL
+			          <![CDATA[
+			          AND TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) > 7)
+			           ]]>
+			           OR (A.CANCEL_APPLY_DATE IS NULL
+			           <![CDATA[
+			          AND TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) > 7))
+			           ]]>
+			        </when>
+			        <when test='category == "1"'>
+			          AND ((A.CANCEL_APPLY_DATE IS NOT NULL
+			          	  <![CDATA[
+			          AND TRUNC(SYSDATE) - TO_DATE(CANCEL_APPLY_DATE) <= 7)
+			          ]]>
+			           OR (A.CANCEL_APPLY_DATE IS NULL
+			           	  <![CDATA[
+			          AND TRUNC(SYSDATE) - TO_DATE(POST_END_DATE) <= 7))
+			          ]]>
+			        </when>
+			       </choose>
+	          AND C.USER_NAME LIKE '%'|| #{ searchValue } || '%'
+	            ORDER BY A.AD_CODE DESC
+							) D
+					  )
+				WHERE RN BETWEEN #{start} AND #{end} ) E
+		</select>
+	
+	  <!-- 전체 광고 관리 조회 -->
+	  <select id="selectPayAllForMonthList" resultMap="adAdmin">
+	  	SELECT 
+			   A.AD_CODE
+			 , NVL(B.CLICK,0) CLICK_NUM
+             , NVL(B.CLICK,0)*150 PRICE_2ND
+			 , A.USER_CODE
+			 , C.USER_NAME
+			 , C.USER_ID
+			 , A.AD_TITLE
+			 , A.COMPANY_NUMBER
+			 , A.APPLY_DATE
+			 , A.STATE_CODE
+			 , B.DECISION_DATE
+			 , A.POST_START_DATE
+             , A.POST_END_DATE
+             , A.CANCEL_APPLY_DATE
+             , A.POST_YN
+             , A.PAY_DATE_1ST
+             , A.PAY_DATE_2ND 
+             , A.REFUND_YN
+             , A.AD_TYPE_CODE
+             , NVL2(A.PAY_DATE_1ST, B.DECISION_DATE, A.POST_END_DATE) PAY_UNTIL_DATE
+             , NVL2(A.PAY_DATE_1ST,'납부완료','납부취소') PAY_STATUS
+		FROM AD_APPLY_TABLE A
+		LEFT JOIN DECISION_TABLE B ON A.DECISION_CODE = B.DECISION_CODE
+		LEFT JOIN USER_TABLE C ON C.USER_CODE = A.USER_CODE
+		LEFT OUTER JOIN
+	  			 (SELECT AD_CODE, COUNT(*) CLICK
+           		    FROM AD_CLICK_COUNT 
+                    GROUP BY AD_CODE) B ON (A.AD_CODE = B.AD_CODE)
+WHERE ((A.STATE_CODE = 2
+		  AND (A.CANCEL_APPLY_DATE IS NULL
+		  AND A.PAY_DATE_1ST IS NULL
+		  <![CDATA[
+		  AND TRUNC(SYSDATE) - TRUNC(B.DECISION_DATE) <= 3)
+		     ]]>
+		   OR (A.PAY_DATE_1ST IS NOT NULL 
+          AND A.PAY_DATE_2ND IS NULL
+           <![CDATA[
+          AND TRUNC(SYSDATE) - TRUNC(A.POST_END_DATE) <= 7))
+          ]]>
+           OR (( A.STATE_CODE = 2 OR A.STATE_CODE = 4)
+          AND (A.PAY_DATE_1ST IS NOT NULL
+           OR A.PAY_DATE_2ND IS NOT NULL))
+           
+            OR ( A.STATE_CODE = 2
+		  AND (A.CANCEL_APPLY_DATE IS NULL
+		  AND A.PAY_DATE_1ST IS NULL
+		   <![CDATA[
+		  AND TRUNC(SYSDATE) - TRUNC(B.DECISION_DATE) > 3)
+		  ]]>
+		   OR (A.PAY_DATE_1ST IS NOT NULL 
+          AND A.PAY_DATE_2ND IS NULL
+          <![CDATA[
+          AND TRUNC(SYSDATE) - TRUNC(A.POST_END_DATE) > 7))
+          ]]>
+          
+           OR (A.STATE_CODE = 4 
+          AND A.PAY_DATE_1ST IS NULL
+          <![CDATA[
+          AND (TRUNC(A.CANCEL_APPLY_DATE) - TRUNC(B.DECISION_DATE) <= 3)))
+          ]]>
+	  </select>	
+	  
+	  <update id="updateAdPayDate" parameterType="adAdminDTO">
+		 UPDATE AD_APPLY_TABLE
+	        SET PAY_DATE = #{ payUntilDate }
+	          , PAY_NEW_STATUS = #{ payNewStatus }
+	      WHERE AD_CODE =  #{ adCode } 
+       </update>
+	
+</mapper>

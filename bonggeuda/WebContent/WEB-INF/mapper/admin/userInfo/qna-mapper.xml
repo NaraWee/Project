@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="selectQnaList">
+        SELECT
+               C.RNUM
+             , C.ADMIN_QNA_NO
+             , C.ADMIN_QNA_TITLE
+             , C.ADMIN_QNA_WRITER
+    		 , C.MEMBER_NO
+    		 , C.ADMIN_QNA_DATE
+          FROM (
+                SELECT 
+                       ROWNUM RNUM
+     		 	     , B.ADMIN_QNA_NO
+     		 	  	 , B.ADMIN_QNA_TITLE
+     				 , B.ADMIN_QNA_WRITER
+     				 , B.MEMBER_NO
+     				 , B.ADMIN_QNA_DATE
+                  FROM(
+       					SELECT 
+            				   A.ADMIN_QNA_NO
+           				     , A.ADMIN_QNA_TITLE
+          				     , A.ADMIN_QNA_WRITER
+          					 , A.MEMBER_NO
+           					 , A.ADMIN_QNA_DATE
+       					  FROM ADMIN_QNA A
+       				  ) B
+               )C
+          WHERE C.RNUM BETWEEN ? AND ?
+	</entry>
+
+	<entry key="selectQnaTotalCount">
+       SELECT 
+             COUNT(*)
+         FROM ADMIN_QNA A
+	</entry>
+	
+	<entry key="selectQnaDetail">
+       SELECT 
+              A.ADMIN_QNA_TITLE
+            , A.ADMIN_QNA_WRITER
+            , A.ADMIN_QNA_DATE
+            , A.ADMIN_QNA_CONTENT
+            , A.ADMIN_QNA_NO
+         FROM ADMIN_QNA A
+        WHERE A.ADMIN_QNA_NO= ?
+	</entry>
+	
+	<entry key="insertQna">
+        INSERT
+          INTO ADMIN_ANSWER
+          (
+            ANSWER_NO
+          , ADMIN_QNA_NO
+          , ANSWER_CONTENT
+          , ANSWER_DATE
+          )
+          VALUES
+          (
+            SEQ_ANSWER_NO.NEXTVAL
+           , ?
+           , ?
+           , SYSDATE
+          )
+	</entry>
+	
+	<entry key="selectWriterList">
+        SELECT
+               C.RNUM
+             , C.ADMIN_QNA_NO
+             , C.ADMIN_QNA_TITLE
+             , C.ADMIN_QNA_WRITER
+    		 , C.MEMBER_NO
+    		 , C.ADMIN_QNA_DATE
+          FROM (
+                SELECT 
+                       ROWNUM RNUM
+     		 	     , B.ADMIN_QNA_NO
+     		 	  	 , B.ADMIN_QNA_TITLE
+     				 , B.ADMIN_QNA_WRITER
+     				 , B.MEMBER_NO
+     				 , B.ADMIN_QNA_DATE
+                  FROM(
+       					SELECT 
+            				   A.ADMIN_QNA_NO
+           				     , A.ADMIN_QNA_TITLE
+          				     , A.ADMIN_QNA_WRITER
+          					 , A.MEMBER_NO
+           					 , A.ADMIN_QNA_DATE
+       					  FROM ADMIN_QNA A
+       				  ) B
+               )C
+            WHERE C.RNUM BETWEEN ? AND ?
+              AND C.ADMIN_QNA_WRITER = ?
+	</entry>
+	
+	<entry key="selectWriterTotalCount">
+       SELECT 
+             COUNT(*)
+         FROM ADMIN_QNA A
+     	WHERE A.ADMIN_QNA_WRITER = ?
+	</entry>
+	
+</properties>
