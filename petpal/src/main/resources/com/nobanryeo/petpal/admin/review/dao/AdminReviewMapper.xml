@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nobanryeo.petpal.admin.review.dao.AdminReviewMapper">
+<resultMap id="ReviewSet" type="AdminReviewDTO">
+		<id column="BOARD_CODE" property="boardCode" />
+		<result column="USER_CODE" property="userCode" />
+		<result column="USER_ID" property="userId" />
+		<result column="USER_NAME" property="userName" />
+		<result column="BOARD_TITLE" property="boardTitle" />
+		<result column="BOARD_POST_DATE" property="postDate" />
+		<result column="STATE_NAME" property="state" />
+	</resultMap>
+<resultMap id="ReviewDetailSet" type="AdminReviewDetailDTO">
+		<result column="USER_ID" property="userId" />
+		<result column="USER_NAME" property="userName" />
+		<result column="BOARD_TITLE" property="boardTitle" />
+		<result column="BOARD_POST_DATE" property="postDate" />
+		<result column="STATE_NAME" property="state" />
+		<result column="ADMIN_ID" property="adminId" />
+		<result column="ADMIN_NAME" property="adminName" />
+		<result column="DECISION_REASON" property="reason" />
+	</resultMap>
+
+<select id="selectReviewCount" resultType="int">
+	   SELECT COUNT(*) 
+	   	<if test='category == "0"'>
+		FROM INFO_BOARD A
+		</if>
+		<if test='category == "1"'>
+		FROM FRIENDLY_BOARD A
+		</if>
+		<if test='searchCondition == "userId"'>
+        JOIN USER_TABLE B ON(A.USER_CODE = B.USER_CODE)
+		WHERE B.USER_ID LIKE '%' || #{searchValue} || '%' 
+		
+		</if>
+		<if test='searchCondition == "boardTitle"'>
+		WHERE BOARD_TITLE LIKE '%' || #{searchValue} || '%' 
+		</if>
+		
+	</select>
+<select id="selectReview" resultMap="ReviewSet" parameterType="AdminReviewDTO">
+	SELECT
+        *
+        FROM( SELECT ROWNUM RNUM, G.*
+                    FROM (SELECT
+                    		A.BOARD_CODE,
+                            B.USER_CODE,
+                            B.USER_ID,
+                            B.USER_NAME,
+                            A.BOARD_TITLE,
+                            A.BOARD_POST_DATE,
+                            NVL2(A.DECISION_CODE,D.STATE_NAME,'대기중') AS STATE_NAME
+                            <if test='category == "0"'>
+							FROM INFO_BOARD A
+							</if>
+							<if test='category == "1"'>
+							FROM FRIENDLY_BOARD A
+							</if>
+							
+	                        JOIN USER_TABLE B ON(A.USER_CODE = B.USER_CODE)
+							LEFT OUTER JOIN DECISION_TABLE C ON(A.DECISION_CODE = C.DECISION_CODE)
+	                        LEFT OUTER JOIN STATE_TABLE D ON(C.STATE_CODE = D.STATE_CODE)
+	                        <if test='searchCondition == "userId"'>
+							WHERE B.USER_ID LIKE '%' || #{searchValue} || '%' 
+							
+							</if>
+							<if test='searchCondition == "boardTitle"'>
+							WHERE A.BOARD_TITLE LIKE '%' || #{searchValue} || '%' 
+							</if>
+							
+							
+							<choose>
+								<when test="sortValue == 1">
+									ORDER BY D.STATE_NAME DESC ,A.BOARD_CODE DESC
+											
+								</when>
+								<when test="sortValue == 2">
+									ORDER BY D.STATE_NAME ASC ,A.BOARD_CODE DESC
+								</when>
+								<otherwise>
+									ORDER BY A.BOARD_CODE DESC
+								</otherwise>
+							</choose>
+                            
+                        )G
+                )A 
+                WHERE RNUM BETWEEN #{start} AND #{end}
+	
+	
+	
+	</select>
+<select id="selectReviewDetail" resultMap="ReviewDetailSet" parameterType="AdminReviewDetailDTO">
+SELECT
+    B.USER_ID,
+    B.USER_NAME,
+    A.BOARD_TITLE,
+    A.BOARD_POST_DATE,
+    NVL(D.STATE_NAME,'대기중') AS STATE_NAME,
+    C.DECISION_REASON,
+    F.USER_NAME AS ADMIN_NAME,
+    F.USER_ID AS ADMIN_ID
+    <if test='category == "0"'>
+	FROM INFO_BOARD A
+	</if>
+	<if test='category == "1"'>
+	FROM FRIENDLY_BOARD A
+	</if>
+    JOIN USER_TABLE B ON(A.USER_CODE = B.USER_CODE)
+    LEFT OUTER JOIN DECISION_TABLE C ON(A.DECISION_CODE = C.DECISION_CODE)
+    LEFT OUTER JOIN STATE_TABLE D ON(C.STATE_CODE = D.STATE_CODE)
+    LEFT OUTER JOIN ADMIN_TABLE E ON(C.USER_CODE = E.USER_CODE)
+    LEFT OUTER JOIN USER_TABLE F ON(E.USER_CODE = F.USER_CODE)
+    WHERE A.BOARD_CODE = #{boardCode}
+
+
+
+</select>
+<insert id="insertDecision" parameterType="com.nobanryeo.petpal.admin.dto.DecisionDTO">
+	    INSERT 
+	      INTO DECISION_TABLE
+	    (
+	      DECISION_CODE
+	    , DECISION_REASON
+	    , DECISION_DATE
+	    , STATE_CODE
+	    , USER_CODE
+	    )
+        VALUES
+        (
+          DECISION_CODE_SEQ.NEXTVAL
+        , #{ decisionReason }
+        , SYSDATE
+        , #{ stateCode }
+        , #{ code }
+        )
+	  </insert>	
+	  
+<update id="updateReport" parameterType="com.nobanryeo.petpal.admin.dto.DecisionDTO">
+		<selectKey keyProperty="decisionCode" order="BEFORE" resultType="_int">
+			SELECT
+			       DECISION_CODE_SEQ.CURRVAL
+			  FROM DUAL
+		</selectKey>
+		<choose>
+		<when test="category == 0">
+		
+	     UPDATE INFO_BOARD
+		   SET 
+			   DECISION_CODE = #{ decisionCode }
+	     WHERE BOARD_CODE = #{ boardCode }
+		</when>
+		<otherwise>
+		UPDATE FRIENDLY_BOARD
+		   SET 
+			   DECISION_CODE = #{ decisionCode }
+	     WHERE BOARD_CODE = #{ boardCode }
+		</otherwise>
+		</choose>
+		
+	 </update>
+</mapper>
+

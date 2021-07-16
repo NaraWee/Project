@@ -1,0 +1,574 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nobanryeo.petpal.admin.ad.dao.AdAdminMapper">
+	
+	 <!-- AdAdminDTO의 필드와 각 컬럼을 1:1매핑시켜줌 -->
+	 <resultMap id="adAdmin" type="com.nobanryeo.petpal.admin.dto.AdAdminDTO">
+	  	<id property="adCode" column="AD_CODE"/>
+	  	<result property="adTitle" column="AD_TITLE"/>
+	  	<result property="adContent" column="AD_CONTENT"/>
+	  	<result property="companyNumber" column="COMPANY_NUMBER"/>
+	  	<result property="applyDate" column="APPLY_DATE"/>
+	  	<result property="stateCode" column="STATE_CODE"/>
+	  	<result property="adTypeCode" column="AD_TYPE_CODE"/>
+	  	<result property="postStartDate" column="POST_START_DATE"/>
+	  	<result property="postEndDate" column="POST_END_DATE"/>
+	  	<result property="postYn" column="POST_YN"/>
+	  	<result property="payDate1st" column="PAY_DATE_1ST"/>
+	  	<result property="payDate2nd" column="PAY_DATE_2ND"/>
+	  	<result property="cancelApplyDate" column="CANCEL_APPLY_DATE"/>
+	  	<result property="refundYn" column="REFUND_YN"/>
+	  	<result property="clickNum" column="CLICK_NUM"/>
+	  	<!-- 유저코드에 대한 유저이름 가져옴 (유저코드가 매개) -->
+	  	<!-- 하나의 유저코드는 하나의 유저명만 가질 수 있음 -->	  
+	  	<association property="user" javaType="com.nobanryeo.petpal.user.dto.UserInfoDTO">
+	  		<id property="code" column="USER_CODE"/>
+			<result property="name" column="USER_NAME"/>
+			<result property="id" column="USER_ID"/>
+		</association>
+	  </resultMap>
+	  
+	  <!-- 총 광고 심사 갯수 조회 -->
+	  <select id="selectAdApply" resultType="int" parameterType="AdminPageInfoDTO">
+		SELECT COUNT(*) FROM AD_APPLY_TABLE
+		<if test='category == "1"'>
+		 WHERE STATE_CODE = 1
+		</if>
+		<if test='category == "2"'>
+		 WHERE STATE_CODE = 2
+		</if>
+		<if test='category == "3"'>
+		 WHERE STATE_CODE = 3
+		</if>		
+		<if test='category == "4"'>
+		 WHERE STATE_CODE = 4
+		</if>
+	  </select>
+	  
+	  <!-- 광고 심사 리스트 -->
+	  <select id="selectAdApproveList" resultMap="adAdmin" parameterType="AdminPageInfoDTO">
+		SELECT * 
+		  FROM (
+			    SELECT ROWNUM RN, C.* 
+			      FROM (
+			    	     SELECT 
+			                  	 A.AD_CODE
+			                   , A.USER_CODE
+			                   , B.USER_NAME
+			                   , B.USER_ID
+			                   , A.AD_TITLE
+			                   , A.COMPANY_NUMBER
+			                   , A.APPLY_DATE
+			                   , A.STATE_CODE
+			    	       FROM AD_APPLY_TABLE A 
+		                   JOIN USER_TABLE B ON B.USER_CODE = A.USER_CODE
+						   <where>
+		                    <if test='category == "1"'>
+						     	A.STATE_CODE = 1
+						    </if>
+						    <if test='category == "2"'>
+						     	A.STATE_CODE = 2
+						    </if>
+						    <if test='category == "3"'>
+						     	A.STATE_CODE = 3
+						    </if>
+						    <if test='category == "4"'>
+						     	A.STATE_CODE = 4
+						    </if>
+						   </where>
+		               ORDER BY A.AD_CODE DESC
+						) C
+				  )
+			WHERE RN BETWEEN #{start} AND #{end}
+	  </select>
+	  
+	  <!-- 검색 시 총 광고 심사 검색 갯수 조회 -->
+	  <select id="searchAdApply" resultType="int" parameterType="AdminPageInfoDTO">
+		SELECT COUNT(*) 
+		  FROM AD_APPLY_TABLE A
+		  JOIN USER_TABLE B ON B.USER_CODE = A.USER_CODE
+	   <where>
+		<if test='searchCondition != null and searchCondition == "adCode"'>
+		  A.AD_CODE LIKE '%' || #{ searchValue } || '%'
+		</if>
+		<if test='searchCondition != null and searchCondition == "adTitle"'>
+		  A.AD_TITLE LIKE '%' || #{ searchValue } || '%'
+		</if>
+		<if test='searchCondition != null and searchCondition == "name"'>
+		  B.USER_NAME LIKE '%'|| #{ searchValue } || '%'
+		</if>
+	    <if test='category != null and category == "1"'>
+		  AND A.STATE_CODE = 1
+		</if>
+		<if test='category != null and category == "2"'>
+		  AND A.STATE_CODE = 2
+		</if>
+		<if test='category != null and category == "3"'>
+		  AND A.STATE_CODE = 3
+		</if>
+		<if test='category != null and category == "4"'>
+		  AND A.STATE_CODE = 4
+		</if>		
+	   </where>
+	  </select>
+	  
+	   <!-- 광고 심사 리스트 -->
+	  <select id="searchAdApproveList" resultMap="adAdmin" parameterType="AdminPageInfoDTO">
+		SELECT * 
+		  FROM (
+			    SELECT ROWNUM RN, C.* 
+			      FROM (
+			    	     SELECT 
+			                  	 A.AD_CODE
+			                   , A.USER_CODE
+			                   , B.USER_NAME
+			                   , B.USER_ID
+			                   , A.AD_TITLE
+			                   , A.COMPANY_NUMBER
+			                   , A.APPLY_DATE
+			                   , A.STATE_CODE
+			    	       FROM AD_APPLY_TABLE A 
+		                   JOIN USER_TABLE B ON B.USER_CODE = A.USER_CODE
+						   <where>
+							<if test='searchCondition == "adCode"'>
+							  A.AD_CODE LIKE '%' || #{ searchValue } || '%'
+							</if>
+							<if test='searchCondition != null and searchCondition == "adTitle"'>
+							  A.AD_TITLE LIKE '%' || #{ searchValue } || '%'
+							</if>
+							<if test='searchCondition != null and searchCondition == "name"'>
+							  B.USER_NAME LIKE '%'|| #{ searchValue } || '%'
+							</if>
+						  	 <if test='category != null and category == "1"'>
+							  AND A.STATE_CODE = 1
+							</if>
+							<if test='category != null and category == "2"'>
+							  AND A.STATE_CODE = 2
+							</if>
+							<if test='category != null and category == "3"'>
+							  AND A.STATE_CODE = 3
+							</if>
+							<if test='category != null and category == "4"'>
+							  AND A.STATE_CODE = 4
+							</if>		
+						   </where>
+		               ORDER BY A.AD_CODE DESC
+						) C
+				  )
+			WHERE RN BETWEEN #{start} AND #{end}
+	  </select>
+	  
+
+	<resultMap id="adApproveDetail" extends="adAdmin" type="com.nobanryeo.petpal.admin.dto.AdAdminDTO">
+		<!-- 추가적인 속성만 넣으면 됨 -->
+		<result property="companyName" column="COMPANY_NAME"/>
+		<result property="companyPhone" column="COMPANY_PHONE"/>
+		<result property="companyEmail" column="COMPANY_EMAIL"/>
+		<result property="adTypeCode" column="AD_TYPE_CODE"/>
+	</resultMap>
+	
+	 <!-- 광고 심사 팝업 -->
+	 <select id="selectAdPopUp" resultMap="adApproveDetail" parameterType="int">
+	   SELECT 
+			  	A.AD_CODE
+			  , A.AD_TITLE
+			  ,	A.COMPANY_NAME
+			  , B.USER_NAME
+			  ,	B.USER_ID
+			  ,	A.AD_CONTENT
+			  , A.APPLY_DATE
+		   FROM AD_APPLY_TABLE A
+		   JOIN USER_TABLE B ON B.USER_CODE = A.USER_CODE
+		  WHERE A.AD_CODE = #{adCode}
+	 </select>
+	
+	  <!-- 광고 심사 디테일 -->
+	  <select id="selectAdApproveDetail" resultMap="adApproveDetail" parameterType="int">
+	    SELECT 
+			  	A.AD_CODE
+			  , A.AD_TITLE
+			  ,	A.COMPANY_NAME
+			  ,	B.USER_ID
+			  ,	A.COMPANY_NUMBER
+			  ,	A.PICTURE_CODE
+			  ,	A.COMPANY_PHONE
+			  , A.COMPANY_EMAIL
+			  , A.AD_TYPE_CODE
+			  , A.STATE_CODE
+		   FROM AD_APPLY_TABLE A
+		   JOIN USER_TABLE B ON B.USER_CODE = A.USER_CODE
+		  WHERE A.AD_CODE = #{adCode}
+	  </select>
+	  
+	  <resultMap id="adDetail" extends="adApproveDetail" type="com.nobanryeo.petpal.admin.dto.AdAdminDTO">
+		<!-- 추가적인 속성만 넣으면 됨 -->
+		<result property="price2nd" column="PRICE_2ND"/>
+	  </resultMap>
+	  
+	  <!-- 광고 관리 디테일 -->
+	  <select id="selectAdDetail" resultMap="adDetail" parameterType="int">
+	    SELECT 
+	             A.AD_CODE
+	           , NVL(B.CLICK,0) CLICK_NUM
+               , NVL(B.CLICK,0)*150 PRICE_2ND
+	           , A.USER_CODE
+       		   , B.USER_NAME
+       		   , B.USER_ID
+	           , A.AD_TITLE
+               , A.AD_CONTENT
+               , A.AD_TYPE_CODE
+               , A.COMPANY_NAME
+               , A.COMPANY_PHONE
+               , A.COMPANY_EMAIL
+               , A.COMPANY_NUMBER
+               , A.POST_START_DATE
+               , A.POST_END_DATE
+               , A.POST_YN
+               , A.PAY_DATE_1ST
+               , A.PAY_DATE_2ND
+               , A.CANCEL_APPLY_DATE
+               , A.REFUND_YN
+               , A.APPLY_DATE
+               , A.STATE_CODE
+	    	FROM AD_APPLY_TABLE A 
+	   LEFT JOIN USER_TABLE B ON B.USER_CODE = A.USER_CODE
+	   LEFT OUTER JOIN
+	  			 (SELECT AD_CODE, COUNT(*) CLICK
+           		    FROM AD_CLICK_COUNT 
+         	       WHERE AD_CODE = #{adCode}
+                    GROUP BY AD_CODE) B ON (A.AD_CODE = B.AD_CODE)
+        		   WHERE A.AD_CODE = #{adCode}
+	  </select>
+	  
+	  
+	  <resultMap id="adDecision" extends="adAdmin" type="com.nobanryeo.petpal.admin.dto.AdAdminDTO">
+		<!-- 추가적인 속성만 넣으면 됨 -->
+	   <association property="decision" javaType="com.nobanryeo.petpal.admin.dto.DecisionDTO">
+	   	 <id property="decisionCode" column="DECISION_CODE"/>
+	     <result property="decisionDate" column="DECISION_DATE"/>
+   	     <result property="decisionReason" column="DECISION_REASON"/>
+       </association>
+	</resultMap>
+	 
+	 <!-- 광고 심사 사유 조회 -->
+	 <select id="selectAdApproveDecision" resultMap="adDecision" parameterType="int">
+   	   SELECT 
+              A.AD_TITLE
+            , A.AD_CODE
+            , A.STATE_CODE
+            , B.DECISION_CODE
+            , B.DECISION_DATE
+            , B.DECISION_REASON
+            , C.USER_CODE
+            , C.USER_NAME
+            , C.USER_ID
+         FROM AD_APPLY_TABLE A
+         JOIN DECISION_TABLE B ON A.DECISION_CODE = B.DECISION_CODE
+         JOIN USER_TABLE C ON C.USER_CODE = B.USER_CODE
+        WHERE A.AD_CODE = #{ adCode }
+	 </select>
+	  
+	  
+	  <!-- 광고 심사 인서트 -->
+	  <insert id="insertAdApprove" parameterType="com.nobanryeo.petpal.admin.dto.DecisionDTO">
+	    INSERT 
+	      INTO DECISION_TABLE
+	    (
+	      DECISION_CODE
+	    , DECISION_REASON
+	    , DECISION_DATE
+	    , STATE_CODE
+	    , USER_CODE
+	    )
+        VALUES
+        (
+          DECISION_CODE_SEQ.NEXTVAL
+        , #{ decisionReason }
+        , SYSDATE
+        , #{ stateCode }
+        , #{ code }
+        )
+	  </insert>	
+	  
+	  <!-- 광고 신청 내역 테이블에 심사 결과 업데이트 -->
+	  <update id="updateAdApprove" parameterType="com.nobanryeo.petpal.admin.dto.DecisionDTO">
+		<selectKey keyProperty="decisionCode" order="BEFORE" resultType="_int">
+			SELECT
+			       DECISION_CODE_SEQ.CURRVAL
+			  FROM DUAL
+		</selectKey>
+		UPDATE AD_APPLY_TABLE 
+		   SET 
+			   DECISION_CODE = #{ decisionCode }
+		     , STATE_CODE = #{ stateCode }
+	     WHERE AD_CODE = #{ adCode }
+	 </update>
+	 
+	  <!-- 총 광고 관리 갯수 조회 -->
+	  <select id="selectAdList" resultType="int" parameterType="AdminPageInfoDTO">
+		SELECT COUNT(*) FROM AD_APPLY_TABLE A
+		<if test='category == null'>
+		WHERE A.STATE_CODE = 2 OR (A.STATE_CODE = 4
+		  AND A.CANCEL_APPLY_DATE IS NOT NULL)
+		</if>
+		<if test='category == "1"'>
+		WHERE A.STATE_CODE = 2
+		  AND A.POST_YN = 'N'
+		  AND A.CANCEL_APPLY_DATE IS NULL
+		  AND A.PAY_DATE_1ST IS NULL
+		   OR (A.PAY_DATE_1ST IS NOT NULL
+		   <![CDATA[
+		  AND A.PAY_DATE_1ST = TO_CHAR(SYSDATE,'YYYYMMDD'))
+		   ]]>
+		</if>
+		<if test='category == "2"'>
+		WHERE A.STATE_CODE = 2
+          AND A.CANCEL_APPLY_DATE IS NULL
+           <![CDATA[
+          AND A.POST_START_DATE <= TO_CHAR(SYSDATE,'YYYYMMDD')
+          AND TO_CHAR(SYSDATE,'YYYYMMDD') <= A.POST_END_DATE
+          ]]>
+		</if>
+		<if test='category == "3"'>
+		WHERE A.STATE_CODE = 2
+          AND (A.CANCEL_APPLY_DATE IS NULL
+          <![CDATA[
+          AND TO_CHAR(SYSDATE,'YYMMDD') > A.POST_END_DATE)
+          ]]>
+		</if>
+		<if test='category =="4"'>
+		WHERE A.CANCEL_APPLY_DATE IS NOT NULL
+		</if>		
+	  </select>
+	  
+	  <!-- 광고 관리 검색 시 갯수 조회 -->
+	  <select id="searchAdList" resultType="int" parameterType="AdminPageInfoDTO">
+		   SELECT COUNT(*) 
+		     FROM AD_APPLY_TABLE A
+		     JOIN USER_TABLE B ON B.USER_CODE = A.USER_CODE
+		    <where>
+		     <if test='searchCondition != null and searchCondition == "adCode"'>
+			  A.AD_CODE LIKE '%' || #{ searchValue } || '%'
+			</if>
+			<if test='searchCondition != null and searchCondition == "adTitle"'>
+			  A.AD_TITLE LIKE '%' || #{ searchValue } || '%'
+			</if>
+			<if test='searchCondition != null and searchCondition == "name"'>
+			  B.USER_NAME LIKE '%'|| #{ searchValue } || '%'
+			</if>
+			</where>		
+			<if test='category == null'>
+			  AND (A.STATE_CODE = 2 OR (A.STATE_CODE = 4
+			  AND A.CANCEL_APPLY_DATE IS NOT NULL))
+			</if>
+			<if test='category == "1"'>
+			  AND A.STATE_CODE = 2
+			  AND A.POST_YN = 'N'
+			  AND A.CANCEL_APPLY_DATE IS NULL
+			  AND A.PAY_DATE_1ST IS NULL
+			   OR (A.PAY_DATE_1ST IS NOT NULL
+			   <![CDATA[
+			  AND A.PAY_DATE_1ST = TO_CHAR(SYSDATE,'YYYYMMDD'))
+			   ]]>
+			</if>
+			<if test='category == "2"'>
+			  AND A.STATE_CODE = 2
+	          AND A.CANCEL_APPLY_DATE IS NULL
+	           <![CDATA[
+	          AND A.POST_START_DATE <= TO_CHAR(SYSDATE,'YYYYMMDD')
+	          AND TO_CHAR(SYSDATE,'YYYYMMDD') <= A.POST_END_DATE
+	          ]]>
+			</if>
+			<if test='category == "3"'>
+			  AND A.STATE_CODE = 2
+	          AND (A.CANCEL_APPLY_DATE IS NULL
+	          <![CDATA[
+	          AND TO_CHAR(SYSDATE,'YYMMDD') > A.POST_END_DATE)
+	          ]]>
+			</if>
+			<if test='category =="4"'>
+			  AND A.CANCEL_APPLY_DATE IS NOT NULL
+			</if>
+			
+	  </select>
+
+ 	  <!-- 광고 관리 리스트 -->
+	  <select id="selectAdAllList" resultMap="adAdmin" parameterType="AdminPageInfoDTO">
+		SELECT * 
+		  FROM (
+			    SELECT ROWNUM RN, C.* 
+			      FROM (
+			    	     SELECT 
+			                         A.AD_CODE
+                                   , A.USER_CODE
+                                   , B.USER_NAME
+                                   , B.USER_ID
+                                   , A.AD_TITLE
+                                   , A.AD_TYPE_CODE
+                                   , A.POST_START_DATE
+                                   , A.POST_END_DATE
+                                   , A.POST_YN
+                                   , A.PAY_DATE_1ST
+                                   , A.PAY_DATE_2ND
+                                   , A.CANCEL_APPLY_DATE
+                                   , A.REFUND_YN
+                                   , A.APPLY_DATE
+                                   , A.STATE_CODE
+                                   , C.DECISION_DATE
+                               FROM AD_APPLY_TABLE A 
+                               LEFT JOIN USER_TABLE B ON B.USER_CODE = A.USER_CODE
+                               LEFT JOIN DECISION_TABLE C ON A.DECISION_CODE = C.DECISION_CODE
+                            <if test='category == null'>
+							WHERE A.STATE_CODE = 2 OR (A.STATE_CODE = 4
+							  AND A.CANCEL_APPLY_DATE IS NOT NULL)
+							</if>
+							<if test='category == "1"'>
+							WHERE A.STATE_CODE = 2
+							  AND A.POST_YN = 'N'
+							  AND A.CANCEL_APPLY_DATE IS NULL
+							  AND A.PAY_DATE_1ST IS NULL
+							   OR (A.PAY_DATE_1ST IS NOT NULL
+							   <![CDATA[
+							  AND A.PAY_DATE_1ST = TO_CHAR(SYSDATE,'YYYYMMDD'))
+							   ]]>
+							</if>
+							<if test='category == "2"'>
+							WHERE A.STATE_CODE = 2
+					          AND A.CANCEL_APPLY_DATE IS NULL
+					           <![CDATA[
+					          AND A.POST_START_DATE <= TO_CHAR(SYSDATE,'YYYYMMDD')
+					          AND TO_CHAR(SYSDATE,'YYYYMMDD') <= A.POST_END_DATE
+					          ]]>
+							</if>
+							<if test='category == "3"'>
+							WHERE A.STATE_CODE = 2
+					          AND (A.CANCEL_APPLY_DATE IS NULL
+					          <![CDATA[
+					          AND TO_CHAR(SYSDATE,'YYMMDD') > A.POST_END_DATE)
+					          ]]>
+							</if>
+							<if test='category =="4"'>
+							WHERE A.CANCEL_APPLY_DATE IS NOT NULL
+							</if>		
+		                  ORDER BY A.AD_CODE DESC
+					        	) C
+				          )
+			              WHERE RN BETWEEN #{start} AND #{end}
+	  </select>
+	  
+	  <!-- 광고 관리 검색 시 조회 -->
+	  <select id="searchAdAllList" resultMap="adAdmin" parameterType="AdminPageInfoDTO">
+	  		SELECT * 
+		  FROM (
+			    SELECT ROWNUM RN, C.* 
+			      FROM (
+			    	     SELECT 
+			                         A.AD_CODE
+                                   , A.USER_CODE
+                                   , B.USER_NAME
+                                   , B.USER_ID
+                                   , A.AD_TITLE
+                                   , A.AD_TYPE_CODE
+                                   , A.POST_START_DATE
+                                   , A.POST_END_DATE
+                                   , A.POST_YN
+                                   , A.PAY_DATE_1ST
+                                   , A.PAY_DATE_2ND
+                                   , A.CANCEL_APPLY_DATE
+                                   , A.REFUND_YN
+                                   , A.APPLY_DATE
+                                   , A.STATE_CODE
+                                   , C.DECISION_DATE
+                               FROM AD_APPLY_TABLE A 
+                               LEFT JOIN USER_TABLE B ON B.USER_CODE = A.USER_CODE
+                               LEFT JOIN DECISION_TABLE C ON A.DECISION_CODE = C.DECISION_CODE
+                            <where>
+		     <if test='searchCondition != null and searchCondition == "adCode"'>
+			  A.AD_CODE LIKE '%' || #{ searchValue } || '%'
+			</if>
+			<if test='searchCondition != null and searchCondition == "adTitle"'>
+			  A.AD_TITLE LIKE '%' || #{ searchValue } || '%'
+			</if>
+			<if test='searchCondition != null and searchCondition == "name"'>
+			  B.USER_NAME LIKE '%'|| #{ searchValue } || '%'
+			</if>
+			</where>		
+			<if test='category == null'>
+			  AND (A.STATE_CODE = 2 OR (A.STATE_CODE = 4
+			  AND A.CANCEL_APPLY_DATE IS NOT NULL))
+			</if>
+			<if test='category == "1"'>
+			  AND A.STATE_CODE = 2
+			  AND A.POST_YN = 'N'
+			  AND A.CANCEL_APPLY_DATE IS NULL
+			  AND A.PAY_DATE_1ST IS NULL
+			   OR (A.PAY_DATE_1ST IS NOT NULL
+			   <![CDATA[
+			  AND A.PAY_DATE_1ST = TO_CHAR(SYSDATE,'YYYYMMDD'))
+			   ]]>
+			</if>
+			<if test='category == "2"'>
+			  AND A.STATE_CODE = 2
+	          AND A.CANCEL_APPLY_DATE IS NULL
+	           <![CDATA[
+	          AND A.POST_START_DATE <= TO_CHAR(SYSDATE,'YYYYMMDD')
+	          AND TO_CHAR(SYSDATE,'YYYYMMDD') <= A.POST_END_DATE
+	          ]]>
+			</if>
+			<if test='category == "3"'>
+			  AND A.STATE_CODE = 2
+	          AND (A.CANCEL_APPLY_DATE IS NULL
+	          <![CDATA[
+	          AND TO_CHAR(SYSDATE,'YYMMDD') > A.POST_END_DATE)
+	          ]]>
+			</if>
+			<if test='category =="4"'>
+			  AND A.CANCEL_APPLY_DATE IS NOT NULL
+			</if>
+		                  ORDER BY A.AD_CODE DESC
+					        	) C
+				          )
+			              WHERE RN BETWEEN #{start} AND #{end}
+	  </select>
+	  
+	  <!-- 광고 관리 게시 중일 때 '클릭수' 구하기 -->
+	  <select id="selectClickList" resultMap="adAdmin" parameterType="AdminPageInfoDTO" >
+	    SELECT 
+	           A.AD_CODE
+	         , NVL(B.CLICK,0) CLICK_NUM
+	         , A.USER_CODE
+     		 , B.USER_NAME
+     		 , B.USER_ID
+	         , A.AD_TITLE
+             , A.AD_TYPE_CODE
+             , A.POST_START_DATE
+             , A.POST_END_DATE
+             , A.POST_YN
+             , A.PAY_DATE_1ST
+             , A.PAY_DATE_2ND
+             , A.CANCEL_APPLY_DATE
+             , A.REFUND_YN
+             , A.APPLY_DATE
+             , A.STATE_CODE
+             , C.DECISION_DATE
+		  FROM AD_APPLY_TABLE A 
+	LEFT JOIN USER_TABLE B ON B.USER_CODE = A.USER_CODE
+    LEFT JOIN DECISION_TABLE C ON A.DECISION_CODE = C.DECISION_CODE
+	LEFT OUTER JOIN
+				(SELECT AD_CODE, COUNT(*) CLICK
+         		   FROM AD_CLICK_COUNT 
+       			  WHERE AD_CODE IN 
+      <foreach collection="list" item="click" open="(" separator="," close=")">
+	      	#{ click.adCode }
+	      </foreach> 
+         	   GROUP BY AD_CODE) B ON (A.AD_CODE = B.AD_CODE)
+      		   WHERE A.AD_CODE IN 
+      <foreach collection="list" item="click" open="(" separator="," close=")">
+	      	#{ click.adCode }
+	      </foreach> 
+	      ORDER BY A.AD_CODE DESC
+	  </select>
+	 
+</mapper>

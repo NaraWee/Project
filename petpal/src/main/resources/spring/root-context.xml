@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="configLocation" value="classpath:mybatis/mybatis-config.xml"/>
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
+	<bean id="rdataSource"
+      class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+      <property name="driverClassName"
+         value="oracle.jdbc.driver.OracleDriver" />
+      <property name="url"
+         value="jdbc:oracle:thin:@tjoeunkn.iptime.org:1521:xe" />
+      <property name="username" value="FINAL_503_TEAM_PETPAL" />
+      <property name="password" value="PETPAL" />
+      <property name="defaultAutoCommit" value="false" />
+   </bean>
+
+	  <bean id="mailSender" 
+					class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="smtp.gmail.com" /> <!-- gmail을 사용 -->
+        <property name="port" value="587" />
+        <property name="username" value="lifeworksh@gmail.com" />
+        <property name="password" value="knitchan1!" />
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.transport.protocol">smtp</prop>
+                <prop key="mail.smtp.auth">true</prop>
+                <prop key="mail.smtp.starttls.enable">true</prop>
+                <prop key="mail.debug">true</prop>
+            </props>
+        </property>
+    </bean>
+   <bean id="dataSource"
+      class="net.sf.log4jdbc.Log4jdbcProxyDataSource">
+      <constructor-arg ref="rdataSource"></constructor-arg>
+      <property name="logFormatter">
+         <bean class="net.sf.log4jdbc.tools.Log4JdbcCustomFormatter">
+            <property name="loggingType" value="MULTI_LINE" />
+            <property name="sqlPrefix" value="[SQL]" />
+         </bean>
+      </property>
+   </bean>
+		
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="search*" read-only="true" rollback-for="Exception" />
+			<tx:method name="select*" read-only="true" rollback-for="Exception" />
+			<tx:method name="insert*" rollback-for="Exception" propagation="REQUIRED" isolation="SERIALIZABLE"/>
+			<tx:method name="update*" rollback-for="Exception" propagation="REQUIRED" isolation="SERIALIZABLE" />
+			<tx:method name="delete*" rollback-for="Exception" propagation="REQUIRED" isolation="SERIALIZABLE" />
+		</tx:attributes>
+	</tx:advice> 
+	
+	<aop:config proxy-target-class="true">
+		<aop:pointcut id="serviceMethod"
+			expression="execution(* com.nobanryeo.petpal..*ServiceImpl.*(..))" />
+		<aop:advisor id="transactionAdvisor" pointcut-ref="serviceMethod"
+			advice-ref="txAdvice" />
+	</aop:config>
+	
+	<mybatis-spring:scan 
+		base-package="com.nobanryeo.petpal.admin.ad.dao, 
+					  com.nobanryeo.petpal.admin.report.dao,
+					  com.nobanryeo.petpal.user.ad.dao,
+					  com.nobanryeo.petpal.user.adopt.dao,
+					  com.nobanryeo.petpal.user.mypage.dao,
+					  com.nobanryeo.petpal.admin.ask.dao,
+					  com.nobanryeo.petpal.admin.report.dao,
+					  com.nobanryeo.petpal.admin.pay.dao,
+					  com.nobanryeo.petpal.admin.manage.dao,
+					  com.nobanryeo.petpal.admin.review.dao,
+					  com.nobanryeo.petpal.admin.mainpage.dao,
+					  com.nobanryeo.petpal.admin.blacklist.dao,
+					  com.nobanryeo.petpal.admin.email.dao"/>
+	
+</beans>

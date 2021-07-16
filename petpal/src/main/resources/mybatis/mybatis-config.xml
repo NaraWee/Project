@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+ <configuration>
+  	<settings>
+ 		<setting name="jdbcTypeForNull" value="NULL"/>
+ 	</settings>
+ 
+ 	<typeAliases>
+ 		<typeAlias alias="UserInfoDTO" type="com.nobanryeo.petpal.user.dto.UserInfoDTO"/>
+ 		<typeAlias alias="PageDTO" type="com.nobanryeo.petpal.user.dto.PageDTO"/>
+ 		<typeAlias alias="ReportManageDTO" type="com.nobanryeo.petpal.user.dto.ReportManageDTO"/>
+ 		<typeAlias alias="BoradAndCommentDTO" type="com.nobanryeo.petpal.user.dto.BoradAndCommentDTO"/>
+ 		<typeAlias alias="MissingDTO" type="com.nobanryeo.petpal.user.dto.MissingDTO"/>
+ 		<typeAlias alias="ReviewDTO" type="com.nobanryeo.petpal.user.dto.ReviewDTO"/>
+ 		<typeAlias alias="ReviewReplyDTO" type="com.nobanryeo.petpal.user.dto.ReviewReplyDTO"/>
+ 		<typeAlias alias="ReviewReportDTO" type="com.nobanryeo.petpal.user.dto.ReviewReportDTO"/>
+ 		
+ 	
+ 		<typeAlias alias="FreeBoardDTO" type="com.nobanryeo.petpal.user.dto.FreeBoardDTO"/>
+ 		<typeAlias alias="FreeBoardReplyDTO" type="com.nobanryeo.petpal.user.dto.FreeBoardReplyDTO"/>
+ 		<typeAlias alias="MessageTableDTO" type="com.nobanryeo.petpal.user.dto.MessageTableDTO"/>
+ 		<typeAlias alias="FreeBoardReportDTO" type="com.nobanryeo.petpal.user.dto.FreeBoardReportDTO"/>
+ 		<typeAlias alias="AdDTO" type="com.nobanryeo.petpal.user.dto.AdDTO"/>
+ 		<typeAlias alias="AdQnADTO" type="com.nobanryeo.petpal.user.dto.AdQnADTO"/>
+ 		<typeAlias alias="ShareInfoDTO" type="com.nobanryeo.petpal.user.dto.ShareInfoDTO"/>
+ 		<typeAlias alias="FriendlyPlaceDTO" type="com.nobanryeo.petpal.user.dto.FriendlyPlaceDTO"/>
+ 		
+ 		
+ 		<typeAlias alias="AdoptDTO" type="com.nobanryeo.petpal.user.dto.AdoptDTO"/>
+ 		<typeAlias alias="PictureDTO" type="com.nobanryeo.petpal.user.dto.PictureDTO"/>
+ 		<typeAlias alias="AdoptReplyDTO" type="com.nobanryeo.petpal.user.dto.AdoptReplyDTO"/>
+ 		<typeAlias alias="ShareFreeDTO" type="com.nobanryeo.petpal.user.dto.ShareFreeDTO"/>
+ 		
+ 		<typeAlias alias="BoardReplyDTO" type="com.nobanryeo.petpal.user.dto.BoardReplyDTO"/>
+ 		<typeAlias alias="AdoptPictureManageDTO" type="com.nobanryeo.petpal.user.dto.AdoptPictureManageDTO"/>
+ 		<typeAlias alias="MissingPictureDTO" type="com.nobanryeo.petpal.user.dto.MissingPictureDTO"/>
+
+ 		<typeAlias alias="AskDTO" type="com.nobanryeo.petpal.admin.dto.AskDTO"/>
+ 		<typeAlias alias="ReportDTO" type="com.nobanryeo.petpal.admin.dto.ReportDTO"/>
+ 		<typeAlias alias="ReportDetailDTO" type="com.nobanryeo.petpal.admin.dto.ReportDetailDTO"/>
+		<typeAlias alias="AskDetailDTO" type="com.nobanryeo.petpal.admin.dto.AskDetailDTO"/>
+ 		
+ 		<typeAlias alias="AdAdminDTO" type="com.nobanryeo.petpal.admin.dto.AdAdminDTO"/>
+ 		<typeAlias alias="DecisionDTO" type="com.nobanryeo.petpal.admin.dto.DecisionDTO"/>
+ 		<typeAlias alias="AdminPageInfoDTO" type="com.nobanryeo.petpal.admin.dto.AdminPageInfoDTO"/>
+ 		<typeAlias alias="AdminReviewDTO" type="com.nobanryeo.petpal.admin.dto.AdminReviewDTO"/>
+ 		<typeAlias alias="reportPopupDTO" type="com.nobanryeo.petpal.admin.dto.reportPopupDTO"/>
+ 		<typeAlias alias="BoardTotalViewsDTO" type="com.nobanryeo.petpal.admin.dto.BoardTotalViewsDTO"/>
+ 		
+ 		<typeAlias alias="AdminReviewDetailDTO" type="com.nobanryeo.petpal.admin.dto.AdminReviewDetailDTO"/>
+ 		<typeAlias alias="EmailDTO" type="com.nobanryeo.petpal.admin.dto.EmailDTO"/>
+ 		<!-- <typeAlias alias="SearchCriteria" type="com.nobanryeo.petpal.admin.dto.SearchCriteria"/> -->
+ 		
+ 	</typeAliases>
+ </configuration>

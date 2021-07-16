@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+ <mapper namespace="com.nobanryeo.petpal.user.adopt.dao.ShareFreeMapper">
+ 
+ 	<resultMap type="ShareFreeDTO" id="sharefreeResultMap">
+ 		<id column="BOARD_CODE" property="boardCode"/>
+ 		<result column="BOARD_TITLE" property="boardTitle"/>
+ 		<result column="BOARD_CONTENT" property="boardContent"/>
+ 		<result column="BOARD_DELETE_YN" property="boardDeleteYn"/>
+ 		<result column="BOARD_VIEWS" property="boardViews"/>
+ 		<result column="BOARD_POST_DATE" property="boardDate"/>
+ 		<result column="STATE_CODE" property="stateCode"/>
+ 		<result column="STATE_NAME" property="stateName"/>
+ 		<result column="USER_CODE" property="userCode"/>
+ 		<result column="USER_NIKNAME" property="userNickname"/>
+ 		<result column="PICTURE_CODE" property="pictureCode"/>
+ 		<result column="PICTURE_DELETE_YN" property="pictureDeleteYN"/>
+ 		<result column="PICTURE_NEW_NAME" property="pictureNewName"/>
+ 		<result column="PICTURE_UTIL_PATH" property="pictureUtilPath"/>
+ 	</resultMap>
+ 	
+ 	<resultMap type="PictureDTO" id="pictureInsertResultset">
+  		<id column="PICTURE_CODE" property="pictureCode"/>
+  		<result column="PICTURE_NAME" property="pictureName"/>
+  		<result column="PICTURE_URL" property="pictureURL"/>
+  		<result column="PICTURE_UPLOAD_DATE" property="pictureUploadDate"/>
+  		<result column="PICTURE_DELETE_YN" property="pictureDeleteYN"/>
+  		<result column="PICTURE_NEW_NAME" property="pictureNewName"/>
+  		<result column="PICTURE_UTIL_PATH" property="pictureUtilPath"/>
+  	</resultMap>
+  	
+  	<resultMap id="messageResultSet" type="MessageTableDTO">
+		<id column="MESSAGE_CODE" property="messageCode"/>
+		<result column="MESSAGE_CONTENT" property="messageContent"/>
+		<result column="MESSAGE_DATE" property="messageDate"/>
+		<result column="USER_CODE1" property="userCode1"/>
+		<result column="USER_CODE" property="userCode"/>
+		<result column="SEND_NICKNAME" property="sendUserNick"/>
+		<result column="RECEIVE_NICKNAME" property="receiveUserNick"/>
+	</resultMap>
+	<resultMap id="reportResultSet" type="FreeBoardReportDTO">
+		<id column="REPORT_CODE" property="reportCode"/>
+		<result column="REPORT_TITLE" property="reportTitle"/>
+		<result column="REPORT_CONTENT" property="reportContent"/>
+		<result column="REPORT_DATE" property="reportDate"/>
+		<result column="DECISION_CODE" property="decisionCode"/>
+		<result column="USER_CODE" property="userCode"/>
+		<result column="BOARD_CODE" property="boardCode"/>
+	</resultMap>
+  	
+ 	
+ 	<select id="selectTotalCount" resultType="int">
+ 		SELECT
+		       COUNT(*)
+		  FROM SHARE_BOARD S
+		  JOIN USER_TABLE U ON (U.USER_CODE = S.USER_CODE)
+		  JOIN SHARE_PICTURE_MANAGE SM ON(S.BOARD_CODE = SM.BOARD_CODE)
+		  JOIN PICTURE_TABLE P ON(P.PICTURE_CODE = SM.PICTURE_CODE)
+		 WHERE S.BOARD_DELETE_YN = 'N'
+		   AND P.PICTURE_DELETE_YN = 'N'
+ 	</select>
+ 	<select id="selectTotalIngCount" resultType="int">
+ 		SELECT
+		       COUNT(*)
+		  FROM SHARE_BOARD S
+		  JOIN USER_TABLE U ON (U.USER_CODE = S.USER_CODE)
+		  JOIN SHARE_PICTURE_MANAGE SM ON(S.BOARD_CODE = SM.BOARD_CODE)
+		  JOIN PICTURE_TABLE P ON(P.PICTURE_CODE = SM.PICTURE_CODE)
+		 WHERE S.BOARD_DELETE_YN = 'N'
+		   AND P.PICTURE_DELETE_YN = 'N'
+		   AND S.STATE_CODE = 1
+ 	</select>
+ 	<select id="selectTotalComCount" resultType="int">
+ 		SELECT
+		       COUNT(*)
+		  FROM SHARE_BOARD S
+		  JOIN USER_TABLE U ON (U.USER_CODE = S.USER_CODE)
+		  JOIN SHARE_PICTURE_MANAGE SM ON(S.BOARD_CODE = SM.BOARD_CODE)
+		  JOIN PICTURE_TABLE P ON(P.PICTURE_CODE = SM.PICTURE_CODE)
+		 WHERE S.BOARD_DELETE_YN = 'N'
+		   AND P.PICTURE_DELETE_YN = 'N'
+		   AND S.STATE_CODE = 2
+ 	</select>
+ 	<select id="selectSearchCount" parameterType="string" resultType="int">
+ 		SELECT
+		       COUNT(*)
+		  FROM SHARE_BOARD S
+		  JOIN USER_TABLE U ON (U.USER_CODE = S.USER_CODE)
+		  JOIN SHARE_PICTURE_MANAGE SM ON(S.BOARD_CODE = SM.BOARD_CODE)
+		  JOIN PICTURE_TABLE P ON(P.PICTURE_CODE = SM.PICTURE_CODE)
+		 WHERE S.BOARD_DELETE_YN = 'N'
+		   AND P.PICTURE_DELETE_YN = 'N'
+		   AND S.BOARD_TITLE LIKE '%' ||#{keyword}|| '%'
+ 	</select>
+ 	
+ 	<select id="selectShareFreeIngList" parameterType="hashmap" resultMap="sharefreeResultMap">
+ 		SELECT *
+		  FROM(
+		        SELECT ROWNUM RN, R.*
+		          FROM(
+		                SELECT S.BOARD_CODE
+		                     , S.BOARD_TITLE
+		                     , S.BOARD_CONTENT
+		                     , S.BOARD_DELETE_YN
+		                     , S.BOARD_VIEWS
+		                     , S.STATE_CODE
+		                     , ST.STATE_NAME
+		                     , U.USER_NIKNAME
+		                     , P.PICTURE_UTIL_PATH
+		                  FROM SHARE_BOARD S
+		                  JOIN STATE_TABLE ST ON (ST.STATE_CODE = S.STATE_CODE)
+		                  JOIN USER_TABLE U ON (U.USER_CODE = S.USER_CODE)
+		                  JOIN SHARE_PICTURE_MANAGE SM ON(S.BOARD_CODE = SM.BOARD_CODE)
+		                  JOIN PICTURE_TABLE P ON(P.PICTURE_CODE = SM.PICTURE_CODE)
+		                 WHERE S.BOARD_DELETE_YN = 'N'
+		                   AND P.PICTURE_DELETE_YN = 'N'
+		                   AND S.STATE_CODE = 1
+		                 ORDER BY S.BOARD_POST_DATE DESC
+		                 )R
+		            )
+		    WHERE RN BETWEEN  #{pageInfo.start} AND #{pageInfo.end}
+ 	</select>
+ 	<select id="selectShareFreeComList" parameterType="hashmap" resultMap="sharefreeResultMap">
+ 		SELECT *
+		  FROM(
+		        SELECT ROWNUM RN, R.*
+		          FROM(
+		                SELECT S.BOARD_CODE
+		                     , S.BOARD_TITLE
+		                     , S.BOARD_CONTENT
+		                     , S.BOARD_DELETE_YN
+		                     , S.BOARD_VIEWS
+		                     , S.STATE_CODE
+		                     , ST.STATE_NAME
+		                     , U.USER_NIKNAME
+		                     , P.PICTURE_UTIL_PATH
+		                  FROM SHARE_BOARD S
+		                  JOIN STATE_TABLE ST ON (ST.STATE_CODE = S.STATE_CODE)
+		                  JOIN USER_TABLE U ON (U.USER_CODE = S.USER_CODE)
+		                  JOIN SHARE_PICTURE_MANAGE SM ON(S.BOARD_CODE = SM.BOARD_CODE)
+		                  JOIN PICTURE_TABLE P ON(P.PICTURE_CODE = SM.PICTURE_CODE)
+		                 WHERE S.BOARD_DELETE_YN = 'N'
+		                   AND P.PICTURE_DELETE_YN = 'N'
+		                   AND S.STATE_CODE = 2
+		                 ORDER BY S.BOARD_POST_DATE DESC
+		                 )R
+		            )
+		    WHERE RN BETWEEN  #{pageInfo.start} AND #{pageInfo.end}
+ 	</select>
+ 	<select id="selectShareFreeList" parameterType="hashmap" resultMap="sharefreeResultMap">
+ 		SELECT *
+		  FROM(
+		        SELECT ROWNUM RN, R.*
+		          FROM(
+		                SELECT S.BOARD_CODE
+		                     , S.BOARD_TITLE
+		                     , S.BOARD_CONTENT
+		                     , S.BOARD_DELETE_YN
+		                     , S.BOARD_VIEWS
+		                     , S.STATE_CODE
+		                     , ST.STATE_NAME
+		                     , U.USER_NIKNAME
+		                     , P.PICTURE_UTIL_PATH
+		                  FROM SHARE_BOARD S
+		                  JOIN STATE_TABLE ST ON (ST.STATE_CODE = S.STATE_CODE)
+		                  JOIN USER_TABLE U ON (U.USER_CODE = S.USER_CODE)
+		                  JOIN SHARE_PICTURE_MANAGE SM ON(S.BOARD_CODE = SM.BOARD_CODE)
+		                  JOIN PICTURE_TABLE P ON(P.PICTURE_CODE = SM.PICTURE_CODE)
+		                 WHERE S.BOARD_DELETE_YN = 'N'
+		                   AND P.PICTURE_DELETE_YN = 'N'
+		                 ORDER BY S.BOARD_POST_DATE DESC
+		                 )R
+		            )
+		    WHERE RN BETWEEN  #{pageInfo.start} AND #{pageInfo.end}
+ 	</select>
+ 	<select id="selectShareFreeSearchList" parameterType="hashmap" resultMap="sharefreeResultMap">
+ 		SELECT *
+		  FROM(
+		        SELECT ROWNUM RN, R.*
+		          FROM(
+		                SELECT S.BOARD_CODE
+		                     , S.BOARD_TITLE
+		                     , S.BOARD_CONTENT
+		                     , S.BOARD_DELETE_YN
+		                     , S.BOARD_VIEWS
+		                     , S.STATE_CODE
+		                     , ST.STATE_NAME
+		                     , U.USER_NIKNAME
+		                     , P.PICTURE_UTIL_PATH
+		                  FROM SHARE_BOARD S
+		                  JOIN STATE_TABLE ST ON (ST.STATE_CODE = S.STATE_CODE)
+		                  JOIN USER_TABLE U ON (U.USER_CODE = S.USER_CODE)
+		                  JOIN SHARE_PICTURE_MANAGE SM ON(S.BOARD_CODE = SM.BOARD_CODE)
+		                  JOIN PICTURE_TABLE P ON(P.PICTURE_CODE = SM.PICTURE_CODE)
+		                 WHERE S.BOARD_DELETE_YN = 'N'
+		                   AND P.PICTURE_DELETE_YN = 'N'
+		                   AND  S.BOARD_TITLE LIKE '%' ||#{keyword}|| '%'
+		                 ORDER BY S.BOARD_POST_DATE DESC
+		                 )R
+		            )
+		    WHERE RN BETWEEN  #{pageInfo.start} AND #{pageInfo.end}
+ 	</select>
+ 	
+ 	<insert id="insertNewBoard" parameterType="ShareFreeDTO">
+ 		INSERT
+ 		  INTO SHARE_BOARD
+ 		VALUES
+ 		(
+ 		  SHARE_BOARD_SEQ.NEXTVAL
+ 		, #{boardTitle}
+ 		, #{boardContent}
+ 		, 'N'
+ 		, 0
+ 		, SYSDATE
+ 		, 1
+ 		, #{userCode}
+ 		)
+ 		
+ 		<selectKey keyProperty="boardCode" order="AFTER" resultType="int">
+ 		   SELECT
+ 		         SHARE_BOARD_SEQ.CURRVAL
+ 		     FROM DUAL
+ 		</selectKey>
+ 	</insert>
+ 	
+ 	 	<insert id="insertNewPicture" parameterType="PictureDTO" >
+ 		INSERT 
+	  	 INTO PICTURE_TABLE
+	  	VALUES
+	  	(
+	  	  PIC_CODE_SEQ.NEXTVAL
+	  	, #{pictureName}
+	  	, #{pictureURL}
+	  	, SYSDATE
+	  	, 'N'
+	  	, #{pictureNewName}
+	  	, #{pictureUtilPath}
+	  	)
+ 	</insert>
+ 	
+ 	<insert id="insertMidBoard" >
+ 		<selectKey keyProperty="pictureCode" order="BEFORE" resultType="int">
+	  	SELECT
+	  	      PIC_CODE_SEQ.CURRVAL
+	  	  FROM DUAL
+	  </selectKey>
+ 	    INSERT
+	  	INTO SHARE_PICTURE_MANAGE
+	  	(
+	  	  BOARD_CODE
+	  	, PICTURE_CODE
+	  	)
+	  	VALUES
+	  	(
+	  	#{boardCode}
+	   ,#{pictureCode}
+	  	)
+ 	</insert>
+ 	
+ 	<update id="updateShareBoardViews" parameterType="int">
+ 		UPDATE SHARE_BOARD
+ 		   SET BOARD_VIEWS =BOARD_VIEWS+1
+ 		 WHERE BOARD_CODE = #{boardCode}
+ 	</update>
+ 	
+ 	<select id="selectBoardDetail" parameterType="int" resultMap="sharefreeResultMap">
+ 	 	SELECT 
+ 	 		   S.BOARD_CODE
+             , S.BOARD_TITLE
+             , S.BOARD_CONTENT
+             , S.BOARD_DELETE_YN
+             , S.BOARD_VIEWS
+             , S.STATE_CODE
+             , S.USER_CODE
+             , S.BOARD_POST_DATE
+             , ST.STATE_NAME
+             , U.USER_NIKNAME
+             , P.PICTURE_UTIL_PATH
+          FROM SHARE_BOARD S
+          JOIN STATE_TABLE ST ON (ST.STATE_CODE = S.STATE_CODE)
+          JOIN USER_TABLE U ON (U.USER_CODE = S.USER_CODE)
+          JOIN SHARE_PICTURE_MANAGE SM ON(S.BOARD_CODE = SM.BOARD_CODE)
+          JOIN PICTURE_TABLE P ON(P.PICTURE_CODE = SM.PICTURE_CODE)
+         WHERE S.BOARD_DELETE_YN = 'N'
+           AND P.PICTURE_DELETE_YN = 'N' 
+           AND S.BOARD_CODE = #{boardCode}
+ 	</select>
+ 	 <update id="putMissingStatus" parameterType="int">
+	  	  UPDATE SHARE_BOARD
+	         SET STATE_CODE = 2
+	       WHERE BOARD_CODE = #{boardCode}
+	  
+	 </update>
+	 
+	 <insert id="insertMessage" parameterType="MessageTableDTO">
+		  INSERT
+		  	  INTO MESSAGE_TABLE
+		  	VALUES
+		  	(
+			  MESSAGE_CODE_SEQ.NEXTVAL
+			, #{messageContent}
+			, SYSDATE
+			, #{userCode1}
+			, #{userCode}
+			, #{sendUserNick}
+			, #{receiveUserNick}
+		  	)
+	  
+	  </insert>
+	  
+	  	  <insert id="insertBoardReport" parameterType="FreeBoardReportDTO">
+	  	INSERT
+	  	  INTO REPORT_MANAGE
+	  	VALUES
+	  	(
+	  	 REPORT_MANAGE_SEQ.NEXTVAL
+	   , #{reportTitle}
+	   , #{reportContent}
+	   , SYSDATE
+	   , DEFAULT
+	   , #{userCode}
+	  	)
+	  
+	  </insert>
+	  <insert id="insertBoardReportMid" parameterType="FreeBoardReportDTO">
+	  	<selectKey keyProperty="reportCode" order="BEFORE" resultType="int">
+	  		SELECT
+		  	      REPORT_MANAGE_SEQ.CURRVAL
+		  	  FROM DUAL
+	  	</selectKey>
+	  	INSERT
+	  	  INTO SHARE_BOARD_REPORT
+	  	VALUES
+	  	(
+	  	 #{boardCode}
+	   , #{reportCode}
+	  	)
+	  </insert>
+	  
+	  <update id="updateBoard" parameterType="ShareFreeDTO">
+	      UPDATE SHARE_BOARD
+	         SET BOARD_TITLE = #{boardTitle}
+	           , BOARD_CONTENT = #{boardContent}
+	       WHERE BOARD_CODE = #{boardCode}
+	  </update>
+	  
+	  <update id="updatePicture" parameterType="PictureDTO">
+	      <selectKey keyProperty="pictureCode" order="BEFORE" resultType="int">
+	          SELECT PICTURE_CODE
+	            FROM SHARE_PICTURE_MANAGE
+	           WHERE BOARD_CODE = #{boardCode}
+	      </selectKey>
+	  	  UPDATE PICTURE_TABLE
+	  	    SET PICTURE_NAME =#{pictureName}
+			  , PICTURE_URL = #{pictureURL}
+			  , PICTURE_NEW_NAME = #{pictureNewName}
+			  , PICTURE_UTIL_PATH = #{pictureUtilPath}
+	      WHERE PICTURE_CODE = #{pictureCode}
+	  </update>
+ </mapper>

@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nobanryeo.petpal.user.mypage.dao.ReviewMapper">
+
+	<resultMap id="reviewResultSet" type="ReviewDTO">
+		<id column="BOARD_CODE" property="boardCode"/>
+		<result column="BOARD_TITLE" property="boardTitle"/>
+		<result column="BOARD_CONTENT" property="boardContent"/>
+		<result column="BOARD_VIEWS" property="boardViews"/>
+		<result column="BOARD_POST_DATE" property="boardPostDate"/>
+		<result column="BOARD_DELETE_YN" property="boardDeleteYn"/>
+		<result column="USER_CODE" property="userCode"/>
+		<result column="USER_NIKNAME" property="userNickName"/>
+		<result column="CATEGORY" property="category"/>
+	</resultMap>
+	
+	<resultMap id="reviewReplyResultSet" type="ReviewReplyDTO">
+		<id column="REPLY_CODE" property="replyCode"/>
+		<result column="REPLY_CONTENT" property="replyContent"/>
+		<result column="REPLY_DATE" property="replyDate"/>
+		<result column="REPLY_DELETE_YN" property="replyDeleteYN"/>
+		<result column="REPORT_YN" property="reportYN"/>
+		<result column="BOARD_CODE" property="boardCode"/>
+		<result column="USER_NIKNAME" property="userNickName"/>
+		<result column="USER_CODE" property="userCode"/>
+		<result column="USER_CODE1" property="userCode1"/>
+		<result column="REPLY_REPORT_TITLE" property="replyReportTitle"/>
+		<result column="REPLY_REPORT_CONTENT" property="replyReportContent"/>
+		<result column="REPLY_REPORT_DATE" property="replyReportDate"/>
+		<result column="DECISION_CODE" property="decisionCode"/>
+	</resultMap>
+	
+	<resultMap id="messageResultSet" type="MessageTableDTO">
+		<id column="MESSAGE_CODE" property="messageCode"/>
+		<result column="MESSAGE_CONTENT" property="messageContent"/>
+		<result column="MESSAGE_DATE" property="messageDate"/>
+		<result column="USER_CODE1" property="userCode1"/>
+		<result column="USER_CODE" property="userCode"/>
+		<result column="SEND_NICKNAME" property="sendUserNick"/>
+		<result column="RECEIVE_NICKNAME" property="receiveUserNick"/>
+	</resultMap>
+	
+	<resultMap id="pictureResultSet" type="PictureDTO">
+		<id column="PICTURE_CODE" property="pictureCode"/>
+		<result column="PICTURE_NAME" property="pictureName"/>
+		<result column="PICTURE_URL" property="pictureURL"/>
+		<result column="PICTURE_UPLOAD_DATE" property="pictureUploadDate"/>
+		<result column="PICTURE_DELETE_YN" property="pictureDeleteYN"/>
+		<result column="PICTURE_NEW_NAME" property="pictureNewName"/>
+		<result column="BOARD_CODE" property="boardCode"/>
+		<result column="PICTURE_UTIL_PATH" property="pictureUtilPath"/>
+		<result column="USER_CODE" property="userCode"/>
+	</resultMap>
+	
+	<resultMap id="adResultSet" type="AdDTO">
+		<id column="AD_CODE" property="adCode"/>
+		<result column="COMPANY_NAME" property="companyName"/>
+		<result column="APPLY_DATE" property="applyDate"/>
+		<result column="COMPANY_NUMBER" property="companyNumber"/>
+		<result column="COMPANY_PHONE" property="companyPhone"/>
+		<result column="COMPANY_EMAIL" property="companyEmail"/>
+		<result column="AD_CONTENT" property="adContent"/>
+		<result column="POST_YN" property="postYn"/>
+		<result column="REFUND_YN" property="refundYn"/>
+		<result column="PAY_DATE_2ND" property="payDate2nd"/>
+		<result column="PICTURE_CODE" property="pictureCode"/>
+		<result column="PAY_DATE_1ST" property="payDate1st"/>
+		<result column="USER_CODE" property="userCode"/>
+		<result column="AD_TYPE_CODE" property="adTypeCode"/>
+		<result column="AD_TITLE" property="adTitle"/>
+		<result column="PAY_METHOD" property="payMethod"/>
+		<result column="DECISION_CODE" property="decisionCode"/>
+		<result column="CANCEL_APPLY_DATE" property="cancelApplyDate"/>
+		<result column="POST_START_DATE" property="postStartDate"/>
+		<result column="POST_END_DATE" property="postEndDate"/>
+		<result column="STATE_CODE" property="stateCode"/>
+		<result column="CLICK_DATE" property="clickDate"/>
+		<result column="AD_TYPE_NAME" property="adTypeName"/>
+		<result column="AD_PRICE" property="adPrice"/>
+		<result column="AD_WEEK" property="adWeek"/>
+		<result column="CLICK_COUNT" property="clickCount"/>
+		<result column="MORE_PAY_AMOUNT" property="morePayAmount"/>
+		<result column="LEADER_NAME" property="leaderName"/>
+		<result column="COMPANY_LOCATION" property="companyLocation"/>
+		<result column="INDUSTRY" property="industry"/>
+		<result column="INDUSTRY_DETAIL" property="industryDetail"/>
+		<result column="PICTURE_NAME" property="pictureName"/>
+		<result column="PICTURE_URL" property="pictureUrl"/>
+		<result column="PICTURE_UPLOAD_DATE" property="pictureUploadDate"/>
+		<result column="PICTURE_DELETE_YN" property="pictureDeleteYn"/>
+		<result column="PICTURE_NEW_NAME" property="pictureNewName"/>
+		<result column="PICTURE_UTIL_PATH" property="pictureUtilPath"/>
+		<result column="DECISION_DATE" property="decisionDate"/>
+	</resultMap>
+
+	<select id="selectReviewPostCount" resultType="int">
+		SELECT 
+		       COUNT(*)
+		  FROM REVIEW_BOARD
+		 WHERE BOARD_DELETE_YN = 'N'
+	</select>
+
+	<select id="selectReviewPostList" resultMap="reviewResultSet">
+		SELECT * 
+		  FROM (SELECT ROWNUM RN, A.* 
+		          FROM (SELECT 
+		                        A.BOARD_CODE
+                              , A.BOARD_TITLE
+                              , A.BOARD_CONTENT
+							  , A.BOARD_VIEWS
+							  , A.BOARD_POST_DATE
+							  , A.BOARD_DELETE_YN
+							  , A.USER_CODE
+							  , B.USER_NIKNAME
+		          FROM REVIEW_BOARD A
+		          JOIN USER_TABLE B ON(A.USER_CODE = B.USER_CODE)
+		         WHERE BOARD_DELETE_YN = 'N'
+		      ORDER BY BOARD_POST_DATE DESC) A)
+			WHERE RN BETWEEN #{ start } AND #{ end }
+		      ORDER BY BOARD_POST_DATE DESC	
+	</select>
+	
+	<update id="updateViewsCount" parameterType="int">
+		UPDATE REVIEW_BOARD
+		   SET BOARD_VIEWS = BOARD_VIEWS + 1
+	     WHERE BOARD_CODE = #{ boardCode }
+	</update>
+	
+	<select id="selectReviewDetail" parameterType="ReviewDTO" resultMap="reviewResultSet">
+		SELECT
+               A.BOARD_TITLE
+             , A.BOARD_VIEWS
+             , A.BOARD_POST_DATE
+             , A.BOARD_CONTENT
+             , A.BOARD_CODE
+             , A.USER_CODE
+             , B.USER_NIKNAME
+          FROM REVIEW_BOARD A
+          JOIN USER_TABLE B ON (B.USER_CODE = A.USER_CODE)
+         WHERE A.BOARD_DELETE_YN = 'N'
+           AND A.BOARD_CODE = #{ boardCode }
+	</select>
+	
+	<select id="selectReviewImg" parameterType="PictureDTO" resultMap="pictureResultSet">
+        SELECT A.PICTURE_UTIL_PATH
+          FROM PICTURE_TABLE A
+          JOIN REVIEW_PICTURE_MANAGE B ON(B.PICTURE_CODE = A.PICTURE_CODE)
+         WHERE B.BOARD_CODE = #{ boardCode }    
+	</select>
+	
+	<select id="selectReviewReply" resultMap="reviewReplyResultSet" parameterType="ReviewReplyDTO">
+		SELECT
+               D.USER_NIKNAME
+             , A.REPLY_CONTENT
+             , A.REPLY_DATE
+             , A.REPLY_DELETE_YN
+             , B.BOARD_CODE
+             , A.REPLY_CODE
+             , D.USER_CODE
+             , A.REPORT_YN
+          FROM REPLY_MANAGE A
+          JOIN REVIEW_BOARD_REPLY B ON(B.REPLY_CODE = A.REPLY_CODE)
+          JOIN REVIEW_BOARD C ON(C.BOARD_CODE = B.BOARD_CODE)
+          JOIN USER_TABLE D ON(D.USER_CODE = B.USER_CODE)
+         WHERE B.BOARD_CODE = #{ boardCode }
+         ORDER BY A.REPLY_DATE DESC
+	</select>
+	
+	<insert id="insertWriteReviewBoard" parameterType="ReviewDTO">
+		INSERT
+		  INTO REVIEW_BOARD
+		VALUES (
+				 REVIEW_BOARD_SEQ.NEXTVAL
+		       , #{ boardTitle }
+		       , #{ boardContent }
+		       , 0
+		       , SYSDATE
+		       , 'N'
+		       , #{ userCode }
+		       )
+	</insert>
+	
+	<select id="selectBoardCode" resultType="_int">
+		SELECT REVIEW_BOARD_SEQ.CURRVAL
+	  	  FROM DUAL
+	</select>
+	
+	<insert id="insertReviewBoardImg" parameterType="PictureDTO">
+		INSERT
+		  INTO PICTURE_TABLE
+		VALUES ( 
+				 PIC_CODE_SEQ.NEXTVAL
+		       , #{ pictureName }
+			   , #{ pictureURL }
+               , SYSDATE
+               , 'N'
+               , #{ pictureNewName }
+               , #{ pictureUtilPath }
+		       )
+	</insert>
+	
+	<insert id="insertReviewBoardImg2" parameterType="PictureDTO">
+		<selectKey keyProperty="pictureCode" order="BEFORE" resultType="int">
+	  		SELECT PIC_CODE_SEQ.CURRVAL
+	  	  	  FROM DUAL
+	  	</selectKey>
+		INSERT
+		  INTO REVIEW_PICTURE_MANAGE
+		VALUES ( 
+				 #{ boardCode }
+		       , #{ pictureCode }
+		       )
+	</insert>
+	
+	<insert id="insertReviewBoardMessage" parameterType="MessageTableDTO">
+		<selectKey keyProperty="sendUserNick" order="BEFORE" resultType="string">
+			SELECT
+			       USER_NIKNAME
+			  FROM USER_TABLE
+			 WHERE USER_CODE = #{ userCode }
+		</selectKey>
+		INSERT
+		  INTO MESSAGE_TABLE
+		VALUES ( 
+				 MESSAGE_CODE_SEQ.NEXTVAL
+		       , #{ messageContent }
+		       , SYSDATE
+		       , #{ userCode1 }
+		       , #{ userCode }
+		       , #{ sendUserNick }
+		       , #{ receiveUserNick }
+		       )
+	</insert>
+	
+	<insert id="insertReviewBoardReport" parameterType="ReviewReportDTO">
+		<selectKey keyProperty="reportTitle" order="BEFORE" resultType="string">
+			SELECT
+			       BOARD_TITLE
+			  FROM REVIEW_BOARD
+			 WHERE BOARD_CODE = #{ boardCode }
+		</selectKey>
+			INSERT ALL
+			  INTO REPORT_MANAGE
+			VALUES (
+					 REPORT_MANAGE_SEQ.NEXTVAL
+			       , #{ reportTitle }
+			       , #{ reportContent }
+			       , SYSDATE
+			       , NULL
+			       , #{ userCode }
+			       )
+			  INTO REVIEW_BOARD_REPORT
+		    VALUES (
+		    		 #{ boardCode }
+		           , REPORT_MANAGE_SEQ.CURRVAL
+		           )
+            SELECT *
+              FROM DUAL
+	</insert>
+
+	<insert id="insertReviewBoardReply" parameterType="ReviewReplyDTO">
+		INSERT ALL
+		  INTO REPLY_MANAGE
+		VALUES (
+				 REPLY_CODE_SEQ.CURRVAL
+		       , #{ replyContent }
+		       , SYSDATE
+		       , 'N'
+		       , 'N'
+		       , #{ userCode }
+		       )
+		  INTO REVIEW_BOARD_REPLY
+		VALUES ( #{ boardCode }
+		       , REPLY_CODE_SEQ.NEXTVAL
+		       , #{ userCode }
+		       )
+        SELECT *
+          FROM DUAL
+	</insert>
+	
+	<insert id="insertReviewReplyReport" parameterType="ReviewReplyDTO">
+		<selectKey keyProperty="replyReportTitle" order="BEFORE" resultType="string">
+			SELECT
+			       REPLY_CONTENT
+			  FROM REPLY_MANAGE
+			 WHERE REPLY_CODE = #{ replyCode }
+		</selectKey>
+			INSERT 
+			  INTO REPLY_REPORT_TABLE
+			VALUES (
+					 #{ userCode1 }
+			       , #{ replyCode }
+			       , #{ userCode }
+			       , #{ replyReportTitle }
+			       , #{ replyReportContent }
+			       , SYSDATE
+			       , null
+			       )
+	</insert>
+	
+	<update id="updateReviewBoard" parameterType="ReviewDTO">
+		UPDATE REVIEW_BOARD
+		   SET BOARD_TITLE = #{ boardTitle }
+		     , BOARD_CONTENT = #{ boardContent }
+		 WHERE BOARD_CODE = #{ boardCode }
+	</update>
+	
+	<select id="selectRandomAd" parameterType="AdDTO" resultMap="adResultSet">
+		SELECT * FROM(
+						SELECT 
+						       A.AD_CODE
+						     , A.COMPANY_NAME
+						     , A.AD_TITLE
+						     , A.POST_START_DATE
+						  FROM AD_APPLY_TABLE A
+						  JOIN AD_MANAGE_TABLE B ON(A.AD_TYPE_CODE = B.AD_TYPE_CODE)
+						 WHERE B.AD_TYPE_CODE = 1 OR B.AD_TYPE_CODE = 3
+						   AND POST_YN = 'Y'
+						   <![CDATA[
+				           AND POST_START_DATE <= SYSDATE
+				           AND POST_END_DATE >= SYSDATE
+						 ORDER BY DBMS_RANDOM.VALUE
+						 )
+						 WHERE ROWNUM <= 2]]>
+	</select>
+	
+	<insert id="insertAdViewsCount" parameterType="hashmap">
+		<selectKey keyProperty="userCode" order="BEFORE" resultType="int">
+			SELECT
+			       USER_CODE
+			  FROM USER_TABLE
+			 WHERE USER_ID = #{ userId }
+		</selectKey>
+		INSERT
+		  INTO AD_CLICK_COUNT
+		VALUES ( 
+				 SYSDATE
+		       , #{ userCode }
+		       , #{ boardCode }
+		       )
+	</insert>
+	
+	<select id="selectAd" parameterType="AdDTO" resultMap="adResultSet">
+		SELECT
+		       AD_TITLE
+		     , COMPANY_NAME  
+		     , AD_CONTENT
+		  FROM AD_APPLY_TABLE
+		 WHERE AD_CODE = #{ boardCode } 
+	</select>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
