@@ -77,7 +77,7 @@ public class ShareInfoController {
     		
     		if(!(cookie.getName().equals("AdCookie"))) {		// 광고
     			
-    			cookie = new Cookie("AdCookie",null); 			// sharInfoAd라는 이름의 쿠키 생성
+    			cookie = new Cookie("AdCookie",null); 			// AdCookie라는 이름의 쿠키 생성
     			cookie.setComment("AdCookie 게시글 조회 확인");		// 해당 쿠키가 어떤 용도인지 커멘트
     			response.addCookie(cookie);						// 사용자에게 해당 쿠키를 추가
     			
